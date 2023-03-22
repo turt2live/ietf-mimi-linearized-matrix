@@ -180,7 +180,7 @@ In the existing Matrix Federation APIs, a PDU {{MxV10PDUFormat}} contains an eve
 DAG-specific fields to it. When using the Linearized Matrix API, we introduce a concept of a *Linear
 PDU* which looks similar to a regular room event, but has all non-essential fields removed.
 
-```jsonc
+~~~ jsonc
 {
   "room_id": "!room:example.org", // the room ID the event is sent within
   "type": "org.example.event_type", // the implied (or explicit) event type
@@ -195,7 +195,7 @@ PDU* which looks similar to a regular room event, but has all non-essential fiel
     "sha256": "<content hash, just like in Matrix today>"
   }
 }
-```
+~~~
 
 {{MxContentHashCalculation}}
 
@@ -312,7 +312,7 @@ down to a Delegated Linear PDU with ease.
 
 A complete DAG-ready PDU would look like:
 
-```jsonc
+~~~ jsonc
 {
   "room_id": "!room:example.org", // the room ID the event is sent within
   "type": "org.example.event_type", // the implied (or explicit) event type
@@ -343,7 +343,7 @@ A complete DAG-ready PDU would look like:
     }
   }
 }
-```
+~~~
 
 When validating the signatures {{MxSignatureValidation}} on this PDU, DAG-capable servers would apply the
 following algorithm. If at any point the check fails, the algorithm bails.
