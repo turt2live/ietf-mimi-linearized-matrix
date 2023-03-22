@@ -320,7 +320,7 @@ A complete DAG-ready PDU would look like:
   "sender": "@user:example.org", // the user ID of the sender
   "origin_server_ts": 123456789,
   "original_authorized_sending_server": "owner.example.org", // the domain of the room owner
-  "authorized_sending_server": "dag.example.org", // DAG-capable server; see bridging considerations for selection approach
+  "authorized_sending_server": "dag.example.org", // DAG-capable server
   "content": {
     // the normal event content
   },
