@@ -308,7 +308,7 @@ Linearized Matrix is essentially an alternative API for accessing normal Matrix 
 which means servers which support a full-blown DAG can still join and participate in the room.
 This is critical in order to avoid breaking compatibility with today's fully-decentalised Matrix, and
 provides a way to decentralise ownership of rooms even if large messaging providers are themselves
-not able to implement full decentralisation yet (c.f. {{?I-D.avoiding-internet-centralization}}).
+not able to implement full decentralisation yet. {{?I-D.avoiding-internet-centralization}}
 
 With DAG-compatible servers in the room, the DAG-compatible servers talk to each other directly as they
 do with the current Matrix APIs.  Any DAG-compatible server which can also speak Linearized Matrix
