@@ -306,14 +306,14 @@ Room Version 10 definition {{MxRoomVersion10}}. Changes will be made to support 
 
 Linearized Matrix is essentially an alternative API for accessing normal Matrix rooms over federation,
 which means servers which support a full-blown DAG can still join and participate in the room.
-This is critical in order to avoid breaking compatibility with today's fully-decentalised Matrix, and
-provides a way to decentralise ownership of rooms even if large messaging providers are themselves
-not able to implement full decentralisation yet. {{?I-D.avoiding-internet-centralization}}
+This is critical in order to avoid breaking compatibility with today's fully-decentralized Matrix, and
+provides a way to decentralize ownership of rooms even if large messaging providers are themselves
+not able to implement full decentralization yet. {{?I-D.avoiding-internet-centralization}}
 
 With DAG-compatible servers in the room, the DAG-compatible servers talk to each other directly as they
 do with the current Matrix APIs.  Any DAG-compatible server which can also speak Linearized Matrix
 can connect to the owner server - effectively trunking Linearized Matrix into normal Matrix and tracking
-its events into the DAG.  As long as servers speaking Linearised Matrix uphold the room's access controls,
+its events into the DAG.  As long as servers speaking Linearized Matrix uphold the room's access controls,
 then they appear as a single logical DAG-compatible server to normal Matrix, and will maintain consistency
 with the rest of normal Matrix.
 
