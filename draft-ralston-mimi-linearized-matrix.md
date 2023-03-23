@@ -30,6 +30,10 @@ author:
     fullname: Travis Ralston
     organization: The Matrix.org Foundation C.I.C.
     email: travisr@matrix.org
+ -
+    fullname: Matthew Hodgson
+    organization: The Matrix.org Foundation C.I.C.
+    email: matthew@matrix.org
 
 normative:
 
@@ -88,16 +92,18 @@ informative:
 
 Matrix is an existing openly specified decentralized secure communications protocol
 able to provide a framework for instant messaging interoperability. Matrix rooms
-currently use a Directed Acyclic Graph (DAG) for persisting events/messages. Servers
-broadcast their changes to the DAG to every other server in order to create new events.
+(aka conversations) currently use a Directed Acyclic Graph (DAG) for persisting
+events/messages. Servers broadcast their changes to the DAG to every other server in
+order to create new events.
 
-This model provides excellent decentralization characteristics, however is complex
-when aiming to adopt Matrix as an interoperable chat protocol, such as with the emergence
-of the European Union's Digital Markets Act (DMA).
+This model provides excellent decentralization characteristics and conversation history
+replication, but proves complex when aiming to use Matrix strictly for interoperability
+between today's existing messaging service providers, which often do not persist
+chat history serverside, and do not seek to replicate it between servers.
 
-This document explores an API surface for Matrix which knowingly trades some of the
-decentralization aspects for ease of interoperability at a per-room level. We call this
-API surface "Linearized Matrix".
+This document explores an API surface for Matrix which optimises for ease of
+interoperability at the expense of decentralised conversation history at a per-room level.
+We call this API surface "Linearized Matrix".
 
 
 --- middle
@@ -115,7 +121,7 @@ Many aspects for how Matrix works as an interoperable messaging framework is des
 federation API, and DAG-related features of the framework document by presenting rooms as a
 single, flat, array of events, without being incompatible with those same replaced components.
 
-This document does not currently define transport layer for the Linearized Matrix API, instead
+This document does not currently define a transport layer for the Linearized Matrix API, instead
 focusing its efforts on the operational aspects of a room.
 
 # Conventions and Definitions
@@ -154,27 +160,30 @@ At an implementation level, it should be possible for an owning server to use a 
 wishes, however for the protocol considerations a room has a single flat array to store state
 changes and room events.
 
-Room state is the same as non-Linearized Matrix: represented by an event type and state key in
-tuple form. "Current state" is simply the most recent instance of each event type and state key
-pair in the array.
+Room state is the same as non-Linearized Matrix: represented by an event type and state key tuple
+which maps to a state event. "Current state" is simply the most recent instance of each event type
+and state key pair in the array.
 
 To send an event into the room, each "participant server" (non-owner) asks the owner to send it
-to the room. The owner adds the event to the room's array, after simple validation, and sends it
+to the room. The owner applies access controls to the event, following Matrix's existing access
+controls (power levels, bans, server_acls etc.) and then adds the event to the room's array, and sends it
 out to all participating servers (including the original sender, for simplicity of implementation).
 If the owner would like to send an event, it simply adds the event to the array (assuming such an
-action is valid) and broadcasts it.
+action is valid) and broadcasts it. The owner server MUST follow the access control semantics defined
+by the room's current state - it MUST NOT make up its own rules. For instance, the owning server
+must only let Alice invite Bob to a room if Alice has permission to invite, and if Alice's server
+sent the invite event.
 
 Each room additionally records which Matrix room version it is using for access control behaviours,
 such as Authorization Rules {{MxV10AuthRules}}. This is required for when rooms gain a DAG-compatible
-server in them. Note that this document introduces new semantics for a room version to be built
-around, which would become the first elligible room version for a room using Linearized Matrix.
+server in them. Note that this document introduces new semantics requiring a new room version.
 
 # Event Signing
 
 Events are signed by the participant/original server to ensure the owning server is not spoofing
 events on behalf of another server. The exact details for how a server's signing keys are shared
 to other servers is left as a transport consideration, however signing keys are currently expected
-to be ed25519 keys.
+to be Ed25519 keys.
 
 In the existing Matrix Federation APIs, a PDU {{MxV10PDUFormat}} contains an event and has several
 DAG-specific fields to it. When using the Linearized Matrix API, we introduce a concept of a *Linear
@@ -220,6 +229,10 @@ A transport layer would describe a formal request/response structure for the mem
 requests should be able to be rejected by the owner server prior to the membership transition happening
 in the room, as the owner server may wish to apply additional checks for anti-abuse or similar.
 
+**XXX**: I still don't understand why we need membership APIs, rather than just sending the right state
+event to the server to invite/ban/kick/etc.  It just makes them look special-cased and makes the
+API look more bigger than it really is... --Matthew
+
 Additionally, for invites specifically, the owner server MUST proxy an invite to the targeted
 participant server before responding to the original invite request, if it has not already rejected
 the request itself. This is to ensure the participant server has an opportunity to decline the
@@ -233,12 +246,12 @@ A server is considered to be "in the room" if it has at least one user with `joi
 # State Events API
 
 Matrix, and therefore Linearized Matrix, tracks changes to the room as *state events*. State events
-have an event type and state key to differentiate them from room (or non-state) events. While history
+have both an event type and state key to differentiate them from room (or non-state) events. While history
 for state changes is stored in the room, only the most recent change for an event type and state key
 pair is considered "current state". For example, the current room name is the most recent `m.room.name`
 state event.
 
-As already mentioned in this document, a transport layer would be responsible for the request/response
+As mentioned above, a transport layer would be responsible for the request/response
 structure for this API, however a need would be present to send (arbitrary) state events, read those
 state events back, and read the whole of current state (including membership).
 
@@ -262,6 +275,8 @@ ownership role. If the participant server agrees to take ownership, it would cre
 ownership state event. The current owner then signs the ownership state event itself and sends it to all
 participating servers (including the new owner), just as it would for any other event. All requests from
 that point forward now go to the new owner, and the old owner becomes a regular participating server.
+
+**TODO**: What do you do if the owner server dies or partitions before transferring to a successor?
 
 # Other APIs
 
@@ -289,10 +304,18 @@ Room Version 10 definition {{MxRoomVersion10}}. Changes will be made to support 
 
 # DAG-Compatible Event Structure
 
-Linearized Matrix is simply a simpler API for accessing a room on Matrix, which means servers which support
-a full-blown DAG can still join and participate in the room. With DAG-compatible servers in the room, the
-DAG-compatible servers talk to each other directly as they do with the current Matrix APIs, only involving
-the room owner for state changes (like membership).
+Linearized Matrix is essentially an alternative API for accessing normal Matrix rooms over federation,
+which means servers which support a full-blown DAG can still join and participate in the room.
+This is critical in order to avoid breaking compatibility with today's fully-decentalised Matrix, and
+provides a way to decentralise ownership of rooms even if large messaging providers are themselves
+not able to implement full decentralisation yet (c.f. {{?I-D.avoiding-internet-centralization}}).
+
+With DAG-compatible servers in the room, the DAG-compatible servers talk to each other directly as they
+do with the current Matrix APIs.  Any DAG-compatible server which can also speak Linearized Matrix
+can connect to the owner server - effectively trunking Linearized Matrix into normal Matrix and tracking
+its events into the DAG.  As long as servers speaking Linearised Matrix uphold the room's access controls,
+then they appear as a single logical DAG-compatible server to normal Matrix, and will maintain consistency
+with the rest of normal Matrix.
 
 Normally, events are checked for signatures from the "origin" server implied by the `sender` on an event.
 Events sent with the Linearized Matrix API are already signed by the participant server to ensure the owner
