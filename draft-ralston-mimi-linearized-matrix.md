@@ -102,7 +102,7 @@ between today's existing messaging service providers, which often do not persist
 chat history serverside, and do not seek to replicate it between servers.
 
 This document explores an API surface for Matrix which optimizes for ease of
-interoperability at the expense of decentralised conversation history at a per-room level.
+interoperability at the expense of decentralized conversation history at a per-room level.
 We call this API surface "Linearized Matrix".
 
 
