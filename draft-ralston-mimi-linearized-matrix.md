@@ -212,7 +212,7 @@ The Linear PDU is then redacted {{MxRedaction}}, canonicalized {{MxCanonicalJSON
 {{MxSigning}}. The signature is supplied to the owner server alongside the event itself for sending
 to the room.
 
-# Membership API
+# Membership
 
 After a room is created (by an imagined `/createRoom` API, for example), it will exist on a single
 server: the owner's. This is not particularly helpful if the goal is to talk to other people, so a
@@ -225,13 +225,9 @@ ban evasion.
 **TODO**: Describe those membership transitions. Currently specified in the Client-Server API
 https://spec.matrix.org/v1.6/client-server-api/#room-membership (we should move that).
 
-A transport layer would describe a formal request/response structure for the membership APIs. Those
-requests should be able to be rejected by the owner server prior to the membership transition happening
-in the room, as the owner server may wish to apply additional checks for anti-abuse or similar.
-
-**XXX**: I still don't understand why we need membership APIs, rather than just sending the right state
-event to the server to invite/ban/kick/etc.  It just makes them look special-cased and makes the
-API look more bigger than it really is... --Matthew
+The owner server should be able to reject membership transitions for anti-abuse reasons, but cannot
+change how the resulting `m.room.member` events are accepted into the room. Rejection happens at the
+transport layer in this case.
 
 Additionally, for invites specifically, the owner server MUST proxy an invite to the targeted
 participant server before responding to the original invite request, if it has not already rejected
