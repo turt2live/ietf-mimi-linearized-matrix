@@ -374,6 +374,12 @@ following algorithm. If at any point the check fails, the algorithm bails.
    traditional sense. That particular step in event validation is therefore skipped when step 1 or 2 is
    performed.
 
+**TODO**: How does an owner server pick a DAG server to communicate with, and how does the owner receive events
+from the DAG to send to participant servers? One option might be to have DAG-capable servers identify themselves
+during joins with the owner server, then the current owner can transfer ownership to the DAG-capable server.
+The DAG-capable owner would simply shuffle events around internally to feed both API surfaces, though this means
+all DAG-capable servers need to implement both API surfaces.
+
 # Security Considerations
 
 **TODO**: Expand upon this section.
