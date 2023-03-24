@@ -187,12 +187,18 @@ PDU* which looks similar to a regular room event, but has all non-essential fiel
 
 ~~~ jsonc
 {
-  "room_id": "!room:example.org", // the room ID the event is sent within
-  "type": "org.example.event_type", // the implied (or explicit) event type
-  "state_key": "", // for state events, even if an empty string
-  "sender": "@user:example.org", // the user ID of the sender
-  "origin_server_ts": 123456789, // milliseconds since epoch
-  "authorized_sending_server": "owner.example.org", // the domain of the room owner
+  // the room ID the event is sent within
+  "room_id": "!room:example.org",
+  // the implied (or explicit) event type
+  "type": "org.example.event_type",
+  // for state events, even if an empty string
+  "state_key": "",
+  // the user ID of the sender
+  "sender": "@user:example.org",
+  // milliseconds since epoch
+  "origin_server_ts": 123456789,
+  // the domain of the room owner
+  "authorized_sending_server": "owner.example.org",
   "content": {
     // the normal event content
   },
@@ -329,13 +335,20 @@ A complete DAG-ready PDU would look like:
 
 ~~~ jsonc
 {
-  "room_id": "!room:example.org", // the room ID the event is sent within
-  "type": "org.example.event_type", // the implied (or explicit) event type
-  "state_key": "", // for state events, even if an empty string
-  "sender": "@user:example.org", // the user ID of the sender
+  // the room ID the event is sent within
+  "room_id": "!room:example.org",
+  // the implied (or explicit) event type
+  "type": "org.example.event_type",
+  // for state events, even if an empty string
+  "state_key": "",
+  // the user ID of the sender
+  "sender": "@user:example.org",
+  // milliseconds since epoch
   "origin_server_ts": 123456789,
-  "original_authorized_sending_server": "owner.example.org", // the domain of the room owner
-  "authorized_sending_server": "dag.example.org", // DAG-capable server
+  // the domain of the room owner
+  "original_authorized_sending_server": "owner.example.org",
+  // DAG-capable server
+  "authorized_sending_server": "dag.example.org",
   "content": {
     // the normal event content
   },
