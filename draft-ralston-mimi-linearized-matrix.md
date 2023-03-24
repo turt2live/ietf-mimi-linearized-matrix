@@ -126,10 +126,6 @@ focusing its efforts on the operational aspects of a room.
 
 # Conventions and Definitions
 
-<!--
-{::boilerplate bcp14-tagged}
--->
-
 This document additionally uses the following definitions:
 
 * Owner Server: The server responsible for holding the room history, accepting new events, etc.
@@ -304,7 +300,7 @@ Linearized Matrix is essentially an alternative API for accessing normal Matrix 
 which means servers which support a full-blown DAG can still join and participate in the room.
 This is critical in order to avoid breaking compatibility with today's fully-decentralized Matrix, and
 provides a way to decentralize ownership of rooms even if large messaging providers are themselves
-not able to implement full decentralization yet. {{?I-D.avoiding-internet-centralization}}
+not able to implement full decentralization yet. {{?I-D.nottingham-avoiding-internet-centralization}}
 
 With DAG-compatible servers in the room, the DAG-compatible servers talk to each other directly as they
 do with the current Matrix APIs.  Any DAG-compatible server which can also speak Linearized Matrix
