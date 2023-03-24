@@ -225,9 +225,10 @@ ban evasion.
 **TODO**: Describe those membership transitions. Currently specified in the Client-Server API
 https://spec.matrix.org/v1.6/client-server-api/#room-membership (we should move that).
 
-For invites specifically, the owner server MUST proxy an invite to the targeted participant server
-before responding to the original invite request. This is to ensure the participant server has an
-opportunity to decline the invite request for its own reasons, such as its own anti-abuse measures.
+For invites specifically, the owner server MUST proxy invites it receives from participant servers
+to the targeted participant server before responding to the original invite request. This is to
+ensure the participant server has an opportunity to decline the invite request for its own reasons,
+such as its own anti-abuse measures.
 
 The owner server broadcasts successful membership changes as `m.room.member` events to all participant
 servers in the room, including the sending server.
