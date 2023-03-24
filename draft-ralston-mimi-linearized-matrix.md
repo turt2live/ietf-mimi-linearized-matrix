@@ -289,6 +289,15 @@ Room Version 10 definition {{MxRoomVersion10}}. Changes will be made to support 
 
 **TODO**: Expand upon this section with formal details of what the above looks like for a room version.
 
+# Anti-Abuse and Anti-Spam
+
+**TODO**: Expand upon this section.
+
+In a Matrix room, state events get appended to the DAG/array to show intent. If a server wishes to decline
+the request, such as in the case where the recipient server believes an invite is spammy, it can do so
+by sending another event to the room. For example, an antispam system might issue redactions for messages
+which look spammy on behalf of a room admin.
+
 # DAG-Compatible Event Structure
 
 Linearized Matrix is essentially an alternative API for accessing normal Matrix rooms over federation,
