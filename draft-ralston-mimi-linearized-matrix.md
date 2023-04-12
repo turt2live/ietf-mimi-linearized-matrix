@@ -38,101 +38,75 @@ author:
 normative:
 
 informative:
-  MxV10AuthRules:
-    target: https://spec.matrix.org/v1.6/rooms/v10/#authorization-rules
-    title: "Matrix Specification | v1.6 | Room Version 10 | Authorization Rules"
+  MSC3995:
+    target: https://github.com/matrix-org/matrix-spec-proposals/pull/3995
+    title: "MSC3995: [WIP] Linearized Matrix"
     date: 2023
     author:
-      - org: The Matrix.org Foundation C.I.C.
-  MxV10PDUFormat:
-    target: https://spec.matrix.org/v1.6/rooms/v10/#event-format-1
-    title: "Matrix Specification | v1.6 | Room Version 10 | Event Format"
-    date: 2023
-    author:
-      - org: The Matrix.org Foundation C.I.C.
-  MxContentHashCalculation:
-    target: https://spec.matrix.org/v1.6/server-server-api/#calculating-the-content-hash-for-an-event
-    title: "Matrix Specification | v1.6 | Federation API | Calculating the Content Hash"
-    date: 2023
-    author:
-      - org: The Matrix.org Foundation C.I.C.
-  MxRedaction:
-    target: https://spec.matrix.org/v1.6/client-server-api/#redactions
-    title: "Matrix Specification | v1.6 | Client-Server API | Redaction Algorithm"
-    date: 2023
-    author:
-      - org: The Matrix.org Foundation C.I.C.
-  MxCanonicalJSON:
-    target: https://spec.matrix.org/v1.6/appendices/#canonical-json
-    title: "Matrix Specification | v1.6 | Appendices | Canonical JSON"
-    date: 2023
-    author:
-      - org: The Matrix.org Foundation C.I.C.
-  MxSigning:
-    target: https://spec.matrix.org/v1.6/appendices/#signing-details
-    title: "Matrix Specification | v1.6 | Appendices | Signing"
-    date: 2023
-    author:
-      - org: The Matrix.org Foundation C.I.C.
-  MxRoomVersion10:
-    target: https://spec.matrix.org/v1.6/rooms/v10
-    title: "Matrix Specification | v1.6 | Room Version 10"
-    date: 2023
-    author:
-      - org: The Matrix.org Foundation C.I.C.
-  MxSignatureValidation:
-    target: https://spec.matrix.org/v1.6/server-server-api/#validating-hashes-and-signatures-on-received-events
-    title: "Matrix Specification | v1.6 | Federation API | Validating Hashes and Signatures"
-    date: 2023
-    author:
-      - org: The Matrix.org Foundation C.I.C.
-
+       - fullname: Travis Ralston
+         organization: The Matrix.org Foundation C.I.C.
+         email: travisr@matrix.org
 
 --- abstract
 
 Matrix is an existing openly specified decentralized secure communications protocol
-able to provide a framework for instant messaging interoperability. Matrix rooms
-(aka conversations) currently use a Directed Acyclic Graph (DAG) for persisting
-events/messages. Servers broadcast their changes to the DAG to every other server in
-order to create new events.
+able to provide a framework for instant messaging interoperability. With changes to
+how Matrix handles rooms, the protocol becomes easily suited for messaging interoperability
+usecases.
 
-This model provides excellent decentralization characteristics and conversation history
-replication, but proves complex when aiming to use Matrix strictly for interoperability
-between today's existing messaging service providers, which often do not persist
-chat history serverside, and do not seek to replicate it between servers.
-
-This document explores an API surface for Matrix which optimizes for ease of
-interoperability at the expense of decentralized conversation history at a per-room level.
-We call this API surface "Linearized Matrix".
-
+This document explores "Linearized Matrix": the modified room model still backed by
+Matrix.
 
 --- middle
 
 # Introduction
 
-At a high level, rooms using Linearized Matrix have a single server which owns that room.
-The owner can change, but will typically be the server which created the room. All other
-servers are known as participating servers and call the owner server to send events. The
-owner server is then responsible for informing all the other servers of any changes/messages
-in the room.
+Alongside messaging, Matrix operates as an openly federated communications protocol for
+VoIP, IoT, and more. The existing Matrix network uses fully decentralized access control
+within rooms (conversations) and is highly extensible in its structure. These features
+are not critically important to a strict focus on messaging interoperability, however.
 
-Many aspects for how Matrix works as an interoperable messaging framework is described by
-{{!I-D.ralston-mimi-matrix-framework}}. This document replaces the eventual consistency model,
-federation API, and DAG-related features of the framework document by presenting rooms as a
-single, flat, array of events, without being incompatible with those same replaced components.
-
-This document does not currently define a transport layer for the Linearized Matrix API, instead
-focusing its efforts on the operational aspects of a room.
+This document describes "Linearized Matrix": an API surface on top of Matrix's existing
+room model. This document does *not* explore how to interconnect Linearized Matrix with
+the existing Matrix room model - interested readers may wish to review MSC3995 {{MSC3995}}
+within the Matrix Specification process.
 
 # Conventions and Definitions
 
+This document uses {{!I-D.ralston-mimi-terminology}} where possible.
+
 This document additionally uses the following definitions:
 
-* Owner Server: The server responsible for holding the room history, accepting new events, etc.
-* Participant Server: Every other server. Note that a server may inherit this role even if not
-  (currently) participating in the room.
+* **Room**: Synonymous with "conversation" from I-D.ralston-mimi-terminology.
+* **Room Member**: Synonymous with "conversation member" from I-D.ralston-mimi-terminology.
+* **State Event**: Synonymous with "conversation property" from I-D.ralston-mimi-terminology.
+  A state event is a subclass of an event.
 
-**TODO**: Merge/add definitions from framework to here, such as "homeserver", "user", etc.
+# Federation architecture
+
+~~~ aasvg
+      {   Client A   }                                {   Client B   }
+        ^          |                                    ^          |
+        |  events  |  Client-Server API                 |  events  |
+        |          V                                    |          V
+    +------------------+                            +------------------+
+    |                  |----------( events )------->|                  |
+    | Provider/Server  |                            | Provider/Server  |
+    |        A         |<---------( events )--------|        B         |
+    +------------------+     Server-Server API      +------------------+
+          |     ^
+          |     |                                   +------------------+
+          |     +-----------------( events )--------|                  |
+          |                                         | Provider/Server  |
+          +-----------------------( events )------->|        C         |
+                                                    +------------------+
+                                                        ^          |
+                                                        |  events  |
+                                                        |          V
+                                                      {   Client C   }
+~~~
+
+
 
 # Identifiers
 
