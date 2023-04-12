@@ -82,10 +82,10 @@ This document additionally uses the following definitions:
 * **State Event**: Synonymous with "conversation property" from I-D.ralston-mimi-terminology.
   A state event is a subclass of an event.
 
-# Federation architecture
+# Architecture
 
 ~~~ aasvg
-      [   Client A   ]                                [   Client B   ]
+      (   Client A   )                                (   Client B   )
         ^          |                                    ^          |
         |  events  |  Client-Server API                 |  events  |
         |          V                                    |          V
@@ -103,7 +103,7 @@ This document additionally uses the following definitions:
                                                         ^          |
                                                         |  events  |
                                                         |          V
-                                                      [   Client C   ]
+                                                      (   Client C   )
 ~~~
 
 
