@@ -85,7 +85,7 @@ This document additionally uses the following definitions:
 # Federation architecture
 
 ~~~ aasvg
-      {   Client A   }                                {   Client B   }
+      [   Client A   ]                                [   Client B   ]
         ^          |                                    ^          |
         |  events  |  Client-Server API                 |  events  |
         |          V                                    |          V
@@ -103,7 +103,7 @@ This document additionally uses the following definitions:
                                                         ^          |
                                                         |  events  |
                                                         |          V
-                                                      {   Client C   }
+                                                      [   Client C   ]
 ~~~
 
 
