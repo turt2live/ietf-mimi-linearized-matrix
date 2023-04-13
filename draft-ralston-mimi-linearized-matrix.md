@@ -50,9 +50,10 @@ informative:
 --- abstract
 
 Matrix is an existing openly specified decentralized secure communications protocol
-able to provide a framework for instant messaging interoperability. With changes to
-how Matrix handles rooms, the protocol becomes easily suited for messaging interoperability
-usecases.
+able to provide a framework for instant messaging interoperability. However, the
+existing model can be complex to reason about for simple interoperability usecases.
+With modifications to the room model, Matrix can support those simpler usecases more
+easily.
 
 This document explores "Linearized Matrix": the modified room model still backed by
 Matrix.
@@ -66,10 +67,10 @@ VoIP, IoT, and more. The existing Matrix network uses fully decentralized access
 within rooms (conversations) and is highly extensible in its structure. These features
 are not critically important to a strict focus on messaging interoperability, however.
 
-This document describes "Linearized Matrix": an API surface on top of Matrix's existing
-room model. This document does *not* explore how to interconnect Linearized Matrix with
-the existing Matrix room model - interested readers may wish to review MSC3995 {{MSC3995}}
-within the Matrix Specification process.
+This document describes "Linearized Matrix": a modified room model based upon Matrix's
+existing room model. This document does *not* explore how to interconnect Linearized
+Matrix with the existing Matrix room model - interested readers may wish to review
+MSC3995 {{MSC3995}} within the Matrix Specification process.
 
 # Conventions and Definitions
 
