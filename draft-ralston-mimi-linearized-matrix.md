@@ -514,6 +514,8 @@ of an `m.room.create` event which has no `auth_events`.
 With consideration for default/calculated power levels, the ordered rules which affect
 authorization of a given event are:
 
+**TODO**: should we reference `m.federate`?
+
 1. Events must be signed by the server denoted by the `sender` field. Note that this may be
    an LPDU if the `hub_server` is specified and not the same server.
 
@@ -533,8 +535,6 @@ authorization of a given event are:
       auth events selection algorithm, reject.
    3. If there are entries where the referenced event was rejected during receipt, reject.
    4. If there is no `m.room.create` event among the entries, reject.
-
-**TODO**: Include `m.federate: false` here?
 
 5. If `type` is `m.room.member`:
 
