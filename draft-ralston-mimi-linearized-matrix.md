@@ -521,72 +521,72 @@ authorization of a given event are:
 
 3. If `type` is `m.room.create`:
 
-  1. If it has any `prev_events`, reject.
-  2. If the domain of the `room_id` is not the same domain as the `sender`, reject.
-  3. If `content.room_version` is not `I.1`, reject. **TODO**: Incorporate room versions properly.
-  4. Otherwise, allow.
+   1. If it has any `prev_events`, reject.
+   2. If the domain of the `room_id` is not the same domain as the `sender`, reject.
+   3. If `content.room_version` is not `I.1`, reject. **TODO**: Incorporate room versions properly.
+   4. Otherwise, allow.
 
 4. Considering the event's `auth_events`:
 
-  1. If there are duplicate entries for a given `type` and `state_key` pair, reject.
-  2. If there are entries whose `type` and `state_key` do not match those specified by the
-     auth events selection algorithm, reject.
-  3. If there are entries where the referenced event was rejected during receipt, reject.
-  4. If there is no `m.room.create` event among the entries, reject.
+   1. If there are duplicate entries for a given `type` and `state_key` pair, reject.
+   2. If there are entries whose `type` and `state_key` do not match those specified by the
+      auth events selection algorithm, reject.
+   3. If there are entries where the referenced event was rejected during receipt, reject.
+   4. If there is no `m.room.create` event among the entries, reject.
 
 **TODO**: Include `m.federate: false` here?
 
 5. If `type` is `m.room.member`:
 
-  1. If there is no `state_key` property, or no `membership` in `content`, reject.
+   1. If there is no `state_key` property, or no `membership` in `content`, reject.
 
-  2. If `membership` is `join`:
+   2. If `membership` is `join`:
 
-    1. If the previous event is an `m.room.create` event and the `state_key` is the
-       creator, allow.
-    2. If `sender` does not match `state_key`, reject.
-    3. If the `sender` is banned, reject.
-    4. If the `join_rule` for `m.room.join_rules` is `invite` or `knock`, then allow if
-       the current membership state is `invite` or `join`.
-    5. If the `join_rule` for `m.room.join_rules` is `public`, allow.
-    6. Otherwise, reject.
+      1. If the previous event is an `m.room.create` event and the `state_key` is the
+         creator, allow.
+      2. If `sender` does not match `state_key`, reject.
+      3. If the `sender` is banned, reject.
+      4. If the `join_rule` for `m.room.join_rules` is `invite` or `knock`, then allow if
+         the current membership state is `invite` or `join`.
+      5. If the `join_rule` for `m.room.join_rules` is `public`, allow.
+      6. Otherwise, reject.
 
-  3. If `membership` is `invite`:
+   3. If `membership` is `invite`:
 
-    1. If the `sender`'s current membership state is not `join`, reject.
-    2. If the target user's (`state_key`) membership is `join` or `ban`, reject.
-    3. If the `sender`'s power level is greater than or equal to the power level needed
-       to send invites, allow.
-    4. Otherwise, reject.
+      1. If the `sender`'s current membership state is not `join`, reject.
+      2. If the target user's (`state_key`) membership is `join` or `ban`, reject.
+      3. If the `sender`'s power level is greater than or equal to the power level needed
+         to send invites, allow.
+      4. Otherwise, reject.
 
-  4. If `membership` is `leave`:
+   4. If `membership` is `leave`:
 
-    1. If the `sender` matches the `state_key`, allow if and only if that user's current
-       membership state is `knock`, `join`, or `invite`.
-    2. If the `sender`'s current membership state is not `join`, reject.
-    3. If the target user's (`state_key`) current membership state is `ban`, and the
-       `sender`'s power level is less than the power level needed to ban other users, reject.
-    4. If the `sender`'s power level is greater than or equal to the power level needed to
-       kick users, and the target user's (`state_key`) power level is less than the `sender`'s,
-       allow.
-    5. Otherwise, reject.
+      1. If the `sender` matches the `state_key`, allow if and only if that user's current
+         membership state is `knock`, `join`, or `invite`.
+      2. If the `sender`'s current membership state is not `join`, reject.
+      3. If the target user's (`state_key`) current membership state is `ban`, and the
+         `sender`'s power level is less than the power level needed to ban other users, reject.
+      4. If the `sender`'s power level is greater than or equal to the power level needed to
+         kick users, and the target user's (`state_key`) power level is less than the `sender`'s,
+         allow.
+      5. Otherwise, reject.
 
-  5. If `membership` is `ban`:
+   5. If `membership` is `ban`:
 
-    1. If the `sender`'s current membership state is not `join`, reject.
-    2. If the `sender`'s power level is greater than or equal to the power level needed
-       to ban users, and the target user's (`state_key`) power level is less than the
-       `sender`'s power level, allow.
-    3. Otherwise, reject.
+      1. If the `sender`'s current membership state is not `join`, reject.
+      2. If the `sender`'s power level is greater than or equal to the power level needed
+         to ban users, and the target user's (`state_key`) power level is less than the
+         `sender`'s power level, allow.
+      3. Otherwise, reject.
 
-  6. If `membership` is `knock`:
+   6. If `membership` is `knock`:
 
-    1. If the `join_rule` for `m.room.join_rules` is anything other than `knock`, reject.
-    2. If the `sender` does not match the `state_key`, reject.
-    3. If the `sender`'s current membership state is not `ban` or `join`, allow.
-    4. Otherwise, reject.
+      1. If the `join_rule` for `m.room.join_rules` is anything other than `knock`, reject.
+      2. If the `sender` does not match the `state_key`, reject.
+      3. If the `sender`'s current membership state is not `ban` or `join`, allow.
+      4. Otherwise, reject.
 
-  7. Otherwise, the `membership` is unknown. Reject.
+   7. Otherwise, the `membership` is unknown. Reject.
 
 6. If the `sender`'s current membership state is not `join`, reject.
 
@@ -598,41 +598,41 @@ authorization of a given event are:
 
 9. If `type` is `m.room.power_levels`:
 
-  1. If any of the fields `users_default`, `events_default`, `state_default`, `ban`, `redact`,
-     `kick`, or `invite` in `content` are present and not an integer, reject.
+   1. If any of the fields `users_default`, `events_default`, `state_default`, `ban`, `redact`,
+      `kick`, or `invite` in `content` are present and not an integer, reject.
 
-  2. If `events` in `content` is present and not an object with values that are integers,
-     reject.
+   2. If `events` in `content` is present and not an object with values that are integers,
+      reject.
 
-  3. If the `users` in `content` is present and not an object with valid user IDs as keys and
-     integers as values, reject.
+   3. If the `users` in `content` is present and not an object with valid user IDs as keys and
+      integers as values, reject.
 
-  4. If there is no previous `m.room.power_levels` event in the room, allow.
+   4. If there is no previous `m.room.power_levels` event in the room, allow.
 
-  5. For the fields `users_default`, `events_default`, `state_default`, `ban`, `redact`, `kick`,
-     and `invite`, check if they were added, changed, or removed. For each found alteration:
+   5. For the fields `users_default`, `events_default`, `state_default`, `ban`, `redact`, `kick`,
+      and `invite`, check if they were added, changed, or removed. For each found alteration:
 
-     1. If the current value is higher than the `sender`'s current power level, reject.
-     2. If the new value is higher than the `sender`'s current power level, reject.
+      1. If the current value is higher than the `sender`'s current power level, reject.
+      2. If the new value is higher than the `sender`'s current power level, reject.
 
-  6. For each entry being changed in or removed from `events`:
+   6. For each entry being changed in or removed from `events`:
 
-     1. If the current value is higher than the `sender`'s current power level, reject.
+      1. If the current value is higher than the `sender`'s current power level, reject.
 
-  7. For each entry being added to or changed in `events`:
+   7. For each entry being added to or changed in `events`:
 
-     1. If the new value is greater than the `sender`'s current power level, reject.
+      1. If the new value is greater than the `sender`'s current power level, reject.
 
-  8. For each entry being changed in or removed from `users`, other than the `sender`'s own
-     entry:
+   8. For each entry being changed in or removed from `users`, other than the `sender`'s own
+      entry:
 
-     1. If the current value is higher than the `sender`'s current power level, reject.
+      1. If the current value is higher than the `sender`'s current power level, reject.
 
-  9. For each entry being added to or changed in `users`:
+   9. For each entry being added to or changed in `users`:
 
-     1. If the new value is greater than the `sender`'s current power level, reject.
+      1. If the new value is greater than the `sender`'s current power level, reject.
 
-  10. Otherwise, allow.
+   10. Otherwise, allow.
 
 10. Otherwise, allow.
 
