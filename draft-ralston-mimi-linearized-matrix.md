@@ -772,6 +772,10 @@ Topics:
 
 Matrix currently uses an HTTPS+JSON transport for this.
 
+# MLS
+
+**TODO**: This section. We might still need DMLS? To be determined...
+
 # Security Considerations
 
 **TODO**: Expand upon this section.
