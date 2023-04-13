@@ -706,7 +706,7 @@ fields are stripped.
 * `m.room.member` retains `membership`.
 * `m.room.join_rules` retains `join_rule`.
 * `m.room.power_levels` retains `ban`, `events`, `events_default`, `kick`, `redact`, `state_default`,
-  `users`, and `users_default`.
+  `users`, `users_default`, and `invite`.
 * `m.room.history_visibility` retains `history_visibility`.
 
 ### Checking a signature
