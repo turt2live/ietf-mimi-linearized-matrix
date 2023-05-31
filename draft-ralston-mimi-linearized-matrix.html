@@ -1,0 +1,2518 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>Linearized Matrix API</title>
+<meta content="Travis Ralston" name="author">
+<meta content="Matthew Hodgson" name="author">
+<meta content='
+       Matrix is an existing openly specified decentralized secure communications protocol
+able to provide a framework for instant messaging interoperability. However, the
+existing model can be complex to reason about for simple interoperability usecases.
+With modifications to the room model, Matrix can support those simpler usecases more
+easily. 
+       This document explores "Linearized Matrix": the modified room model still backed by
+Matrix. 
+    ' name="description">
+<meta content="xml2rfc 3.17.1" name="generator">
+<meta content="matrix" name="keyword">
+<meta content="linearized" name="keyword">
+<meta content="interoperability" name="keyword">
+<meta content="messaging" name="keyword">
+<meta content="mimi" name="keyword">
+<meta content="draft-ralston-mimi-linearized-matrix-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.17.1
+    Python 3.11.3
+    appdirs 1.4.4
+    ConfigArgParse 1.5.3
+    google-i18n-address 2.5.2
+    intervaltree 3.1.0
+    Jinja2 3.1.2
+    lxml 4.9.2
+    pycountry 22.3.5
+    PyYAML 6.0
+    requests 2.30.0
+    setuptools 67.7.2
+    six 1.16.0
+    wcwidth 0.2.6
+-->
+<link href="draft-ralston-mimi-linearized-matrix.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Cabin Condensed';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Cabin Condensed SemiBold'), local('CabinCondensed-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/cabincondensed-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: "Cabin Condensed", sans-serif;
+  font-weight: 600;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+}
+:is(ol, ul) :is(ol, ul) {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  line-height: 1;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+}
+dl.olPercent {
+  --indent: 5ch;
+}
+dl > dt {
+  float: left;
+  margin-right: 2ch;
+  min-width: 8ch;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+dl.olPercent > dt {
+  min-width: calc(var(--indent) - 2ch);
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+}
+:is(dl.compact, .dlCompact) > dd > :is(:first-child, .break:first-child + *) {
+  margin-top: 0;
+}
+:is(dl.compact, .dlCompact) > dd > :is(:last-child) {
+  margin-bottom: 0;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    overflow-x: auto;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+}
+a.pilcrow[href] { color: var(--pilcrow-weak); }
+a.pilcrow[href]:hover { text-decoration: none; }
+@media not print {
+  :hover > a.pilcrow {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+}
+#identifiers dt {
+  width: var(--identifier-width);
+  min-width: var(--identifier-width);
+  clear: left;
+  float: left;
+  text-align: right;
+}
+#identifiers dd {
+  margin: 0;
+  margin-left: calc(1em + var(--identifier-width)) !important;
+  min-width: 5em;
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+#toc nav ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+#toc nav li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+#toc a.xref {
+  white-space: normal;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 10ch;
+  margin-right: 1.5ch;
+}
+.references dt:target::before {
+  content: "⇒";
+  width: 15px;
+  margin: 0 10px 0 -25px;
+}
+.references dd {
+  margin-left: 12ch !important;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc.active {
+      opacity: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 8px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active nav {
+    display: block;
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin-top: 2px;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  #toc nav > ul  {
+    margin-bottom: 2em;
+  }
+  #toc ul {
+    margin: 0 0 0 4px;
+    font-size: var(--small-font-size);
+  }
+  #toc ul :is(p, li) {
+    margin: 2px 0;
+    line-height: 22px;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Changes introduced to fix issues found during implementation */
+
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin: 8px 0.5em 0;
+}
+
+/* Provide styling for table cell text alignment */
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 20em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  dd {
+    page-break-before: avoid;
+  }
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([fill="white"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">Linearized Matrix API</td>
+<td class="right">May 2023</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Ralston &amp; Hodgson</td>
+<td class="center">Expires 2 December 2023</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">More Instant Messaging Interoperability</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-ralston-mimi-linearized-matrix-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2023-05-31" class="published">31 May 2023</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Standards Track</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2023-12-02">2 December 2023</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">T. Ralston</div>
+<div class="org">The Matrix.org Foundation C.I.C.</div>
+</div>
+<div class="author">
+      <div class="author-name">M. Hodgson</div>
+<div class="org">The Matrix.org Foundation C.I.C.</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">Linearized Matrix API</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">Matrix is an existing openly specified decentralized secure communications protocol
+able to provide a framework for instant messaging interoperability. However, the
+existing model can be complex to reason about for simple interoperability usecases.
+With modifications to the room model, Matrix can support those simpler usecases more
+easily.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">This document explores "Linearized Matrix": the modified room model still backed by
+Matrix.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://turt2live.github.io/ietf-mimi-linearized-matrix/draft-ralston-mimi-linearized-matrix.html">https://turt2live.github.io/ietf-mimi-linearized-matrix/draft-ralston-mimi-linearized-matrix.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-ralston-mimi-linearized-matrix/">https://datatracker.ietf.org/doc/draft-ralston-mimi-linearized-matrix/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        More Instant Messaging Interoperability Working Group mailing list (<span><a href="mailto:mimi@ietf.org">mailto:mimi@ietf.org</a></span>),
+        which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/mimi/">https://mailarchive.ietf.org/arch/browse/mimi/</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/mimi/">https://www.ietf.org/mailman/listinfo/mimi/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/turt2live/ietf-mimi-linearized-matrix">https://github.com/turt2live/ietf-mimi-linearized-matrix</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 2 December 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2023 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-conventions-and-definitions" class="internal xref">Conventions and Definitions</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-architecture" class="internal xref">Architecture</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.1">
+                <p id="section-toc.1-1.3.2.1.1" class="keepWithNext"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-server-names-domain-names" class="internal xref">Server names / domain names</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-rooms" class="internal xref">Rooms</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-users" class="internal xref">Users</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.4">
+                <p id="section-toc.1-1.3.2.4.1"><a href="#section-3.4" class="auto internal xref">3.4</a>.  <a href="#name-devices" class="internal xref">Devices</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5">
+                <p id="section-toc.1-1.3.2.5.1"><a href="#section-3.5" class="auto internal xref">3.5</a>.  <a href="#name-events" class="internal xref">Events</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5.2.1">
+                    <p id="section-toc.1-1.3.2.5.2.1.1"><a href="#section-3.5.1" class="auto internal xref">3.5.1</a>.  <a href="#name-linearized-pdu" class="internal xref">Linearized PDU</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5.2.2">
+                    <p id="section-toc.1-1.3.2.5.2.2.1"><a href="#section-3.5.2" class="auto internal xref">3.5.2</a>.  <a href="#name-state-events" class="internal xref">State events</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5.2.3">
+                    <p id="section-toc.1-1.3.2.5.2.3.1"><a href="#section-3.5.3" class="auto internal xref">3.5.3</a>.  <a href="#name-event-types" class="internal xref">Event types</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-mls-considerations" class="internal xref">MLS Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-decentralization-and-append" class="internal xref">Decentralization and Append Only Operation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-server-side-room-model" class="internal xref">Server-side Room Model</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2.2.1">
+                    <p id="section-toc.1-1.4.2.2.2.1.1"><a href="#section-4.2.1" class="auto internal xref">4.2.1</a>.  <a href="#name-event-signing-authorization" class="internal xref">Event Signing &amp; Authorization</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-client-side-room-model" class="internal xref">Client-side Room Model</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-hub-transfers" class="internal xref">Hub transfers</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="auto internal xref">6</a>.  <a href="#name-transport" class="internal xref">Transport</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="auto internal xref">7</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">Alongside messaging, Matrix operates as an openly federated communications protocol for
+VoIP, IoT, and more. The existing Matrix network uses fully decentralized access control
+within rooms (conversations) and is highly extensible in its structure. These features
+are not critically important to a strict focus on messaging interoperability, however.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">This document describes "Linearized Matrix": a modified room model based upon Matrix's
+existing room model. This document does <em>not</em> explore how to interconnect Linearized
+Matrix with the existing Matrix room model - interested readers may wish to review
+MSC3995 <span>[<a href="#MSC3995" class="cite xref">MSC3995</a>]</span> within the Matrix Specification process.<a href="#section-1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="conventions-and-definitions">
+<section id="section-2">
+      <h2 id="name-conventions-and-definitions">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
+      </h2>
+<p id="section-2-1">This document uses <span>[<a href="#I-D.ralston-mimi-terminology" class="cite xref">I-D.ralston-mimi-terminology</a>]</span> where possible.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">This document additionally uses the following definitions:<a href="#section-2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2-3.1">
+          <strong>Room</strong>: Synonymous with "conversation" from I-D.ralston-mimi-terminology.<a href="#section-2-3.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.2">
+          <strong>Room Member</strong>: Synonymous with "conversation member" from I-D.ralston-mimi-terminology.<a href="#section-2-3.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-2-3.3">
+          <strong>State Event</strong>: Synonymous with "conversation property" from I-D.ralston-mimi-terminology.
+A state event is a subclass of an event.<a href="#section-2-3.3" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-2-4">Further terms are introduced in-context within this document.<a href="#section-2-4" class="pilcrow">¶</a></p>
+<p id="section-2-5"><strong>TODO</strong>: We should move/copy those definitions up here anyways.<a href="#section-2-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="architecture">
+<section id="section-3">
+      <h2 id="name-architecture">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-architecture" class="section-name selfRef">Architecture</a>
+      </h2>
+<p id="section-3-1">For a given conversation/room:<a href="#section-3-1" class="pilcrow">¶</a></p>
+<div id="section-3-2">
+        <div class="alignLeft art-svg artwork" id="section-3-2.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="416" width="552" viewBox="0 0 552 416" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px">
+            <path d="M 8,128 L 8,192" fill="none" stroke="black"></path>
+            <path d="M 40,72 L 40,128" fill="none" stroke="black"></path>
+            <path d="M 56,192 L 56,272" fill="none" stroke="black"></path>
+            <path d="M 104,200 L 104,240" fill="none" stroke="black"></path>
+            <path d="M 128,64 L 128,120" fill="none" stroke="black"></path>
+            <path d="M 160,128 L 160,192" fill="none" stroke="black"></path>
+            <path d="M 392,128 L 392,192" fill="none" stroke="black"></path>
+            <path d="M 392,224 L 392,288" fill="none" stroke="black"></path>
+            <path d="M 424,72 L 424,128" fill="none" stroke="black"></path>
+            <path d="M 424,296 L 424,352" fill="none" stroke="black"></path>
+            <path d="M 512,64 L 512,120" fill="none" stroke="black"></path>
+            <path d="M 512,288 L 512,344" fill="none" stroke="black"></path>
+            <path d="M 544,128 L 544,192" fill="none" stroke="black"></path>
+            <path d="M 544,224 L 544,288" fill="none" stroke="black"></path>
+            <path d="M 40,32 L 128,32" fill="none" stroke="black"></path>
+            <path d="M 424,32 L 512,32" fill="none" stroke="black"></path>
+            <path d="M 40,64 L 128,64" fill="none" stroke="black"></path>
+            <path d="M 424,64 L 512,64" fill="none" stroke="black"></path>
+            <path d="M 8,128 L 160,128" fill="none" stroke="black"></path>
+            <path d="M 392,128 L 544,128" fill="none" stroke="black"></path>
+            <path d="M 160,144 L 248,144" fill="none" stroke="black"></path>
+            <path d="M 320,144 L 384,144" fill="none" stroke="black"></path>
+            <path d="M 168,176 L 248,176" fill="none" stroke="black"></path>
+            <path d="M 320,176 L 392,176" fill="none" stroke="black"></path>
+            <path d="M 8,192 L 160,192" fill="none" stroke="black"></path>
+            <path d="M 392,192 L 544,192" fill="none" stroke="black"></path>
+            <path d="M 392,224 L 544,224" fill="none" stroke="black"></path>
+            <path d="M 104,240 L 248,240" fill="none" stroke="black"></path>
+            <path d="M 320,240 L 392,240" fill="none" stroke="black"></path>
+            <path d="M 56,272 L 248,272" fill="none" stroke="black"></path>
+            <path d="M 320,272 L 384,272" fill="none" stroke="black"></path>
+            <path d="M 392,288 L 544,288" fill="none" stroke="black"></path>
+            <path d="M 424,352 L 512,352" fill="none" stroke="black"></path>
+            <path d="M 424,384 L 512,384" fill="none" stroke="black"></path>
+            <path d="M 40,32 C 31.16936,32 24,39.16936 24,48" fill="none" stroke="black"></path>
+            <path d="M 128,32 C 136.83064,32 144,39.16936 144,48" fill="none" stroke="black"></path>
+            <path d="M 424,32 C 415.16936,32 408,39.16936 408,48" fill="none" stroke="black"></path>
+            <path d="M 512,32 C 520.83064,32 528,39.16936 528,48" fill="none" stroke="black"></path>
+            <path d="M 40,64 C 31.16936,64 24,56.83064 24,48" fill="none" stroke="black"></path>
+            <path d="M 128,64 C 136.83064,64 144,56.83064 144,48" fill="none" stroke="black"></path>
+            <path d="M 424,64 C 415.16936,64 408,56.83064 408,48" fill="none" stroke="black"></path>
+            <path d="M 512,64 C 520.83064,64 528,56.83064 528,48" fill="none" stroke="black"></path>
+            <path d="M 424,352 C 415.16936,352 408,359.16936 408,368" fill="none" stroke="black"></path>
+            <path d="M 512,352 C 520.83064,352 528,359.16936 528,368" fill="none" stroke="black"></path>
+            <path d="M 424,384 C 415.16936,384 408,376.83064 408,368" fill="none" stroke="black"></path>
+            <path d="M 512,384 C 520.83064,384 528,376.83064 528,368" fill="none" stroke="black"></path>
+            <polygon class="arrowhead" points="520,344 508,338.4 508,349.6" fill="black" transform="rotate(90,512,344)"></polygon>
+            <polygon class="arrowhead" points="520,120 508,114.4 508,125.6" fill="black" transform="rotate(90,512,120)"></polygon>
+            <polygon class="arrowhead" points="432,296 420,290.4 420,301.6" fill="black" transform="rotate(270,424,296)"></polygon>
+            <polygon class="arrowhead" points="432,72 420,66.4 420,77.6" fill="black" transform="rotate(270,424,72)"></polygon>
+            <polygon class="arrowhead" points="392,272 380,266.4 380,277.6" fill="black" transform="rotate(0,384,272)"></polygon>
+            <polygon class="arrowhead" points="392,144 380,138.4 380,149.6" fill="black" transform="rotate(0,384,144)"></polygon>
+            <polygon class="arrowhead" points="176,176 164,170.4 164,181.6" fill="black" transform="rotate(180,168,176)"></polygon>
+            <polygon class="arrowhead" points="136,120 124,114.4 124,125.6" fill="black" transform="rotate(90,128,120)"></polygon>
+            <polygon class="arrowhead" points="112,200 100,194.4 100,205.6" fill="black" transform="rotate(270,104,200)"></polygon>
+            <polygon class="arrowhead" points="48,72 36,66.4 36,77.6" fill="black" transform="rotate(270,40,72)"></polygon>
+            <g class="text">
+              <text x="76" y="52">Client</text>
+              <text x="112" y="52">A</text>
+              <text x="460" y="52">Client</text>
+              <text x="496" y="52">B</text>
+              <text x="200" y="100">Client-Server</text>
+              <text x="272" y="100">API</text>
+              <text x="284" y="148">events</text>
+              <text x="80" y="164">Provider/Server</text>
+              <text x="464" y="164">Provider/Server</text>
+              <text x="80" y="180">A</text>
+              <text x="284" y="180">events</text>
+              <text x="464" y="180">B</text>
+              <text x="256" y="196">Server-Server</text>
+              <text x="328" y="196">API</text>
+              <text x="284" y="244">events</text>
+              <text x="464" y="260">Provider/Server</text>
+              <text x="284" y="276">events</text>
+              <text x="464" y="276">C</text>
+              <text x="460" y="372">Client</text>
+              <text x="496" y="372">C</text>
+            </g>
+          </svg><a href="#section-3-2.1" class="pilcrow">¶</a>
+</div>
+</div>
+<p id="section-3-3">In this diagram, Server A is acting as a hub for the other two servers. Servers B and C do
+not converse directly when sending events to the room: those events are instead sent to the
+hub which then distributes them back out to all participating servers.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-4">Clients are shown in the diagram here for demonstrative purposes only. No client-server API
+is specified as part of Linearized Matrix, and the clients can be pre-existing or newly
+created for messaging. The objects given to clients are implementation-dependent, though
+for simplicity may be events.<a href="#section-3-4" class="pilcrow">¶</a></p>
+<p id="section-3-5">This leads to two distinct roles:<a href="#section-3-5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3-6.1">
+          <strong>Hub server</strong>: the server responsible for holding conversation history on behalf of
+other servers in the room.<a href="#section-3-6.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-3-6.2">
+          <strong>Participant server</strong>: any non-hub server. This server is not required to persist
+conversation history as it can fetch it from the hub if needed.<a href="#section-3-6.2" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-3-7"><strong>OPEN QUESTION</strong>: Should we support having multiple hubs for increased trust between
+participant and hub? (participant can pick the hub it wants to use rather than being
+forced to use a single hub)<a href="#section-3-7" class="pilcrow">¶</a></p>
+<div id="server-names-domain-names">
+<section id="section-3.1">
+        <h3 id="name-server-names-domain-names">
+<a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-server-names-domain-names" class="section-name selfRef">Server names / domain names</a>
+        </h3>
+<p id="section-3.1-1">Throughout this document servers are referred to as having a "domain name" or "server name".
+A server name MUST be compliant with RFC 1123 (Section 2.1) <span>[<a href="#RFC1123" class="cite xref">RFC1123</a>]</span>.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1-2"><strong>TODO</strong>: Should we incorporate Matrix's IPv6 extension, or are we able to assume that
+everyone will be using non-literal hostnames?<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.1-3"><strong>TODO</strong>: Do we really need to make this case sensitive? Matrix does, but is that correct?<a href="#section-3.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="rooms">
+<section id="section-3.2">
+        <h3 id="name-rooms">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-rooms" class="section-name selfRef">Rooms</a>
+        </h3>
+<p id="section-3.2-1">A room is a conceptual place where users send and receive events. Events are sent to a room,
+and all users which have sufficient access will receive that event.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">Rooms have a single internal "Room ID" to identify them from another room:<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.2-3">
+<pre>
+!&lt;opaque&gt;:&lt;domain&gt;
+</pre><a href="#section-3.2-3" class="pilcrow">¶</a>
+</div>
+<p id="section-3.2-4">For example, <code>!abc:example.org</code>.<a href="#section-3.2-4" class="pilcrow">¶</a></p>
+<p id="section-3.2-5">The opaque portion of the room ID, called the localpart, must not be empty and must consist
+entirely of the characters <code>[0-9a-zA-Z._~-]</code>.<a href="#section-3.2-5" class="pilcrow">¶</a></p>
+<p id="section-3.2-6">The domain portion of a room ID does <em>NOT</em> indicate the room is "hosted" or served by that
+domain. The domain is used as a namespace to prevent another server from maliciously taking
+over a room. The server represented by that domain may no longer be participating in the room.<a href="#section-3.2-6" class="pilcrow">¶</a></p>
+<p id="section-3.2-7">The total length (including the sigil and domain) of a room ID MUST NOT exceed 255 characters.<a href="#section-3.2-7" class="pilcrow">¶</a></p>
+<p id="section-3.2-8">Room IDs are case sensitive.<a href="#section-3.2-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="users">
+<section id="section-3.3">
+        <h3 id="name-users">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-users" class="section-name selfRef">Users</a>
+        </h3>
+<p id="section-3.3-1">As described by <span>[<a href="#I-D.ralston-mimi-terminology" class="cite xref">I-D.ralston-mimi-terminology</a>]</span>, a user is typically a human which operates
+a client. In Linearized Matrix, all users have a User ID to distinguish them:<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.3-2">
+<pre>
+@&lt;localpart&gt;:&lt;domain&gt;
+</pre><a href="#section-3.3-2" class="pilcrow">¶</a>
+</div>
+<p id="section-3.3-3">The localpart portion of the user ID is expected to be human-readable, MUST NOT be empty,
+and MUST consist solely of <code>[0-9a-z._=-/]</code> characters. Note that user IDs <em>cannot</em> contain
+uppercase letters in the localpart.<a href="#section-3.3-3" class="pilcrow">¶</a></p>
+<p id="section-3.3-4">The domain portion indicates which server allocated the ID, or would allocate the resource
+if the user doesn't exist yet. <code>@alice:first.example.org</code> is a different user on a different
+server from <code>@alice:second.example.org</code>, for example.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
+<p id="section-3.3-5">The total length (including the sigil and domain) of a user ID MUST NOT exceed 255 characters.<a href="#section-3.3-5" class="pilcrow">¶</a></p>
+<p id="section-3.3-6">User IDs are case sensitive.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
+<p id="section-3.3-7"><strong>Note</strong>: User IDs are sometimes informally referenced as "MXIDs", short for "Matrix User IDs".<a href="#section-3.3-7" class="pilcrow">¶</a></p>
+<p id="section-3.3-8"><strong>Author's note</strong>: This draft assumes that an external system will resolve phone number to
+user ID, somehow. Or that <code>@18005552222:example.org</code> will resolve to <code>+1 800 555 2222</code> on
+a given server, or similar.<a href="#section-3.3-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="devices">
+<section id="section-3.4">
+        <h3 id="name-devices">
+<a href="#section-3.4" class="section-number selfRef">3.4. </a><a href="#name-devices" class="section-name selfRef">Devices</a>
+        </h3>
+<p id="section-3.4-1">Each user can have zero or more devices/active clients. These devices are intended to be members
+of the MLS group and thus have their own key package material associated with them.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
+<p id="section-3.4-2"><strong>TODO</strong>: Do we need to define grammar and such for device IDs, or is that covered by MLS already?<a href="#section-3.4-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="events">
+<section id="section-3.5">
+        <h3 id="name-events">
+<a href="#section-3.5" class="section-number selfRef">3.5. </a><a href="#name-events" class="section-name selfRef">Events</a>
+        </h3>
+<p id="section-3.5-1">All data exchanged over Linearized Matrix is expressed as an "event". Each client action
+(such as sending a message) correlates with exactly one event. All events have a <code>type</code>
+to distinguish them, and use reverse domain name notation to namespace custom events
+(for example, <code>org.example.appname.eventname</code>). Event types specified by Linearized Matrix
+itself use <code>m.</code> as their namespace.<a href="#section-3.5-1" class="pilcrow">¶</a></p>
+<p id="section-3.5-2">When events are traversing a transport to another server they are often referred to as a
+<strong>Persistent Data Unit</strong> or <strong>PDU</strong>.<a href="#section-3.5-2" class="pilcrow">¶</a></p>
+<p id="section-3.5-3">An event has many other fields:<a href="#section-3.5-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.5-4.1">
+            <code>room_id</code> (string; required) - The room ID for where the event is being sent.<a href="#section-3.5-4.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.5-4.2">
+            <code>type</code> (string; required) - A UTF-8 <span>[<a href="#RFC3629" class="cite xref">RFC3629</a>]</span> string to distinguish different data types
+being carried by events. All event types use a reverse domain name notation to namespace
+themselves (for example, <code>org.example.appname.eventname</code>). Event types specified by
+Linearized Matrix itself use <code>m</code> as their namespace (for example, <code>m.room.member</code>).<a href="#section-3.5-4.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.5-4.3">
+            <code>state_key</code> (string; optional) - A UTF-8 <span>[<a href="#RFC3629" class="cite xref">RFC3629</a>]</span> string to further distinguish an event
+type from other related events. Only specified on State Events (discussed later). Can be
+empty.<a href="#section-3.5-4.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.5-4.4">
+            <code>sender</code> (string; required) - The user ID which is sending this event.<a href="#section-3.5-4.4" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.5-4.5">
+            <code>origin_server_ts</code> (integer; required) - The milliseconds since the unix epoch for when this
+event was created.<a href="#section-3.5-4.5" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.5-4.6">
+            <code>hub_server</code> (string; technically optional) - The domain name of the hub server which is
+sending this event to the remainder of the room. Note that all events created within Linearized
+Matrix will have this field set.<a href="#section-3.5-4.6" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.5-4.7">
+            <code>content</code> (object; required) - The event content. The schema of this is specific to the event
+type, and should be considered untrusted data until verified otherwise. Malicious servers and
+clients can, for example, exclude important fields, use invalid value types, or otherwise
+attempt to disrupt a client - receivers should treat the event with care while processing.<a href="#section-3.5-4.7" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.5-4.8">
+            <code>hashes</code> (object; required) - Keyed by hash algorithm, the <em>content hash</em> for the event.<a href="#section-3.5-4.8" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.5-4.9">
+            <code>signatures</code> (object; required) - Keyed first by domain name then by key ID, the signatures for
+the event.<a href="#section-3.5-4.9" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.5-4.10">
+            <code>auth_events</code> (array of strings; required) - The event IDs which prove the sender is able to
+send this event in the room. Which specific events are put here are defined by the <em>auth events
+selection</em> algorithm.<a href="#section-3.5-4.10" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.5-4.11">
+            <code>prev_events</code> (array of strings; required) - The event IDs which precede the event. Note that all
+events generated within Linearized Matrix will only ever have a single event ID here.<a href="#section-3.5-4.11" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.5-4.12">
+            <code>unsigned</code> (object; optional) - Additional metadata not covered by the signing algorithm.<a href="#section-3.5-4.12" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-3.5-5">Note that an event ID is not specified on the schema. Event IDs are calculated to ensure accuracy
+and consistency between servers. To calculate an event ID, calculate the <em>reference hash</em> of the
+event, encode it using <em>URL-safe Unpadded Base64</em>, and prefix it with the event ID sigil, <code>$</code>.<a href="#section-3.5-5" class="pilcrow">¶</a></p>
+<p id="section-3.5-6">If both the sender and receiver are implementing the algorithms correctly, the event ID will be
+the same. When different, the receiver will have issues accepting the event (none of the <code>auth_events</code>
+will make sense, for example). Both sender and receiver should review their algorithm implementation
+to verify everything is according to the specification in this case.<a href="#section-3.5-6" class="pilcrow">¶</a></p>
+<p id="section-3.5-7">Events are treated as JSON <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span> within the protocol, but can be encoded and represented by
+any binary-compatible format. Additional overhead may be introduced when converting between formats,
+however.<a href="#section-3.5-7" class="pilcrow">¶</a></p>
+<p id="section-3.5-8">An example may be:<a href="#section-3.5-8" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-3.5-9">
+<pre>
+{
+  "room_id": "!abc:example.org",
+  "type": "m.room.member",
+  "state_key": "@alice:first.example.org",
+  "sender": "@bob:second.example.org",
+  "origin_server_ts": 1681340188825,
+  "hub_server": "first.example.org",
+  "content": {
+    "membership": "invite"
+  },
+  "hashes": {
+    "sha256": "&lt;unpadded base64&gt;"
+  },
+  "signatures": {
+    "first.example.org": {
+      "ed25519:1": "&lt;unpadded base64 for signature covering whole event&gt;"
+    },
+    "second.example.org": {
+      "ed25519:1": "&lt;unpadded base64 for signature covering LPDU&gt;"
+    }
+  },
+  "auth_events": ["$first", "$second"],
+  "prev_events": ["$parent"],
+  "unsigned": {
+    "arbitrary": "fields"
+  }
+}
+</pre><a href="#section-3.5-9" class="pilcrow">¶</a>
+</div>
+<div id="linearized-pdu">
+<section id="section-3.5.1">
+          <h4 id="name-linearized-pdu">
+<a href="#section-3.5.1" class="section-number selfRef">3.5.1. </a><a href="#name-linearized-pdu" class="section-name selfRef">Linearized PDU</a>
+          </h4>
+<p id="section-3.5.1-1">The hub server is responsible for ensuring events are linearly added to the room from all participants,
+which means participants cannot set fields such as <code>prev_events</code> on their events. Additionally,
+participant servers are not expected to store past conversation history or even "current state" for
+the room, further making participants unable to reliably populate <code>auth_events</code> and <code>prev_events</code>.<a href="#section-3.5.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.1-2">To avoid these problems, the participant server <em>does not</em> populate the following fields on events
+they are sending to the hub:<a href="#section-3.5.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.5.1-3.1">
+              <code>auth_events</code> - the participant cannot reliably determine what allows it to send the event.<a href="#section-3.5.1-3.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-3.5.1-3.2">
+              <code>prev_events</code> - the participant cannot reliably know what event precedes theirs.<a href="#section-3.5.1-3.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-3.5.1-3.3">
+              <code>hashes</code> - the hashes cover the above two fields.<a href="#section-3.5.1-3.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-3.5.1-4">The participant server will receive an echo of the fully-formed event from the hub once appended.
+To ensure authenticity, the participant server signs this "Linearized PDU" or "LPDU" using the
+normal event <em>signing algorithm</em>.<a href="#section-3.5.1-4" class="pilcrow">¶</a></p>
+<p id="section-3.5.1-5"><strong>TODO</strong>: While a signature is great, it doesn't cover the content. We need to fix <code>hashes</code> to
+actually support an LPDU hash alongside a full-blown content hash.<a href="#section-3.5.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="state-events">
+<section id="section-3.5.2">
+          <h4 id="name-state-events">
+<a href="#section-3.5.2" class="section-number selfRef">3.5.2. </a><a href="#name-state-events" class="section-name selfRef">State events</a>
+          </h4>
+<p id="section-3.5.2-1">State events track metadata for the room, such as name, topic, and members. State is keyed by a
+tuple of <code>type</code> and <code>state_key</code>, noting that an empty string is a valid state key. State in the
+room with the same key-tuple will be overwritten.<a href="#section-3.5.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.2-2">State events are otherwise processed like regular events in the room: they're appended to the
+room history and can be referenced by that room history.<a href="#section-3.5.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.5.2-3">"Current state" is the state at the time being considered (which is often the implied <code>HEAD</code> of
+the room). In Linearized Matrix, a simple approach to calculating current state is to iterate
+over all events in order, overwriting the key-tuple for state events in an adjacent map. That
+map becomes "current state" when the loop is finished.<a href="#section-3.5.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="event-types">
+<section id="section-3.5.3">
+          <h4 id="name-event-types">
+<a href="#section-3.5.3" class="section-number selfRef">3.5.3. </a><a href="#name-event-types" class="section-name selfRef">Event types</a>
+          </h4>
+<p id="section-3.5.3-1">Linearized Matrix defines the following event types:<a href="#section-3.5.3-1" class="pilcrow">¶</a></p>
+<div id="mroomcreate">
+<section id="section-3.5.3.1">
+            <h5 id="name-mroomcreate">
+<a href="#section-3.5.3.1" class="section-number selfRef">3.5.3.1. </a><a href="#name-mroomcreate" class="section-name selfRef"><code>m.room.create</code></a>
+            </h5>
+<p id="section-3.5.3.1-1">The very first event in the room. It MUST NOT have any <code>auth_events</code> or <code>prev_events</code>, and the
+domain of the <code>sender</code> MUST be the same as the domain in the <code>room_id</code>. The <code>state_key</code> MUST
+be an empty string.<a href="#section-3.5.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.3.1-2">The <code>content</code> for a create event MUST have at least a <code>room_version</code> field to denote what set
+of algorithms the room is using. This document as a whole describes a single room version
+identified as <code>I.1</code>.<a href="#section-3.5.3.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.5.3.1-3"><strong>Implementation note</strong>: Currently <code>I.1</code> is not a real thing. Use
+<code>org.matrix.i-d.ralston-mimi-linearized-matrix.00</code> when testing against other Linearized Matrix
+implementations. This room version may be updated later.<a href="#section-3.5.3.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.5.3.1-4"><strong>TODO</strong>: Describe room versions more?<a href="#section-3.5.3.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="mroomjoinrules">
+<section id="section-3.5.3.2">
+            <h5 id="name-mroomjoin_rules">
+<a href="#section-3.5.3.2" class="section-number selfRef">3.5.3.2. </a><a href="#name-mroomjoin_rules" class="section-name selfRef"><code>m.room.join_rules</code></a>
+            </h5>
+<p id="section-3.5.3.2-1">Defines whether users can join without an invite and other similar conditions. The <code>state_key</code>
+MUST be an empty string.<a href="#section-3.5.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.3.2-2">The <code>content</code> for a join rules event MUST have at least a <code>join_rule</code> field to denote the
+join policy for the room. Allowable values are:<a href="#section-3.5.3.2-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.5.3.2-3.1">
+                <code>public</code> - anyone can join without an invite.<a href="#section-3.5.3.2-3.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-3.5.3.2-3.2">
+                <code>knock</code> - users must receive an invite to join, and can request an invite (knock) too.<a href="#section-3.5.3.2-3.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-3.5.3.2-3.3">
+                <code>invite</code> - users must receive an invite to join.<a href="#section-3.5.3.2-3.3" class="pilcrow">¶</a>
+</li>
+            </ul>
+<p id="section-3.5.3.2-4"><strong>TODO</strong>: Describe <code>restricted</code> (and <code>knock_restricted</code>) rooms?<a href="#section-3.5.3.2-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="mroommember">
+<section id="section-3.5.3.3">
+            <h5 id="name-mroommember">
+<a href="#section-3.5.3.3" class="section-number selfRef">3.5.3.3. </a><a href="#name-mroommember" class="section-name selfRef"><code>m.room.member</code></a>
+            </h5>
+<p id="section-3.5.3.3-1">Defines the membership for a user in the room. If the user does not have a membership event then
+they are presumed to be in the <code>leave</code> state.<a href="#section-3.5.3.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.3.3-2">The <code>state_key</code> MUST be a non-empty string denotating the user ID the membership is affecting.<a href="#section-3.5.3.3-2" class="pilcrow">¶</a></p>
+<p id="section-3.5.3.3-3">The <code>content</code> for a membership event MUST have at least a <code>membership</code> field to denote the
+membership state for the user. Allowable values are:<a href="#section-3.5.3.3-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.5.3.3-4.1">
+                <code>leave</code> - not participating in the room. If the <code>state_key</code> and <code>sender</code> do not match, this was
+a kick rather than voluntary leave.<a href="#section-3.5.3.3-4.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-3.5.3.3-4.2">
+                <code>join</code> - participating in the room.<a href="#section-3.5.3.3-4.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-3.5.3.3-4.3">
+                <code>knock</code> - requesting an invite to the room.<a href="#section-3.5.3.3-4.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-3.5.3.3-4.4">
+                <code>invite</code> - invited to participate in the room.<a href="#section-3.5.3.3-4.4" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-3.5.3.3-4.5">
+                <code>ban</code> - implies kicked/not participating. Cannot be invited or join the room without being
+unbanned first (moderator sends a kick, essentially).<a href="#section-3.5.3.3-4.5" class="pilcrow">¶</a>
+</li>
+            </ul>
+<p id="section-3.5.3.3-5">The <em>auth rules</em> define how these membership states interact and what legal transitions are possible.
+For example, preventing users from unbanning themselves falls under the auth rules.<a href="#section-3.5.3.3-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="mroompowerlevels">
+<section id="section-3.5.3.4">
+            <h5 id="name-mroompower_levels">
+<a href="#section-3.5.3.4" class="section-number selfRef">3.5.3.4. </a><a href="#name-mroompower_levels" class="section-name selfRef"><code>m.room.power_levels</code></a>
+            </h5>
+<p id="section-3.5.3.4-1">Defines what given users can and can't do, as well as which event types they are able to send.
+The enforcement of these power levels is determined by the <em>auth rules</em>.<a href="#section-3.5.3.4-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.3.4-2">The <code>state_key</code> MUST be an empty string.<a href="#section-3.5.3.4-2" class="pilcrow">¶</a></p>
+<p id="section-3.5.3.4-3">The <code>content</code> for a power levels event SHOULD have at least the following:<a href="#section-3.5.3.4-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.5.3.4-4.1">
+                <code>ban</code> (integer) - the level required to ban a user. Defaults to <code>50</code> if unspecified.<a href="#section-3.5.3.4-4.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-3.5.3.4-4.2">
+                <code>kick</code> (integer) - the level required to kick a user. Defaults to <code>50</code> if unspecified.<a href="#section-3.5.3.4-4.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-3.5.3.4-4.3">
+                <code>invite</code> (integer) - the level required to invite a user. Defaults to <code>0</code> if unspecified.<a href="#section-3.5.3.4-4.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-3.5.3.4-4.4">
+                <code>redact</code> (integer) - the level required to redact an event sent by another user. Defaults
+to <code>50</code> if unspecified.<a href="#section-3.5.3.4-4.4" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-3.5.3.4-4.5">
+                <code>events</code> (map) - keyed by event type string, the level required to send that event type to
+the room. Defaults to an empty map if unspecified.<a href="#section-3.5.3.4-4.5" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-3.5.3.4-4.6">
+                <code>events_default</code> (integer) - the level required to send events in the room. Overridden by
+the <code>events</code> map. Defaults to <code>0</code> if unspecified.<a href="#section-3.5.3.4-4.6" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-3.5.3.4-4.7">
+                <code>state_default</code> (integer) - the level required to send state events in the room. Overridden
+by the <code>events</code> map. Defaults to <code>50</code> if unspecified.<a href="#section-3.5.3.4-4.7" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-3.5.3.4-4.8">
+                <code>users</code> (map) - keyed by user ID, the level of that user. Defaults to an empty map if
+unspecified.<a href="#section-3.5.3.4-4.8" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-3.5.3.4-4.9">
+                <code>users_default</code> (integer) - the level for users. Overridden by the <code>users</code> map. Defaults to
+<code>0</code> if unspecified.<a href="#section-3.5.3.4-4.9" class="pilcrow">¶</a>
+</li>
+            </ul>
+<p id="section-3.5.3.4-5"><strong>TODO</strong>: Include notifications for at-room here too?<a href="#section-3.5.3.4-5" class="pilcrow">¶</a></p>
+<p id="section-3.5.3.4-6">Note that if no power levels event is specified in the room then the room creator (<code>sender</code> of
+the <code>m.room.create</code> state event) has a default power level of 100.<a href="#section-3.5.3.4-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="todo-other-events">
+<section id="section-3.5.3.5">
+            <h5 id="name-todo-other-events">
+<a href="#section-3.5.3.5" class="section-number selfRef">3.5.3.5. </a><a href="#name-todo-other-events" class="section-name selfRef">TODO: Other events</a>
+            </h5>
+<p id="section-3.5.3.5-1"><strong>TODO</strong>: <code>m.room.name</code>, <code>m.room.topic</code>, <code>m.room.avatar</code>, <code>m.room.encryption</code>, <code>m.room.history_visibility</code><a href="#section-3.5.3.5-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.3.5-2"><strong>TODO</strong>: Drop <code>m.room.encryption</code> and pack it into the create event instead?<a href="#section-3.5.3.5-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="mls-considerations">
+<section id="section-4">
+      <h2 id="name-mls-considerations">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-mls-considerations" class="section-name selfRef">MLS Considerations</a>
+      </h2>
+<p id="section-4-1">MIMI has a chartered requirement to use MLS for encryption, and MLS requires that all group
+members (devices) know of all other devices. If we consider each Matrix room to have an MLS
+group, we encounter scenarios where the room and group membership might diverge or otherwise
+not be equivalent.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">In a traditional Matrix room, membership is not managed at a per-device level but rather a
+per-user level. Devices are authenticated to use the room by being attached to a user. This
+model doesn't work in MLS, though.<a href="#section-4-2" class="pilcrow">¶</a></p>
+<p id="section-4-3">A couple options present themselves:<a href="#section-4-3" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4-4">
+<li id="section-4-4.1">Keep managing the room state at the server level, as is traditional for Matrix, and define
+a set of rules/methods for engaging devices/users in the room with the MLS group. Servers
+have an ability to instruct devices on how/when to add/remove MLS group members, but not
+an ability to handle the MLS Proposals and Commits directly.<a href="#section-4-4.1" class="pilcrow">¶</a>
+</li>
+        <li id="section-4-4.2">Coordinate a room's state at the device level, leaving servers to figure out how to push
+events between servers (and by extension, other devices). Servers would not have knowledge
+or ability to reject proposals based on authorization beyond transport-level authenticity
+concerns.<a href="#section-4-4.2" class="pilcrow">¶</a>
+</li>
+      </ol>
+<p id="section-4-5">At this stage of drafting in the document, it is not clear which would be preferred. Both are
+explored.<a href="#section-4-5" class="pilcrow">¶</a></p>
+<div id="decentralization-and-append-only-operation">
+<section id="section-4.1">
+        <h3 id="name-decentralization-and-append">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-decentralization-and-append" class="section-name selfRef">Decentralization and Append Only Operation</a>
+        </h3>
+<p id="section-4.1-1">Although not explicitly covered by this document, there is interest in maintaining direct
+interoperability with the existing non-linearized Matrix network as a whole. Decentralized
+access to conversations in this way gives messaging providers a trust model which is less
+dependent on a single other server (the room hub) being online and behaving correctly.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2">MLS however does not handle the required eventual consistency present in the existing Matrix
+network. This is in large part due to it being impossible to "rewind" or go back to a previous
+point in the encrypted history and insert/remove a series of events or messages.<a href="#section-4.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.1-3">To fix the rewind problem, Linearized Matrix is append only. Once an event is added to the
+room's underlying linked list, it is there forever. The exact linearization algorithm is
+out of scope for this document, though the important detail is a linearizing (DAG-capable)
+server is <em>unable</em> to alter history through inserts or rejections.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+<p id="section-4.1-4">For all other consistency problems imposed by decentralization, the Matrix team have been
+working on Decentralized MLS <span>[<a href="#DMLS" class="cite xref">DMLS</a>]</span>. In DMLS, epoch counters are per-device rather than
+per-group. This creates a graph of all commits with potential forks.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.1-5">How forks are resolved in DMLS is also out of scope for this document. The current approach
+is discussed and being experimented with from the early draft specification: <span>[<a href="#DMLS" class="cite xref">DMLS</a>]</span>.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.1-6"><strong>TODO</strong>: DMLS might only be required if we use a client-side room model? Depends on how we
+interoperate with non-linearized Matrix.<a href="#section-4.1-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="server-side-room-model">
+<section id="section-4.2">
+        <h3 id="name-server-side-room-model">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-server-side-room-model" class="section-name selfRef">Server-side Room Model</a>
+        </h3>
+<p id="section-4.2-1">Discussed earlier in this section, in this model the server deals with handling the room
+state on behalf of devices. This gives servers an ability to apply access control at a user
+level and instruct other devices on when/how to add or remove devices from the MLS group.
+The server does not have an ability to participate in the MLS group directly.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2-2">This is how traditional Matrix rooms work by handling state changes (user membership, etc)
+in cleartext for everyone to see. A user's devices would be tracked and added/removed from
+the MLS group as needed.<a href="#section-4.2-2" class="pilcrow">¶</a></p>
+<p id="section-4.2-3">The exact rules for how a user's devices become engaged with the MLS group is not yet defined
+in this model.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.2-4">An advantage over this model compared to client-side is the server is able to reduce the
+client's traffic, and likely keep things linear enough for MLS to function properly. This does
+result in increased complexity for the server, however. No conflict resolution algorithm is
+required for this case.<a href="#section-4.2-4" class="pilcrow">¶</a></p>
+<p id="section-4.2-5"><strong>TODO</strong>: Is that true? We might need DMLS anyways to interop with non-linearized Matrix.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
+<p id="section-4.2-6">The remainder of this section covers how Linearized Matrix's server-side room model works.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
+<div id="event-signing-authorization">
+<section id="section-4.2.1">
+          <h4 id="name-event-signing-authorization">
+<a href="#section-4.2.1" class="section-number selfRef">4.2.1. </a><a href="#name-event-signing-authorization" class="section-name selfRef">Event Signing &amp; Authorization</a>
+          </h4>
+<p id="section-4.2.1-1">There are a few aspects of an event which verify its authenticity and therefore whether it
+can be accepted into the room. All of these checks work with the fully-formed PDU for an
+event.<a href="#section-4.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.1-2">First, the event has a <em>content hash</em> which covers the unredacted content of the event. The
+purpose of this hash is to ensure that the original contents are not modified, therefore if
+the hash check fails then the event is redacted before continuing processing. This removes
+any potentially malicious or malformed details from the event.<a href="#section-4.2.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.2.1-3">Second, the event has a <em>reference hash</em> which covers the redacted event. This hash serves
+as the event's ID and thus any difference in calculation will result in an entirely different
+event ID.<a href="#section-4.2.1-3" class="pilcrow">¶</a></p>
+<p id="section-4.2.1-4">Third, the event must be signed by the domain implied by the <code>sender</code>. In Linearized Matrix,
+this will usually be the LPDU signature discussed earlier in this document. This signature
+covers the content hash of the event.<a href="#section-4.2.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.2.1-5"><strong>TODO</strong>: Except the LPDU signature doesn't cover the participant's content hash, because
+the participant doesn't have a content hash at the moment. This needs to be fixed before
+a 01 revision can be cut of this draft.<a href="#section-4.2.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.2.1-6">Finally, the event must be signed by the <code>hub_server</code> domain if present. This is to ensure
+that the event has actually been processed by the hub and isn't falsely being advertised as
+sent by a hub.<a href="#section-4.2.1-6" class="pilcrow">¶</a></p>
+<p id="section-4.2.1-7"><strong>TODO</strong>: Does the hub's signature actually guard anything?<a href="#section-4.2.1-7" class="pilcrow">¶</a></p>
+<div id="checks-performed-upon-receipt-of-a-pduevent">
+<section id="section-4.2.1.1">
+            <h5 id="name-checks-performed-upon-recei">
+<a href="#section-4.2.1.1" class="section-number selfRef">4.2.1.1. </a><a href="#name-checks-performed-upon-recei" class="section-name selfRef">Checks performed upon receipt of a PDU/event</a>
+            </h5>
+<p id="section-4.2.1.1-1">When a hub receives an LPDU from a participant it adds the missing fields to create a fully
+formed PDU then sends that PDU back out to all participants, including the original sender.<a href="#section-4.2.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.1.1-2">When a server (hub or participant) receives a PDU, it:<a href="#section-4.2.1.1-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.1-3">
+<li id="section-4.2.1.1-3.1">Verifies the event is in a valid shape. This will mean ensuring the required schema is
+met and of the correct type (there is a string <code>type</code>, etc). Note that the event may
+have additional fields in various places, such as at the top level or within <code>content</code>:
+the receiver should ensure these additional fields do not cause the event to be invalid.
+If the event fails this validation, it is dropped.<a href="#section-4.2.1.1-3.1" class="pilcrow">¶</a>
+</li>
+              <li id="section-4.2.1.1-3.2">Ensures the required signatures are present and valid. If the event fails this, it is
+dropped.<a href="#section-4.2.1.1-3.2" class="pilcrow">¶</a>
+</li>
+              <li id="section-4.2.1.1-3.3">Ensures the event has a valid content hash. If the event's hash doesn't match, it is
+redacted before processing further. The server will ultimately persist the redacted
+copy.<a href="#section-4.2.1.1-3.3" class="pilcrow">¶</a>
+</li>
+              <li id="section-4.2.1.1-3.4">Ensures the event passes the authorization rules for the state identified by the event's
+<code>auth_events</code>. If it fails, it is rejected.<a href="#section-4.2.1.1-3.4" class="pilcrow">¶</a>
+</li>
+              <li id="section-4.2.1.1-3.5">Ensures the event passes the authorization rules for the state of the room immediately
+before where the event would be inserted. If it fails, it is rejected.<a href="#section-4.2.1.1-3.5" class="pilcrow">¶</a>
+</li>
+              <li id="section-4.2.1.1-3.6">Ensures the event passes the authorization rules for the current state of the room (which
+may very well be the same as the step above). If it fails, it is soft-failed.<a href="#section-4.2.1.1-3.6" class="pilcrow">¶</a>
+</li>
+            </ol>
+</section>
+</div>
+<div id="rejection">
+<section id="section-4.2.1.2">
+            <h5 id="name-rejection">
+<a href="#section-4.2.1.2" class="section-number selfRef">4.2.1.2. </a><a href="#name-rejection" class="section-name selfRef">Rejection</a>
+            </h5>
+<p id="section-4.2.1.2-1">Events which are rejected are not relayed to any local clients and are not appended to the
+room in any way. Within Linearized Matrix, events which reference rejected events are
+rejected themselves.<a href="#section-4.2.1.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="soft-failure">
+<section id="section-4.2.1.3">
+            <h5 id="name-soft-failure">
+<a href="#section-4.2.1.3" class="section-number selfRef">4.2.1.3. </a><a href="#name-soft-failure" class="section-name selfRef">Soft failure</a>
+            </h5>
+<p id="section-4.2.1.3-1">When an event is "soft-failed" it should not be relayed to any local clients nor be used
+in <code>auth_events</code>. The event is otherwise handled as per usual.<a href="#section-4.2.1.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authorization-rules">
+<section id="section-4.2.1.4">
+            <h5 id="name-authorization-rules">
+<a href="#section-4.2.1.4" class="section-number selfRef">4.2.1.4. </a><a href="#name-authorization-rules" class="section-name selfRef">Authorization rules</a>
+            </h5>
+<p id="section-4.2.1.4-1">These are the rules which govern whether an event is accepted into the room, depending on
+the state events surrounding that event. A given event is checked against multiple different
+sets of state.<a href="#section-4.2.1.4-1" class="pilcrow">¶</a></p>
+<div id="auth-events-selection">
+<section id="section-4.2.1.4.1">
+              <h6 id="name-auth-events-selection">
+<a href="#section-4.2.1.4.1" class="section-number selfRef">4.2.1.4.1. </a><a href="#name-auth-events-selection" class="section-name selfRef">Auth events selection</a>
+              </h6>
+<p id="section-4.2.1.4.1-1">The <code>auth_events</code> on an event MUST consist of the following state events, with the exception
+of an <code>m.room.create</code> event which has no <code>auth_events</code>.<a href="#section-4.2.1.4.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.1-2">
+<li id="section-4.2.1.4.1-2.1">The <code>m.room.create</code> state event.<a href="#section-4.2.1.4.1-2.1" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.4.1-2.2">The current <code>m.room.power_levels</code> state event, if any.<a href="#section-4.2.1.4.1-2.2" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.4.1-2.3">The sender's current <code>m.room.member</code> state event, if any.<a href="#section-4.2.1.4.1-2.3" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.4.1-2.4">
+                  <p id="section-4.2.1.4.1-2.4.1">If the <code>type</code> is <code>m.room.member</code>:<a href="#section-4.2.1.4.1-2.4.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.1-2.4.2">
+<li id="section-4.2.1.4.1-2.4.2.1">The target's (<code>state_key</code>) current <code>m.room.member</code> state event, if any.<a href="#section-4.2.1.4.1-2.4.2.1" class="pilcrow">¶</a>
+</li>
+                    <li id="section-4.2.1.4.1-2.4.2.2">If <code>content.membership</code> is <code>join</code> or <code>invite</code>, the current <code>m.room.join_rules</code> state
+event, if any.<a href="#section-4.2.1.4.1-2.4.2.2" class="pilcrow">¶</a>
+</li>
+                  </ol>
+</li>
+              </ol>
+<p id="section-4.2.1.4.1-3"><strong>TODO</strong>: Talk about restricted room joins here?<a href="#section-4.2.1.4.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="auth-rules-algorithm">
+<section id="section-4.2.1.4.2">
+              <h6 id="name-auth-rules-algorithm">
+<a href="#section-4.2.1.4.2" class="section-number selfRef">4.2.1.4.2. </a><a href="#name-auth-rules-algorithm" class="section-name selfRef">Auth rules algorithm</a>
+              </h6>
+<p id="section-4.2.1.4.2-1">With consideration for default/calculated power levels, the ordered rules which affect
+authorization of a given event are:<a href="#section-4.2.1.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.1.4.2-2"><strong>TODO</strong>: should we reference <code>m.federate</code>?<a href="#section-4.2.1.4.2-2" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3">
+<li id="section-4.2.1.4.2-3.1">Events must be signed by the server denoted by the <code>sender</code> field. Note that this may be
+an LPDU if the <code>hub_server</code> is specified and not the same server.<a href="#section-4.2.1.4.2-3.1" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.4.2-3.2">If <code>hub_server</code> is present, events must be signed by that server.<a href="#section-4.2.1.4.2-3.2" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.4.2-3.3">
+                  <p id="section-4.2.1.4.2-3.3.1">If <code>type</code> is <code>m.room.create</code>:<a href="#section-4.2.1.4.2-3.3.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3.3.2">
+<li id="section-4.2.1.4.2-3.3.2.1">If it has any <code>prev_events</code>, reject.<a href="#section-4.2.1.4.2-3.3.2.1" class="pilcrow">¶</a>
+</li>
+                    <li id="section-4.2.1.4.2-3.3.2.2">If the domain of the <code>room_id</code> is not the same domain as the <code>sender</code>, reject.<a href="#section-4.2.1.4.2-3.3.2.2" class="pilcrow">¶</a>
+</li>
+                    <li id="section-4.2.1.4.2-3.3.2.3">If <code>content.room_version</code> is not <code>I.1</code>, reject. <strong>TODO</strong>: Incorporate room versions properly.<a href="#section-4.2.1.4.2-3.3.2.3" class="pilcrow">¶</a>
+</li>
+                    <li id="section-4.2.1.4.2-3.3.2.4">Otherwise, allow.<a href="#section-4.2.1.4.2-3.3.2.4" class="pilcrow">¶</a>
+</li>
+                  </ol>
+</li>
+                <li id="section-4.2.1.4.2-3.4">
+                  <p id="section-4.2.1.4.2-3.4.1">Considering the event's <code>auth_events</code>:<a href="#section-4.2.1.4.2-3.4.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3.4.2">
+<li id="section-4.2.1.4.2-3.4.2.1">If there are duplicate entries for a given <code>type</code> and <code>state_key</code> pair, reject.<a href="#section-4.2.1.4.2-3.4.2.1" class="pilcrow">¶</a>
+</li>
+                    <li id="section-4.2.1.4.2-3.4.2.2">If there are entries whose <code>type</code> and <code>state_key</code> do not match those specified by the
+auth events selection algorithm, reject.<a href="#section-4.2.1.4.2-3.4.2.2" class="pilcrow">¶</a>
+</li>
+                    <li id="section-4.2.1.4.2-3.4.2.3">If there are entries where the referenced event was rejected during receipt, reject.<a href="#section-4.2.1.4.2-3.4.2.3" class="pilcrow">¶</a>
+</li>
+                    <li id="section-4.2.1.4.2-3.4.2.4">If there is no <code>m.room.create</code> event among the entries, reject.<a href="#section-4.2.1.4.2-3.4.2.4" class="pilcrow">¶</a>
+</li>
+                  </ol>
+</li>
+                <li id="section-4.2.1.4.2-3.5">
+                  <p id="section-4.2.1.4.2-3.5.1">If <code>type</code> is <code>m.room.member</code>:<a href="#section-4.2.1.4.2-3.5.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3.5.2">
+<li id="section-4.2.1.4.2-3.5.2.1">If there is no <code>state_key</code> property, or no <code>membership</code> in <code>content</code>, reject.<a href="#section-4.2.1.4.2-3.5.2.1" class="pilcrow">¶</a>
+</li>
+                    <li id="section-4.2.1.4.2-3.5.2.2">
+                      <p id="section-4.2.1.4.2-3.5.2.2.1">If <code>membership</code> is <code>join</code>:<a href="#section-4.2.1.4.2-3.5.2.2.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3.5.2.2.2">
+<li id="section-4.2.1.4.2-3.5.2.2.2.1">If the previous event is an <code>m.room.create</code> event and the <code>state_key</code> is the
+creator, allow.<a href="#section-4.2.1.4.2-3.5.2.2.2.1" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.2.2.2">If <code>sender</code> does not match <code>state_key</code>, reject.<a href="#section-4.2.1.4.2-3.5.2.2.2.2" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.2.2.3">If the <code>sender</code> is banned, reject.<a href="#section-4.2.1.4.2-3.5.2.2.2.3" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.2.2.4">If the <code>join_rule</code> for <code>m.room.join_rules</code> is <code>invite</code> or <code>knock</code>, then allow if
+the current membership state is <code>invite</code> or <code>join</code>.<a href="#section-4.2.1.4.2-3.5.2.2.2.4" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.2.2.5">If the <code>join_rule</code> for <code>m.room.join_rules</code> is <code>public</code>, allow.<a href="#section-4.2.1.4.2-3.5.2.2.2.5" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.2.2.6">Otherwise, reject.<a href="#section-4.2.1.4.2-3.5.2.2.2.6" class="pilcrow">¶</a>
+</li>
+                      </ol>
+</li>
+                    <li id="section-4.2.1.4.2-3.5.2.3">
+                      <p id="section-4.2.1.4.2-3.5.2.3.1">If <code>membership</code> is <code>invite</code>:<a href="#section-4.2.1.4.2-3.5.2.3.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3.5.2.3.2">
+<li id="section-4.2.1.4.2-3.5.2.3.2.1">If the <code>sender</code>'s current membership state is not <code>join</code>, reject.<a href="#section-4.2.1.4.2-3.5.2.3.2.1" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.3.2.2">If the target user's (<code>state_key</code>) membership is <code>join</code> or <code>ban</code>, reject.<a href="#section-4.2.1.4.2-3.5.2.3.2.2" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.3.2.3">If the <code>sender</code>'s power level is greater than or equal to the power level needed
+to send invites, allow.<a href="#section-4.2.1.4.2-3.5.2.3.2.3" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.3.2.4">Otherwise, reject.<a href="#section-4.2.1.4.2-3.5.2.3.2.4" class="pilcrow">¶</a>
+</li>
+                      </ol>
+</li>
+                    <li id="section-4.2.1.4.2-3.5.2.4">
+                      <p id="section-4.2.1.4.2-3.5.2.4.1">If <code>membership</code> is <code>leave</code>:<a href="#section-4.2.1.4.2-3.5.2.4.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3.5.2.4.2">
+<li id="section-4.2.1.4.2-3.5.2.4.2.1">If the <code>sender</code> matches the <code>state_key</code>, allow if and only if that user's current
+membership state is <code>knock</code>, <code>join</code>, or <code>invite</code>.<a href="#section-4.2.1.4.2-3.5.2.4.2.1" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.4.2.2">If the <code>sender</code>'s current membership state is not <code>join</code>, reject.<a href="#section-4.2.1.4.2-3.5.2.4.2.2" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.4.2.3">If the target user's (<code>state_key</code>) current membership state is <code>ban</code>, and the
+<code>sender</code>'s power level is less than the power level needed to ban other users, reject.<a href="#section-4.2.1.4.2-3.5.2.4.2.3" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.4.2.4">If the <code>sender</code>'s power level is greater than or equal to the power level needed to
+kick users, and the target user's (<code>state_key</code>) power level is less than the <code>sender</code>'s,
+allow.<a href="#section-4.2.1.4.2-3.5.2.4.2.4" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.4.2.5">Otherwise, reject.<a href="#section-4.2.1.4.2-3.5.2.4.2.5" class="pilcrow">¶</a>
+</li>
+                      </ol>
+</li>
+                    <li id="section-4.2.1.4.2-3.5.2.5">
+                      <p id="section-4.2.1.4.2-3.5.2.5.1">If <code>membership</code> is <code>ban</code>:<a href="#section-4.2.1.4.2-3.5.2.5.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3.5.2.5.2">
+<li id="section-4.2.1.4.2-3.5.2.5.2.1">If the <code>sender</code>'s current membership state is not <code>join</code>, reject.<a href="#section-4.2.1.4.2-3.5.2.5.2.1" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.5.2.2">If the <code>sender</code>'s power level is greater than or equal to the power level needed
+to ban users, and the target user's (<code>state_key</code>) power level is less than the
+<code>sender</code>'s power level, allow.<a href="#section-4.2.1.4.2-3.5.2.5.2.2" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.5.2.3">Otherwise, reject.<a href="#section-4.2.1.4.2-3.5.2.5.2.3" class="pilcrow">¶</a>
+</li>
+                      </ol>
+</li>
+                    <li id="section-4.2.1.4.2-3.5.2.6">
+                      <p id="section-4.2.1.4.2-3.5.2.6.1">If <code>membership</code> is <code>knock</code>:<a href="#section-4.2.1.4.2-3.5.2.6.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3.5.2.6.2">
+<li id="section-4.2.1.4.2-3.5.2.6.2.1">If the <code>join_rule</code> for <code>m.room.join_rules</code> is anything other than <code>knock</code>, reject.<a href="#section-4.2.1.4.2-3.5.2.6.2.1" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.6.2.2">If the <code>sender</code> does not match the <code>state_key</code>, reject.<a href="#section-4.2.1.4.2-3.5.2.6.2.2" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.6.2.3">If the <code>sender</code>'s current membership state is not <code>ban</code> or <code>join</code>, allow.<a href="#section-4.2.1.4.2-3.5.2.6.2.3" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.5.2.6.2.4">Otherwise, reject.<a href="#section-4.2.1.4.2-3.5.2.6.2.4" class="pilcrow">¶</a>
+</li>
+                      </ol>
+</li>
+                    <li id="section-4.2.1.4.2-3.5.2.7">Otherwise, the <code>membership</code> is unknown. Reject.<a href="#section-4.2.1.4.2-3.5.2.7" class="pilcrow">¶</a>
+</li>
+                  </ol>
+</li>
+                <li id="section-4.2.1.4.2-3.6">If the <code>sender</code>'s current membership state is not <code>join</code>, reject.<a href="#section-4.2.1.4.2-3.6" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.4.2-3.7">If the event <code>type</code>'s required power level is greater than the <code>sender</code>'s power level,
+reject.<a href="#section-4.2.1.4.2-3.7" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.4.2-3.8">If the event has a <code>state_key</code> which starts with an <code>@</code> and does not match the <code>sender</code>,
+reject.<a href="#section-4.2.1.4.2-3.8" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.4.2-3.9">
+                  <p id="section-4.2.1.4.2-3.9.1">If <code>type</code> is <code>m.room.power_levels</code>:<a href="#section-4.2.1.4.2-3.9.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3.9.2">
+<li id="section-4.2.1.4.2-3.9.2.1">If any of the fields <code>users_default</code>, <code>events_default</code>, <code>state_default</code>, <code>ban</code>, <code>redact</code>,
+<code>kick</code>, or <code>invite</code> in <code>content</code> are present and not an integer, reject.<a href="#section-4.2.1.4.2-3.9.2.1" class="pilcrow">¶</a>
+</li>
+                    <li id="section-4.2.1.4.2-3.9.2.2">If <code>events</code> in <code>content</code> is present and not an object with values that are integers,
+reject.<a href="#section-4.2.1.4.2-3.9.2.2" class="pilcrow">¶</a>
+</li>
+                    <li id="section-4.2.1.4.2-3.9.2.3">If the <code>users</code> in <code>content</code> is present and not an object with valid user IDs as keys and
+integers as values, reject.<a href="#section-4.2.1.4.2-3.9.2.3" class="pilcrow">¶</a>
+</li>
+                    <li id="section-4.2.1.4.2-3.9.2.4">If there is no previous <code>m.room.power_levels</code> event in the room, allow.<a href="#section-4.2.1.4.2-3.9.2.4" class="pilcrow">¶</a>
+</li>
+                    <li id="section-4.2.1.4.2-3.9.2.5">
+                      <p id="section-4.2.1.4.2-3.9.2.5.1">For the fields <code>users_default</code>, <code>events_default</code>, <code>state_default</code>, <code>ban</code>, <code>redact</code>, <code>kick</code>,
+and <code>invite</code>, check if they were added, changed, or removed. For each found alteration:<a href="#section-4.2.1.4.2-3.9.2.5.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3.9.2.5.2">
+<li id="section-4.2.1.4.2-3.9.2.5.2.1">If the current value is higher than the <code>sender</code>'s current power level, reject.<a href="#section-4.2.1.4.2-3.9.2.5.2.1" class="pilcrow">¶</a>
+</li>
+                        <li id="section-4.2.1.4.2-3.9.2.5.2.2">If the new value is higher than the <code>sender</code>'s current power level, reject.<a href="#section-4.2.1.4.2-3.9.2.5.2.2" class="pilcrow">¶</a>
+</li>
+                      </ol>
+</li>
+                    <li id="section-4.2.1.4.2-3.9.2.6">
+                      <p id="section-4.2.1.4.2-3.9.2.6.1">For each entry being changed in or removed from <code>events</code>:<a href="#section-4.2.1.4.2-3.9.2.6.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3.9.2.6.2">
+<li id="section-4.2.1.4.2-3.9.2.6.2.1">If the current value is higher than the <code>sender</code>'s current power level, reject.<a href="#section-4.2.1.4.2-3.9.2.6.2.1" class="pilcrow">¶</a>
+</li>
+                      </ol>
+</li>
+                    <li id="section-4.2.1.4.2-3.9.2.7">
+                      <p id="section-4.2.1.4.2-3.9.2.7.1">For each entry being added to or changed in <code>events</code>:<a href="#section-4.2.1.4.2-3.9.2.7.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3.9.2.7.2">
+<li id="section-4.2.1.4.2-3.9.2.7.2.1">If the new value is greater than the <code>sender</code>'s current power level, reject.<a href="#section-4.2.1.4.2-3.9.2.7.2.1" class="pilcrow">¶</a>
+</li>
+                      </ol>
+</li>
+                    <li id="section-4.2.1.4.2-3.9.2.8">
+                      <p id="section-4.2.1.4.2-3.9.2.8.1">For each entry being changed in or removed from <code>users</code>, other than the <code>sender</code>'s own
+entry:<a href="#section-4.2.1.4.2-3.9.2.8.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3.9.2.8.2">
+<li id="section-4.2.1.4.2-3.9.2.8.2.1">If the current value is higher than the <code>sender</code>'s current power level, reject.<a href="#section-4.2.1.4.2-3.9.2.8.2.1" class="pilcrow">¶</a>
+</li>
+                      </ol>
+</li>
+                    <li id="section-4.2.1.4.2-3.9.2.9">
+                      <p id="section-4.2.1.4.2-3.9.2.9.1">For each entry being added to or changed in <code>users</code>:<a href="#section-4.2.1.4.2-3.9.2.9.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.4.2-3.9.2.9.2">
+<li id="section-4.2.1.4.2-3.9.2.9.2.1">If the new value is greater than the <code>sender</code>'s current power level, reject.<a href="#section-4.2.1.4.2-3.9.2.9.2.1" class="pilcrow">¶</a>
+</li>
+                      </ol>
+</li>
+                    <li id="section-4.2.1.4.2-3.9.2.10">Otherwise, allow.<a href="#section-4.2.1.4.2-3.9.2.10" class="pilcrow">¶</a>
+</li>
+                  </ol>
+</li>
+                <li id="section-4.2.1.4.2-3.10">Otherwise, allow.<a href="#section-4.2.1.4.2-3.10" class="pilcrow">¶</a>
+</li>
+              </ol>
+<p id="section-4.2.1.4.2-4">There are some consequences to these rules:<a href="#section-4.2.1.4.2-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.2.1.4.2-5.1">Unless you are already a member of the room, the only permitted operations (aside from
+the initial create/join) are being able to join public rooms, accept invites to rooms,
+and reject invites to rooms.<a href="#section-4.2.1.4.2-5.1" class="pilcrow">¶</a>
+</li>
+                <li class="normal" id="section-4.2.1.4.2-5.2">To unban another user, the sender must have a power level greater than or equal to both
+the kick and ban power levels, <em>and</em> greater than the target user's power level.<a href="#section-4.2.1.4.2-5.2" class="pilcrow">¶</a>
+</li>
+              </ul>
+<p id="section-4.2.1.4.2-6"><strong>TODO</strong>: If we want to enforce a single hub in a room, we'd do so here with auth rules.<a href="#section-4.2.1.4.2-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="signing">
+<section id="section-4.2.1.5">
+            <h5 id="name-signing">
+<a href="#section-4.2.1.5" class="section-number selfRef">4.2.1.5. </a><a href="#name-signing" class="section-name selfRef">Signing</a>
+            </h5>
+<p id="section-4.2.1.5-1">All servers, including hubs and participants, publish an ed25519 <span>[<a href="#RFC8032" class="cite xref">RFC8032</a>]</span> signing key
+to be used by other servers when verifying signatures.<a href="#section-4.2.1.5-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.1.5-2"><strong>TODO</strong>: Verify RFC reference. We might be using a slightly different ed25519 key today?<a href="#section-4.2.1.5-2" class="pilcrow">¶</a></p>
+<div id="canonical-json">
+<section id="section-4.2.1.5.1">
+              <h6 id="name-canonical-json">
+<a href="#section-4.2.1.5.1" class="section-number selfRef">4.2.1.5.1. </a><a href="#name-canonical-json" class="section-name selfRef">Canonical JSON</a>
+              </h6>
+<p id="section-4.2.1.5.1-1">When signing a JSON object, such as an event, it is important that the bytes be ordered in
+the same way for everyone. Otherwise, the signatures will never match.<a href="#section-4.2.1.5.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.1.5.1-2">To canonicalize a JSON object, use <span>[<a href="#RFC8785" class="cite xref">RFC8785</a>]</span>.<a href="#section-4.2.1.5.1-2" class="pilcrow">¶</a></p>
+<p id="section-4.2.1.5.1-3"><strong>TODO</strong>: Matrix currently doesn't use RFC8785, but it should (or similar).<a href="#section-4.2.1.5.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="signing-arbitrary-objects">
+<section id="section-4.2.1.5.2">
+              <h6 id="name-signing-arbitrary-objects">
+<a href="#section-4.2.1.5.2" class="section-number selfRef">4.2.1.5.2. </a><a href="#name-signing-arbitrary-objects" class="section-name selfRef">Signing arbitrary objects</a>
+              </h6>
+<p id="section-4.2.1.5.2-1">Though events receive a lot of signing, it is often necessary for a server to sign arbitary,
+non-event, payloads as well. For example, in Matrix's existing HTTPS+JSON transport, requests
+are signed to ensure they came from the source they claim to be.<a href="#section-4.2.1.5.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.1.5.2-2">To sign an object, the JSON is canonically encoded without the <code>signatures</code> or <code>unsigned</code>
+fields. The bytes of the canonically encoded JSON are then signed using the ed25519 signing
+key for the server. The resulting signature is then encoded using unpadded base64.<a href="#section-4.2.1.5.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="signing-events">
+<section id="section-4.2.1.5.3">
+              <h6 id="name-signing-events">
+<a href="#section-4.2.1.5.3" class="section-number selfRef">4.2.1.5.3. </a><a href="#name-signing-events" class="section-name selfRef">Signing events</a>
+              </h6>
+<p id="section-4.2.1.5.3-1">Signing events is very similar to signing an arbitary object, however with a note that an event
+is first redacted before signing. This ensures that later if the event were to be redacted in
+the room that the signature check still passes.<a href="#section-4.2.1.5.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.1.5.3-2">Note that the content hash covers the event's contents in case of redaction.<a href="#section-4.2.1.5.3-2" class="pilcrow">¶</a></p>
+<div id="redacting-an-event">
+<section id="section-4.2.1.5.3.1">
+                <h6 id="name-redacting-an-event">
+<a href="#section-4.2.1.5.3.1" class="section-number selfRef">4.2.1.5.3.1. </a><a href="#name-redacting-an-event" class="section-name selfRef">Redacting an event</a>
+                </h6>
+<p id="section-4.2.1.5.3.1-1">All fields at the top level except the following are stripped from the event:<a href="#section-4.2.1.5.3.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.2.1.5.3.1-2.1">
+                    <code>type</code><a href="#section-4.2.1.5.3.1-2.1" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-4.2.1.5.3.1-2.2">
+                    <code>room_id</code><a href="#section-4.2.1.5.3.1-2.2" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-4.2.1.5.3.1-2.3">
+                    <code>sender</code><a href="#section-4.2.1.5.3.1-2.3" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-4.2.1.5.3.1-2.4">
+                    <code>state_key</code><a href="#section-4.2.1.5.3.1-2.4" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-4.2.1.5.3.1-2.5">
+                    <code>content</code><a href="#section-4.2.1.5.3.1-2.5" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-4.2.1.5.3.1-2.6">
+                    <code>origin_server_ts</code><a href="#section-4.2.1.5.3.1-2.6" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-4.2.1.5.3.1-2.7">
+                    <code>hashes</code><a href="#section-4.2.1.5.3.1-2.7" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-4.2.1.5.3.1-2.8">
+                    <code>signatures</code><a href="#section-4.2.1.5.3.1-2.8" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-4.2.1.5.3.1-2.9">
+                    <code>prev_events</code><a href="#section-4.2.1.5.3.1-2.9" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-4.2.1.5.3.1-2.10">
+                    <code>auth_events</code><a href="#section-4.2.1.5.3.1-2.10" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-4.2.1.5.3.1-2.11">
+                    <code>hub_server</code><a href="#section-4.2.1.5.3.1-2.11" class="pilcrow">¶</a>
+</li>
+                </ul>
+<p id="section-4.2.1.5.3.1-3">Additionally, some event types retain specific fields under the event's <code>content</code>. All other
+fields are stripped.<a href="#section-4.2.1.5.3.1-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4.2.1.5.3.1-4.1">
+                    <code>m.room.create</code> retains all fields in <code>content</code>.<a href="#section-4.2.1.5.3.1-4.1" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-4.2.1.5.3.1-4.2">
+                    <code>m.room.member</code> retains <code>membership</code>.<a href="#section-4.2.1.5.3.1-4.2" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-4.2.1.5.3.1-4.3">
+                    <code>m.room.join_rules</code> retains <code>join_rule</code>.<a href="#section-4.2.1.5.3.1-4.3" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-4.2.1.5.3.1-4.4">
+                    <code>m.room.power_levels</code> retains <code>ban</code>, <code>events</code>, <code>events_default</code>, <code>kick</code>, <code>redact</code>, <code>state_default</code>,
+<code>users</code>, <code>users_default</code>, and <code>invite</code>.<a href="#section-4.2.1.5.3.1-4.4" class="pilcrow">¶</a>
+</li>
+                  <li class="normal" id="section-4.2.1.5.3.1-4.5">
+                    <code>m.room.history_visibility</code> retains <code>history_visibility</code>.<a href="#section-4.2.1.5.3.1-4.5" class="pilcrow">¶</a>
+</li>
+                </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="checking-a-signature">
+<section id="section-4.2.1.5.4">
+              <h6 id="name-checking-a-signature">
+<a href="#section-4.2.1.5.4" class="section-number selfRef">4.2.1.5.4. </a><a href="#name-checking-a-signature" class="section-name selfRef">Checking a signature</a>
+              </h6>
+<p id="section-4.2.1.5.4-1">If the <code>signatures</code> field is missing, doesn't contain the entity that is expected to have done
+the signing (a server name), doesn't have a known key ID, or is otherwise structurally invalid
+then the signature check fails.<a href="#section-4.2.1.5.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.1.5.4-2">If decoding the base64 fails, the check fails.<a href="#section-4.2.1.5.4-2" class="pilcrow">¶</a></p>
+<p id="section-4.2.1.5.4-3">If removing the <code>signatures</code> and <code>unsigned</code> properties, canonicalizing the JSON, and verifying
+the signature fails, the check fails.<a href="#section-4.2.1.5.4-3" class="pilcrow">¶</a></p>
+<p id="section-4.2.1.5.4-4">Otherwise, the check passes.<a href="#section-4.2.1.5.4-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="hashes">
+<section id="section-4.2.1.6">
+            <h5 id="name-hashes">
+<a href="#section-4.2.1.6" class="section-number selfRef">4.2.1.6. </a><a href="#name-hashes" class="section-name selfRef">Hashes</a>
+            </h5>
+<p id="section-4.2.1.6-1">An event is covered by two hashes: a content hash and a reference hash. The content hash covers the
+unredacted event to ensure it was not modified in transit. The reference hash covers the essential
+fields of the event, including content hashes, and serves as the event's ID.<a href="#section-4.2.1.6-1" class="pilcrow">¶</a></p>
+<div id="content-hash-calculation">
+<section id="section-4.2.1.6.1">
+              <h6 id="name-content-hash-calculation">
+<a href="#section-4.2.1.6.1" class="section-number selfRef">4.2.1.6.1. </a><a href="#name-content-hash-calculation" class="section-name selfRef">Content hash calculation</a>
+              </h6>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.6.1-1">
+<li id="section-4.2.1.6.1-1.1">Remove any existing <code>unsigned</code>, <code>signatures</code>, and <code>hashes</code> fields.<a href="#section-4.2.1.6.1-1.1" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.6.1-1.2">Encode the object using canonical JSON.<a href="#section-4.2.1.6.1-1.2" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.6.1-1.3">Hash the resulting bytes with SHA-256 <span>[<a href="#RFC6234" class="cite xref">RFC6234</a>]</span>.<a href="#section-4.2.1.6.1-1.3" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.6.1-1.4">Encode the hash using unpadded base64.<a href="#section-4.2.1.6.1-1.4" class="pilcrow">¶</a>
+</li>
+              </ol>
+</section>
+</div>
+<div id="reference-hash">
+<section id="section-4.2.1.6.2">
+              <h6 id="name-reference-hash">
+<a href="#section-4.2.1.6.2" class="section-number selfRef">4.2.1.6.2. </a><a href="#name-reference-hash" class="section-name selfRef">Reference hash</a>
+              </h6>
+<ol start="1" type="1" class="normal type-1" id="section-4.2.1.6.2-1">
+<li id="section-4.2.1.6.2-1.1">Redact the event.<a href="#section-4.2.1.6.2-1.1" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.6.2-1.2">Remove <code>signatures</code> and <code>unsigned</code> fields.<a href="#section-4.2.1.6.2-1.2" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.6.2-1.3">Encode the object using canonical JSON.<a href="#section-4.2.1.6.2-1.3" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.6.2-1.4">Hash the resulting bytes with SHA-256 <span>[<a href="#RFC6234" class="cite xref">RFC6234</a>]</span>.<a href="#section-4.2.1.6.2-1.4" class="pilcrow">¶</a>
+</li>
+                <li id="section-4.2.1.6.2-1.5">Encode the hash using URL-safe unpadded base64.<a href="#section-4.2.1.6.2-1.5" class="pilcrow">¶</a>
+</li>
+              </ol>
+</section>
+</div>
+</section>
+</div>
+<div id="unpadded-base64">
+<section id="section-4.2.1.7">
+            <h5 id="name-unpadded-base64">
+<a href="#section-4.2.1.7" class="section-number selfRef">4.2.1.7. </a><a href="#name-unpadded-base64" class="section-name selfRef">Unpadded Base64</a>
+            </h5>
+<p id="section-4.2.1.7-1">Throughout this document, "unpadded base64" is used to represent binary values as strings. Base64 is
+as specified by <span>[<a href="#RFC4648" class="cite xref">RFC4648</a>]</span>, and <em>unpadded</em> base64 simply removes any <code>=</code> padding from the resulting
+string.<a href="#section-4.2.1.7-1" class="pilcrow">¶</a></p>
+<p id="section-4.2.1.7-2">Implementations SHOULD accept input with or without padding on base64 values.<a href="#section-4.2.1.7-2" class="pilcrow">¶</a></p>
+<p id="section-4.2.1.7-3">Section 5 of <span>[<a href="#RFC4648" class="cite xref">RFC4648</a>]</span> describes <em>URL-safe</em> base64. The same changes are adopted here. Namely, the
+62nd and 63rd characters are replaced with <code>-</code> and <code>_</code> respectively. The unpadded behaviour is as
+described above.<a href="#section-4.2.1.7-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="client-side-room-model">
+<section id="section-4.3">
+        <h3 id="name-client-side-room-model">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-client-side-room-model" class="section-name selfRef">Client-side Room Model</a>
+        </h3>
+<p id="section-4.3-1">In this model, a room's state is completely managed within the MLS group. This provides a key advantage
+where servers become message-passing nodes (in essence), but increases implementation complexity on the
+clients/devices.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3-2">Much of this model is based around the server-side model discussed above: event authorization rules,
+redactions, etc still behave the same, but on the client-side instead. The server would likely be
+responsible for ensuring incoming events are properly signed, but otherwise leave it up to clients to
+accept or reject them into their internal linked list.<a href="#section-4.3-2" class="pilcrow">¶</a></p>
+<p id="section-4.3-3">A potential consequence of this model is clients needing to implement a conflict resolution algorithm
+despite having linear room history. This is due to clients receiving MLS messages out of guaranteed order.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
+<p id="section-4.3-4"><strong>TODO</strong>: This could be DMLS, state res, or both.<a href="#section-4.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="hub-transfers">
+<section id="section-5">
+      <h2 id="name-hub-transfers">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-hub-transfers" class="section-name selfRef">Hub transfers</a>
+      </h2>
+<p id="section-5-1"><strong>TODO</strong>: This section, if we want a single canonical hub in the room. Some expected problems in this
+area are: who signs the transfer event? who <em>sends</em> the transfer event? how does a transfer start?<a href="#section-5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="transport">
+<section id="section-6">
+      <h2 id="name-transport">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-transport" class="section-name selfRef">Transport</a>
+      </h2>
+<p id="section-6-1"><strong>TODO</strong>: This section, though this is likely to be a dedicated I-D.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">Topics:
+* Server discovery
+* Publishing of signing keys
+* Sending events between servers
+* Media handling
+* etc<a href="#section-6-2" class="pilcrow">¶</a></p>
+<p id="section-6-3">Matrix currently uses an HTTPS+JSON transport for this.<a href="#section-6-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-7">
+      <h2 id="name-security-considerations">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-7-1"><strong>TODO</strong>: Expand upon this section.<a href="#section-7-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-8">
+      <h2 id="name-iana-considerations">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-8-1">The <code>m.*</code> namespace likely needs formal registration in some capacity.<a href="#section-8-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-9">
+      <h2 id="name-references">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<section id="section-9.1">
+        <h3 id="name-normative-references">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="I-D.ralston-mimi-terminology">[I-D.ralston-mimi-terminology]</dt>
+        <dd>
+<span class="refAuthor">Ralston, T.</span>, <span class="refTitle">"MIMI Terminology"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ralston-mimi-terminology-00</span>, <time datetime="2023-04-11" class="refDate">11 April 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ralston-mimi-terminology-00">https://datatracker.ietf.org/doc/html/draft-ralston-mimi-terminology-00</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC1123">[RFC1123]</dt>
+        <dd>
+<span class="refAuthor">Braden, R., Ed.</span>, <span class="refTitle">"Requirements for Internet Hosts - Application and Support"</span>, <span class="seriesInfo">STD 3</span>, <span class="seriesInfo">RFC 1123</span>, <span class="seriesInfo">DOI 10.17487/RFC1123</span>, <time datetime="1989-10" class="refDate">October 1989</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc1123">https://www.rfc-editor.org/rfc/rfc1123</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3629">[RFC3629]</dt>
+        <dd>
+<span class="refAuthor">Yergeau, F.</span>, <span class="refTitle">"UTF-8, a transformation format of ISO 10646"</span>, <span class="seriesInfo">STD 63</span>, <span class="seriesInfo">RFC 3629</span>, <span class="seriesInfo">DOI 10.17487/RFC3629</span>, <time datetime="2003-11" class="refDate">November 2003</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3629">https://www.rfc-editor.org/rfc/rfc3629</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC4648">[RFC4648]</dt>
+        <dd>
+<span class="refAuthor">Josefsson, S.</span>, <span class="refTitle">"The Base16, Base32, and Base64 Data Encodings"</span>, <span class="seriesInfo">RFC 4648</span>, <span class="seriesInfo">DOI 10.17487/RFC4648</span>, <time datetime="2006-10" class="refDate">October 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4648">https://www.rfc-editor.org/rfc/rfc4648</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6234">[RFC6234]</dt>
+        <dd>
+<span class="refAuthor">Eastlake 3rd, D.</span> and <span class="refAuthor">T. Hansen</span>, <span class="refTitle">"US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)"</span>, <span class="seriesInfo">RFC 6234</span>, <span class="seriesInfo">DOI 10.17487/RFC6234</span>, <time datetime="2011-05" class="refDate">May 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6234">https://www.rfc-editor.org/rfc/rfc6234</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8032">[RFC8032]</dt>
+        <dd>
+<span class="refAuthor">Josefsson, S.</span> and <span class="refAuthor">I. Liusvaara</span>, <span class="refTitle">"Edwards-Curve Digital Signature Algorithm (EdDSA)"</span>, <span class="seriesInfo">RFC 8032</span>, <span class="seriesInfo">DOI 10.17487/RFC8032</span>, <time datetime="2017-01" class="refDate">January 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8032">https://www.rfc-editor.org/rfc/rfc8032</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8259">[RFC8259]</dt>
+        <dd>
+<span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"The JavaScript Object Notation (JSON) Data Interchange Format"</span>, <span class="seriesInfo">STD 90</span>, <span class="seriesInfo">RFC 8259</span>, <span class="seriesInfo">DOI 10.17487/RFC8259</span>, <time datetime="2017-12" class="refDate">December 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8259">https://www.rfc-editor.org/rfc/rfc8259</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8785">[RFC8785]</dt>
+      <dd>
+<span class="refAuthor">Rundgren, A.</span>, <span class="refAuthor">Jordan, B.</span>, and <span class="refAuthor">S. Erdtman</span>, <span class="refTitle">"JSON Canonicalization Scheme (JCS)"</span>, <span class="seriesInfo">RFC 8785</span>, <span class="seriesInfo">DOI 10.17487/RFC8785</span>, <time datetime="2020-06" class="refDate">June 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8785">https://www.rfc-editor.org/rfc/rfc8785</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+<section id="section-9.2">
+        <h3 id="name-informative-references">
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="DMLS">[DMLS]</dt>
+        <dd>
+<span class="refAuthor">Chathi, H.</span>, <span class="refTitle">"Decentrlised MLS"</span>, <time datetime="2023-05-29" class="refDate">29 May 2023</time>, <span>&lt;<a href="https://gitlab.matrix.org/matrix-org/mls-ts/-/blob/48efb972075233c3a0f3e3ca01c4d4f888342205/decentralised.org">https://gitlab.matrix.org/matrix-org/mls-ts/-/blob/48efb972075233c3a0f3e3ca01c4d4f888342205/decentralised.org</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="MSC3995">[MSC3995]</dt>
+      <dd>
+<span class="refAuthor">Ralston, T.</span>, <span class="refTitle">"MSC3995: [WIP] Linearized Matrix"</span>, <time datetime="2023-04-12" class="refDate">12 April 2023</time>, <span>&lt;<a href="https://github.com/matrix-org/matrix-spec-proposals/pull/3995">https://github.com/matrix-org/matrix-spec-proposals/pull/3995</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</section>
+<div id="acknowledgments">
+<section id="appendix-A">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-A-1">Thank you to the Matrix Spec Core Team (SCT), and in particular Richard van der Hoff, for
+exploring how Matrix rooms could be represented as a linear structure, leading to this document.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-B">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Travis Ralston</span></div>
+<div dir="auto" class="left"><span class="org">The Matrix.org Foundation C.I.C.</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:travisr@matrix.org" class="email">travisr@matrix.org</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Matthew Hodgson</span></div>
+<div dir="auto" class="left"><span class="org">The Matrix.org Foundation C.I.C.</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:matthew@matrix.org" class="email">matthew@matrix.org</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>

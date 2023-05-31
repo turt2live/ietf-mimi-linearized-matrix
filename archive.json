@@ -1,0 +1,171 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2023-04-13T00:12:33.740884+00:00",
+  "repo": "turt2live/ietf-mimi-linearized-matrix",
+  "labels": [
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [
+    {
+      "number": 2,
+      "id": "I_kwDOJM90Qc5iPrgz",
+      "title": "Account for new terminology and signing approach",
+      "url": "https://github.com/turt2live/ietf-mimi-linearized-matrix/issues/2",
+      "state": "CLOSED",
+      "author": "turt2live",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "![DLPDU, LPDU, PDU signing (1)](https://user-images.githubusercontent.com/1190097/228958491-32ca1bfd-c37a-451b-a678-2594bd8759f0.png)\r\n",
+      "createdAt": "2023-03-30T20:37:45Z",
+      "updatedAt": "2023-04-12T20:45:36Z",
+      "closedAt": "2023-04-12T20:45:36Z",
+      "comments": []
+    }
+  ],
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOJM90Qc5MsP7Y",
+      "title": "lots of tweaks",
+      "url": "https://github.com/turt2live/ietf-mimi-linearized-matrix/pull/1",
+      "state": "MERGED",
+      "author": "ara4n",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "* reword the abstract to better justify the existence of LM\r\n* emphasise the importance of following authentication rules as per the room version\r\n* clarify (i think) how DAG compatibility would work by \"trunking\" LM via a DAG-capable server.",
+      "createdAt": "2023-03-23T01:01:55Z",
+      "updatedAt": "2023-03-24T01:32:08Z",
+      "baseRepository": "turt2live/ietf-mimi-linearized-matrix",
+      "baseRefName": "main",
+      "baseRefOid": "a534937209475fcc1871031197c1dbea0c253075",
+      "headRepository": "ara4n/ietf-mimi-linearized-matrix",
+      "headRefName": "patch-1",
+      "headRefOid": "100a32c7d816b1e0380cafb8857086ce0e90eb80",
+      "closedAt": "2023-03-24T01:32:08Z",
+      "mergedAt": "2023-03-24T01:32:08Z",
+      "mergedBy": "turt2live",
+      "mergeCommit": {
+        "oid": "6e0b3c10085bf40e1fb932599758359603ad9fbd"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOJM90Qc5QtEkB",
+          "commit": {
+            "abbreviatedOid": "031f12f"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-23T07:30:27Z",
+          "updatedAt": "2023-03-23T07:36:14Z",
+          "comments": [
+            {
+              "originalPosition": 32,
+              "body": "```suggestion\r\nThis document explores an API surface for Matrix which optimizes for ease of\r\n```",
+              "createdAt": "2023-03-23T07:30:27Z",
+              "updatedAt": "2023-03-23T07:36:15Z"
+            },
+            {
+              "originalPosition": 33,
+              "body": "```suggestion\r\ninteroperability at the expense of decentralized conversation history at a per-room level.\r\n```",
+              "createdAt": "2023-03-23T07:30:37Z",
+              "updatedAt": "2023-03-23T07:36:15Z"
+            },
+            {
+              "originalPosition": 92,
+              "body": "Membership has additional context above normal state handling. \r\n\r\nWe're not saying here that one needs to have a transport layer difference between membership and state, just calling out that membership is slightly weird.",
+              "createdAt": "2023-03-23T07:33:00Z",
+              "updatedAt": "2023-03-23T07:36:15Z"
+            },
+            {
+              "originalPosition": 33,
+              "body": "ize throughout",
+              "createdAt": "2023-03-23T07:34:30Z",
+              "updatedAt": "2023-03-23T07:36:15Z"
+            },
+            {
+              "originalPosition": 133,
+              "body": "```suggestion\r\nnot able to implement full decentralisation yet. {{?I-D.avoiding-internet-centralization}}\r\n```",
+              "createdAt": "2023-03-23T07:34:56Z",
+              "updatedAt": "2023-03-23T07:36:15Z"
+            },
+            {
+              "originalPosition": 92,
+              "body": "We can rename the section if needed.",
+              "createdAt": "2023-03-23T07:36:11Z",
+              "updatedAt": "2023-03-23T07:36:15Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5QtNl0",
+          "commit": {
+            "abbreviatedOid": "2c060c3"
+          },
+          "author": "ara4n",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-23T08:00:44Z",
+          "updatedAt": "2023-03-23T08:00:45Z",
+          "comments": [
+            {
+              "originalPosition": 92,
+              "body": "okay, that works for me.",
+              "createdAt": "2023-03-23T08:00:45Z",
+              "updatedAt": "2023-03-23T08:00:45Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
