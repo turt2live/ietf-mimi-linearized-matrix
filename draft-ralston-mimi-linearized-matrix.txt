@@ -5,7 +5,7 @@
 More Instant Messaging Interoperability                       T. Ralston
 Internet-Draft                                                M. Hodgson
 Intended status: Standards Track        The Matrix.org Foundation C.I.C.
-Expires: 2 December 2023                                     31 May 2023
+Expires: 3 December 2023                                     1 June 2023
 
 
                          Linearized Matrix API
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 December 2023.
+   This Internet-Draft will expire on 3 December 2023.
 
 Copyright Notice
 
@@ -1173,7 +1173,7 @@ Table of Contents
 
 9.2.  Informative References
 
-   [DMLS]     Chathi, H., "Decentrlised MLS", 29 May 2023,
+   [DMLS]     Chathi, H., "Decentralised MLS", 29 May 2023,
               <https://gitlab.matrix.org/matrix-org/mls-ts/-
               /blob/48efb972075233c3a0f3e3ca01c4d4f888342205/
               decentralised.org>.
