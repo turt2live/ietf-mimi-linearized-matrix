@@ -48,7 +48,7 @@ informative:
          email: travisr@matrix.org
   DMLS:
     target: https://gitlab.matrix.org/matrix-org/mls-ts/-/blob/48efb972075233c3a0f3e3ca01c4d4f888342205/decentralised.org
-    title: "Decentrlised MLS"
+    title: "Decentralised MLS"
     date: 2023-05-29
     author:
        - fullname: Hubert Chathi
