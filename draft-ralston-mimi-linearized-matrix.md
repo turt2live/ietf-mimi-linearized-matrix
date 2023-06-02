@@ -46,7 +46,7 @@ informative:
        - fullname: Travis Ralston
          organization: The Matrix.org Foundation C.I.C.
          email: travisr@matrix.org
-  DMLS:
+  DMLS: # TODO: Actually link to this somewhere in the doc.
     target: https://gitlab.matrix.org/matrix-org/mls-ts/-/blob/48efb972075233c3a0f3e3ca01c4d4f888342205/decentralised.org
     title: "Decentralised MLS"
     date: 2023-05-29
@@ -436,32 +436,6 @@ the `m.room.create` state event) has a default power level of 100.
 
 **TODO**: Drop `m.room.encryption` and pack it into the create event instead?
 
-# Decentralization and Append Only Operation
-
-Although not explicitly covered by this document, there is interest in maintaining direct
-interoperability with the existing non-linearized Matrix network as a whole. Decentralized
-access to conversations in this way gives messaging providers a trust model which is less
-dependent on a single other server (the room hub) being online and behaving correctly.
-
-MLS however does not handle the required eventual consistency present in the existing Matrix
-network. This is in large part due to it being impossible to "rewind" or go back to a previous
-point in the encrypted history and insert/remove a series of events or messages.
-
-To fix the rewind problem, Linearized Matrix is append only. Once an event is added to the
-room's underlying linked list, it is there forever. The exact linearization algorithm is
-out of scope for this document, though the important detail is a linearizing (DAG-capable)
-server is *unable* to alter history through inserts or rejections.
-
-For all other consistency problems imposed by decentralization, the Matrix team have been
-working on Decentralized MLS {{DMLS}}. In DMLS, epoch counters are per-device rather than
-per-group. This creates a graph of all commits with potential forks.
-
-How forks are resolved in DMLS is also out of scope for this document. The current approach
-is discussed and being experimented with from the early draft specification: {{DMLS}}.
-
-**TODO**: DMLS might only be required if we use a client-side room model? Depends on how we
-interoperate with non-linearized Matrix.
-
 # MLS Considerations
 
 MIMI has a chartered requirement to use MLS for encryption, and MLS requires that all group
@@ -490,33 +464,36 @@ explored.
 
 ## Server-side Room Model
 
-Discussed earlier in this section, in this model the server deals with handling the room
-state on behalf of devices. This gives servers an ability to apply access control at a user
-level and instruct other devices on when/how to add or remove devices from the MLS group.
-The server does not have an ability to participate in the MLS group directly.
+In this model, servers handle the room state on behalf of devices. This gives the server an
+ability to apply access control at a user level, and instruct other devices on when/how to
+add or remove devices from the underlying MLS group. The server does not have an ability to
+participate in the MLS group directly.
 
 This is how traditional Matrix rooms work by handling state changes (user membership, etc)
 in cleartext for everyone to see. A user's devices would be tracked and added/removed from
 the MLS group as needed.
 
-The exact rules for how a user's devices become engaged with the MLS group is not yet defined
-in this model.
+The exact rules for how a user's devices become engaged with the MLS group is not yet defined.
 
 An advantage over this model compared to client-side is the server is able to reduce the
-client's traffic, and likely keep things linear enough for MLS to function properly. This does
-result in increased complexity for the server, however. No conflict resolution algorithm is
-required for this case.
+client's traffic by rejecting events earlier and deal with conflicts that may arise, keeping
+the conversation as linear as possible for the client.
 
-**TODO**: Is that true? We might need DMLS anyways to interop with non-linearized Matrix.
+A clear disadvantage is that without cross-signing or other cryptographic mechanism, the server
+would be able to add malicious devices to its users and therefore the MLS group. A precise
+mitigation strategy is not yet defined by this document, but would involve building verifiable
+trust in a device before it is allowed to participate in the MLS group.
 
 The existing model used by Linearized Matrix is covered by "Event Signing & Authorization"
-in this document.
+later in this document.
+
+**TODO**: We might also need DMLS to handle some of the server-side conflicts?
 
 ## Client-side Room Model
 
-In this model, a room's state is completely managed within the MLS group. This provides a key advantage
-where servers become message-passing nodes (in essence), but increases implementation complexity on the
-clients/devices.
+Here, the room's state is completely managed within the MLS group. This provides a key advantage
+where servers become message-passing nodes (in essence), but increases implementation complexity
+on the clients/devices.
 
 Much of this model is based around the server-side model discussed above: event authorization rules,
 redactions, etc still behave the same, but on the client-side instead. The server would likely be
