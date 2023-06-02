@@ -436,33 +436,7 @@ the `m.room.create` state event) has a default power level of 100.
 
 **TODO**: Drop `m.room.encryption` and pack it into the create event instead?
 
-# MLS Considerations
-
-MIMI has a chartered requirement to use MLS for encryption, and MLS requires that all group
-members (devices) know of all other devices. If we consider each Matrix room to have an MLS
-group, we encounter scenarios where the room and group membership might diverge or otherwise
-not be equivalent.
-
-In a traditional Matrix room, membership is not managed at a per-device level but rather a
-per-user level. Devices are authenticated to use the room by being attached to a user. This
-model doesn't work in MLS, though.
-
-A couple options present themselves:
-
-1. Keep managing the room state at the server level, as is traditional for Matrix, and define
-   a set of rules/methods for engaging devices/users in the room with the MLS group. Servers
-   have an ability to instruct devices on how/when to add/remove MLS group members, but not
-   an ability to handle the MLS Proposals and Commits directly.
-
-2. Coordinate a room's state at the device level, leaving servers to figure out how to push
-   events between servers (and by extension, other devices). Servers would not have knowledge
-   or ability to reject proposals based on authorization beyond transport-level authenticity
-   concerns.
-
-At this stage of drafting in the document, it is not clear which would be preferred. Both are
-explored.
-
-## Decentralization and Append Only Operation
+# Decentralization and Append Only Operation
 
 Although not explicitly covered by this document, there is interest in maintaining direct
 interoperability with the existing non-linearized Matrix network as a whole. Decentralized
@@ -488,6 +462,32 @@ is discussed and being experimented with from the early draft specification: {{D
 **TODO**: DMLS might only be required if we use a client-side room model? Depends on how we
 interoperate with non-linearized Matrix.
 
+# MLS Considerations
+
+MIMI has a chartered requirement to use MLS for encryption, and MLS requires that all group
+members (devices) know of all other devices. If we consider each Matrix room to have an MLS
+group, we encounter scenarios where the room and group membership might diverge or otherwise
+not be equivalent.
+
+In a traditional Matrix room, membership is not managed at a per-device level but rather a
+per-user level. Devices are authenticated to use the room by being attached to a user. This
+model doesn't work in MLS, though.
+
+A couple of options present themselves:
+
+1. Keep managing the room state at the server level, as is traditional for Matrix, and define
+   a set of rules/methods for engaging devices/users in the room with the MLS group. Servers
+   have an ability to instruct devices on how/when to add/remove MLS group members, but not
+   an ability to handle the MLS Proposals and Commits directly.
+
+2. Coordinate a room's state at the device level, leaving servers to figure out how to push
+   events between servers (and by extension, other devices). Servers would not have knowledge
+   or ability to reject proposals based on authorization beyond transport-level authenticity
+   concerns.
+
+At this stage of drafting in the document, it is not clear which would be preferred. Both are
+explored.
+
 ## Server-side Room Model
 
 Discussed earlier in this section, in this model the server deals with handling the room
@@ -509,9 +509,26 @@ required for this case.
 
 **TODO**: Is that true? We might need DMLS anyways to interop with non-linearized Matrix.
 
-The remainder of this section covers how Linearized Matrix's server-side room model works.
+The existing model used by Linearized Matrix is covered by "Event Signing & Authorization"
+in this document.
 
-### Event Signing & Authorization
+## Client-side Room Model
+
+In this model, a room's state is completely managed within the MLS group. This provides a key advantage
+where servers become message-passing nodes (in essence), but increases implementation complexity on the
+clients/devices.
+
+Much of this model is based around the server-side model discussed above: event authorization rules,
+redactions, etc still behave the same, but on the client-side instead. The server would likely be
+responsible for ensuring incoming events are properly signed, but otherwise leave it up to clients to
+accept or reject them into their internal linked list.
+
+A potential consequence of this model is clients needing to implement a conflict resolution algorithm
+despite having linear room history. This is due to clients receiving MLS messages out of guaranteed order.
+
+**TODO**: This could be DMLS, state res, or both.
+
+# Event Signing & Authorization
 
 There are a few aspects of an event which verify its authenticity and therefore whether it
 can be accepted into the room. All of these checks work with the fully-formed PDU for an
@@ -540,7 +557,7 @@ sent by a hub.
 
 **TODO**: Does the hub's signature actually guard anything?
 
-#### Checks performed upon receipt of a PDU/event
+## Checks performed upon receipt of a PDU/event
 
 When a hub receives an LPDU from a participant it adds the missing fields to create a fully
 formed PDU then sends that PDU back out to all participants, including the original sender.
@@ -569,24 +586,24 @@ When a server (hub or participant) receives a PDU, it:
 6. Ensures the event passes the authorization rules for the current state of the room (which
    may very well be the same as the step above). If it fails, it is soft-failed.
 
-#### Rejection
+## Rejection
 
 Events which are rejected are not relayed to any local clients and are not appended to the
 room in any way. Within Linearized Matrix, events which reference rejected events are
 rejected themselves.
 
-#### Soft failure
+## Soft failure
 
 When an event is "soft-failed" it should not be relayed to any local clients nor be used
 in `auth_events`. The event is otherwise handled as per usual.
 
-#### Authorization rules
+## Authorization rules
 
 These are the rules which govern whether an event is accepted into the room, depending on
 the state events surrounding that event. A given event is checked against multiple different
 sets of state.
 
-##### Auth events selection
+### Auth events selection
 
 The `auth_events` on an event MUST consist of the following state events, with the exception
 of an `m.room.create` event which has no `auth_events`.
@@ -601,7 +618,7 @@ of an `m.room.create` event which has no `auth_events`.
 
 **TODO**: Talk about restricted room joins here?
 
-##### Auth rules algorithm
+### Auth rules algorithm
 
 With consideration for default/calculated power levels, the ordered rules which affect
 authorization of a given event are:
@@ -740,14 +757,14 @@ There are some consequences to these rules:
 
 **TODO**: If we want to enforce a single hub in a room, we'd do so here with auth rules.
 
-#### Signing
+## Signing
 
 All servers, including hubs and participants, publish an ed25519 {{!RFC8032}} signing key
 to be used by other servers when verifying signatures.
 
 **TODO**: Verify RFC reference. We might be using a slightly different ed25519 key today?
 
-##### Canonical JSON
+### Canonical JSON
 
 When signing a JSON object, such as an event, it is important that the bytes be ordered in
 the same way for everyone. Otherwise, the signatures will never match.
@@ -756,7 +773,7 @@ To canonicalize a JSON object, use {{!RFC8785}}.
 
 **TODO**: Matrix currently doesn't use RFC8785, but it should (or similar).
 
-##### Signing arbitrary objects
+### Signing arbitrary objects
 
 Though events receive a lot of signing, it is often necessary for a server to sign arbitary,
 non-event, payloads as well. For example, in Matrix's existing HTTPS+JSON transport, requests
@@ -766,7 +783,7 @@ To sign an object, the JSON is canonically encoded without the `signatures` or `
 fields. The bytes of the canonically encoded JSON are then signed using the ed25519 signing
 key for the server. The resulting signature is then encoded using unpadded base64.
 
-##### Signing events
+### Signing events
 
 Signing events is very similar to signing an arbitary object, however with a note that an event
 is first redacted before signing. This ensures that later if the event were to be redacted in
@@ -774,7 +791,7 @@ the room that the signature check still passes.
 
 Note that the content hash covers the event's contents in case of redaction.
 
-###### Redacting an event
+#### Redacting an event
 
 All fields at the top level except the following are stripped from the event:
 
@@ -800,7 +817,7 @@ fields are stripped.
   `users`, `users_default`, and `invite`.
 * `m.room.history_visibility` retains `history_visibility`.
 
-##### Checking a signature
+### Checking a signature
 
 If the `signatures` field is missing, doesn't contain the entity that is expected to have done
 the signing (a server name), doesn't have a known key ID, or is otherwise structurally invalid
@@ -813,20 +830,20 @@ the signature fails, the check fails.
 
 Otherwise, the check passes.
 
-#### Hashes
+## Hashes
 
 An event is covered by two hashes: a content hash and a reference hash. The content hash covers the
 unredacted event to ensure it was not modified in transit. The reference hash covers the essential
 fields of the event, including content hashes, and serves as the event's ID.
 
-##### Content hash calculation
+### Content hash calculation
 
 1. Remove any existing `unsigned`, `signatures`, and `hashes` fields.
 2. Encode the object using canonical JSON.
 3. Hash the resulting bytes with SHA-256 {{!RFC6234}}.
 4. Encode the hash using unpadded base64.
 
-##### Reference hash
+### Reference hash
 
 1. Redact the event.
 2. Remove `signatures` and `unsigned` fields.
@@ -834,7 +851,7 @@ fields of the event, including content hashes, and serves as the event's ID.
 4. Hash the resulting bytes with SHA-256 {{!RFC6234}}.
 5. Encode the hash using URL-safe unpadded base64.
 
-#### Unpadded Base64
+## Unpadded Base64
 
 Throughout this document, "unpadded base64" is used to represent binary values as strings. Base64 is
 as specified by {{!RFC4648}}, and *unpadded* base64 simply removes any `=` padding from the resulting
@@ -845,22 +862,6 @@ Implementations SHOULD accept input with or without padding on base64 values.
 Section 5 of {{!RFC4648}} describes *URL-safe* base64. The same changes are adopted here. Namely, the
 62nd and 63rd characters are replaced with `-` and `_` respectively. The unpadded behaviour is as
 described above.
-
-## Client-side Room Model
-
-In this model, a room's state is completely managed within the MLS group. This provides a key advantage
-where servers become message-passing nodes (in essence), but increases implementation complexity on the
-clients/devices.
-
-Much of this model is based around the server-side model discussed above: event authorization rules,
-redactions, etc still behave the same, but on the client-side instead. The server would likely be
-responsible for ensuring incoming events are properly signed, but otherwise leave it up to clients to
-accept or reject them into their internal linked list.
-
-A potential consequence of this model is clients needing to implement a conflict resolution algorithm
-despite having linear room history. This is due to clients receiving MLS messages out of guaranteed order.
-
-**TODO**: This could be DMLS, state res, or both.
 
 # Hub transfers
 
