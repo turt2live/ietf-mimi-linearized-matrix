@@ -525,8 +525,7 @@ this will usually be the LPDU signature discussed earlier in this document. This
 covers the content hash of the event.
 
 **TODO**: Except the LPDU signature doesn't cover the participant's content hash, because
-the participant doesn't have a content hash at the moment. This needs to be fixed before
-a 01 revision can be cut of this draft.
+the participant doesn't have a content hash at the moment.
 
 Finally, the event must be signed by the `hub_server` domain if present. This is to ensure
 that the event has actually been processed by the hub and isn't falsely being advertised as
@@ -740,6 +739,7 @@ All servers, including hubs and participants, publish an ed25519 {{!RFC8032}} si
 to be used by other servers when verifying signatures.
 
 **TODO**: Verify RFC reference. We might be using a slightly different ed25519 key today?
+See https://hdevalence.ca/blog/2020-10-04-its-25519am
 
 ### Canonical JSON
 
@@ -845,9 +845,11 @@ described above.
 **TODO**: This section, if we want a single canonical hub in the room. Some expected problems in this
 area are: who signs the transfer event? who *sends* the transfer event? how does a transfer start?
 
+**TODO**: Is this section better placed in the MSC for now?
+
 # Transport
 
-**TODO**: This section, though this is likely to be a dedicated I-D.
+**TODO**: This section, though this is likely (should be?) to be a dedicated I-D.
 
 Topics:
 * Server discovery
