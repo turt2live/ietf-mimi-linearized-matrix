@@ -16,7 +16,7 @@ easily.
        This document explores "Linearized Matrix": the modified room model still backed by
 Matrix. 
     ' name="description">
-<meta content="xml2rfc 3.17.1" name="generator">
+<meta content="xml2rfc 3.17.2" name="generator">
 <meta content="matrix" name="keyword">
 <meta content="linearized" name="keyword">
 <meta content="interoperability" name="keyword">
@@ -24,7 +24,7 @@ Matrix.
 <meta content="mimi" name="keyword">
 <meta content="draft-ralston-mimi-linearized-matrix-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.17.1
+  xml2rfc 3.17.2
     Python 3.11.3
     appdirs 1.4.4
     ConfigArgParse 1.5.3
@@ -34,7 +34,7 @@ Matrix.
     lxml 4.9.2
     pycountry 22.3.5
     PyYAML 6.0
-    requests 2.30.0
+    requests 2.31.0
     setuptools 67.7.2
     six 1.16.0
     wcwidth 0.2.6
@@ -619,6 +619,7 @@ sub, sup {
   clear: left;
   float: left;
   text-align: right;
+  margin-right: 1ch;
 }
 #identifiers dd {
   margin: 0;
@@ -1061,7 +1062,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Ralston &amp; Hodgson</td>
-<td class="center">Expires 4 December 2023</td>
+<td class="center">Expires 8 December 2023</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1074,12 +1075,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ralston-mimi-linearized-matrix-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2023-06-02" class="published">2 June 2023</time>
+<time datetime="2023-06-06" class="published">6 June 2023</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2023-12-04">4 December 2023</time></dd>
+<dd class="expires"><time datetime="2023-12-08">8 December 2023</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1139,7 +1140,7 @@ Matrix.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 4 December 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 8 December 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1911,8 +1912,7 @@ event ID.<a href="#section-5-3" class="pilcrow">¶</a></p>
 this will usually be the LPDU signature discussed earlier in this document. This signature
 covers the content hash of the event.<a href="#section-5-4" class="pilcrow">¶</a></p>
 <p id="section-5-5"><strong>TODO</strong>: Except the LPDU signature doesn't cover the participant's content hash, because
-the participant doesn't have a content hash at the moment. This needs to be fixed before
-a 01 revision can be cut of this draft.<a href="#section-5-5" class="pilcrow">¶</a></p>
+the participant doesn't have a content hash at the moment.<a href="#section-5-5" class="pilcrow">¶</a></p>
 <p id="section-5-6">Finally, the event must be signed by the <code>hub_server</code> domain if present. This is to ensure
 that the event has actually been processed by the hub and isn't falsely being advertised as
 sent by a hub.<a href="#section-5-6" class="pilcrow">¶</a></p>
@@ -2224,7 +2224,8 @@ the kick and ban power levels, <em>and</em> greater than the target user's power
         </h3>
 <p id="section-5.5-1">All servers, including hubs and participants, publish an ed25519 <span>[<a href="#RFC8032" class="cite xref">RFC8032</a>]</span> signing key
 to be used by other servers when verifying signatures.<a href="#section-5.5-1" class="pilcrow">¶</a></p>
-<p id="section-5.5-2"><strong>TODO</strong>: Verify RFC reference. We might be using a slightly different ed25519 key today?<a href="#section-5.5-2" class="pilcrow">¶</a></p>
+<p id="section-5.5-2"><strong>TODO</strong>: Verify RFC reference. We might be using a slightly different ed25519 key today?
+See https://hdevalence.ca/blog/2020-10-04-its-25519am<a href="#section-5.5-2" class="pilcrow">¶</a></p>
 <div id="canonical-json">
 <section id="section-5.5.1">
           <h4 id="name-canonical-json">
@@ -2408,6 +2409,7 @@ described above.<a href="#section-5.7-3" class="pilcrow">¶</a></p>
       </h2>
 <p id="section-6-1"><strong>TODO</strong>: This section, if we want a single canonical hub in the room. Some expected problems in this
 area are: who signs the transfer event? who <em>sends</em> the transfer event? how does a transfer start?<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2"><strong>TODO</strong>: Is this section better placed in the MSC for now?<a href="#section-6-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="transport">
@@ -2415,7 +2417,7 @@ area are: who signs the transfer event? who <em>sends</em> the transfer event? h
       <h2 id="name-transport">
 <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-transport" class="section-name selfRef">Transport</a>
       </h2>
-<p id="section-7-1"><strong>TODO</strong>: This section, though this is likely to be a dedicated I-D.<a href="#section-7-1" class="pilcrow">¶</a></p>
+<p id="section-7-1"><strong>TODO</strong>: This section, though this is likely (should be?) to be a dedicated I-D.<a href="#section-7-1" class="pilcrow">¶</a></p>
 <p id="section-7-2">Topics:
 * Server discovery
 * Publishing of signing keys
