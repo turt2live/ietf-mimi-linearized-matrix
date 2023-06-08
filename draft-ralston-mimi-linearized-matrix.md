@@ -46,6 +46,14 @@ informative:
        - fullname: Travis Ralston
          organization: The Matrix.org Foundation C.I.C.
          email: travisr@matrix.org
+  MSC3820:
+    target: https://github.com/matrix-org/matrix-spec-proposals/pull/3820
+    title: "MSC3820: Room Version 11"
+    date: 2023-06-08
+    author:
+       - fullname: Travis Ralston
+         organization: The Matrix.org Foundation C.I.C.
+         email: travisr@matrix.org
   DMLS: # TODO: Actually link to this somewhere in the doc.
     target: https://gitlab.matrix.org/matrix-org/mls-ts/-/blob/48efb972075233c3a0f3e3ca01c4d4f888342205/decentralised.org
     title: "Decentralised MLS"
@@ -178,6 +186,50 @@ over a room. The server represented by that domain may no longer be participatin
 The total length (including the sigil and domain) of a room ID MUST NOT exceed 255 characters.
 
 Room IDs are case sensitive.
+
+### Room Versions
+
+**TODO**: We should consider naming this something else.
+
+A room version is a set of algorithms which define how the room operates, identified by a single
+string. The primary purpose of a room version is to prevent split-brains between servers attempting
+to participate in the room. This makes room versions immutable once specified, preventing rooms
+from suddenly using a new set of rules without all participating servers being aware of the new
+rules.
+
+Servers MUST support at least the room version described by this document, but CAN support
+additional room versions as needed. Room versions prefixed with `I.` are reserved for use within
+the IETF specification process. Room versions consisting solely of `0-9` and `.` are reserved for
+use by the Matrix protocol.
+
+There is no implicit ordering or hierarchy to room versions. Although there is a recommended
+default room version, some rooms might benefit from features of a different room version.
+
+Typically, a room version has the following algorithms defined:
+
+* Event authorization - The rules which govern when events are accepted or rejected by a server.
+* Redaction - The specific rules to decide which fields are kept on events when redacted. This
+  is used by the signing and hash calculations and therefore must be consistent across implementations.
+* Event format - Which fields are expected to be present on an event (or PDU), and the schema
+  for each.
+* Canonical JSON - How exactly to encode events using Canonical JSON. This is used by the signing
+  algorithm and therefore must be consistent across implementations.
+
+Room versions are intentionally decoupled from the transport API, meaning a server is capable
+of supporting multiple room versions at a time. For specification purposes, it'd be expected
+that a dedicated document be used to specify a new room version. An example of this can be found
+in the existing Matrix Spec Change process as MSC3820 {{MSC3820}}.
+
+Each room version has a "stable" or "unstable" designation. Stable room versions can safely be
+used by rooms while unstable room versions might contain bugs or are not yet adopted by a
+specification process.
+
+**TODO**: Matrix considers a version as stable once accepted through FCP. When would be the
+process equivalent for the IETF?
+
+A room version string MUST NOT exceed 128 characters, MUST NOT be empty, and MUST consist solely
+of `[a-z0-9.-]` characters. Custom/unspecified room versions should be prefixed using reverse
+domain name notation to form a namespace (`org.example.my_room_version`).
 
 ## Users
 
@@ -356,14 +408,7 @@ domain of the `sender` MUST be the same as the domain in the `room_id`. The `sta
 be an empty string.
 
 The `content` for a create event MUST have at least a `room_version` field to denote what set
-of algorithms the room is using. This document as a whole describes a single room version
-identified as `I.1`.
-
-**Implementation note**: Currently `I.1` is not a real thing. Use
-`org.matrix.i-d.ralston-mimi-linearized-matrix.00` when testing against other Linearized Matrix
-implementations. This room version may be updated later.
-
-**TODO**: Describe room versions more?
+of algorithms the room is using.
 
 #### `m.room.join_rules`
 
@@ -435,6 +480,17 @@ the `m.room.create` state event) has a default power level of 100.
 **TODO**: `m.room.name`, `m.room.topic`, `m.room.avatar`, `m.room.encryption`, `m.room.history_visibility`
 
 **TODO**: Drop `m.room.encryption` and pack it into the create event instead?
+
+# Initial Room Version
+
+As a whole, this document describes the `I.1` room version. Future room versions can build
+upon this version's principles (or entirely replace them) through dedicated drafts.
+
+**Implementation note**: Currently `I.1` is not a real thing. Use
+`org.matrix.i-d.ralston-mimi-linearized-matrix.00` when testing against other Linearized Matrix
+implementations. This string may be updated later to account for breaking changes.
+
+`I.1` shall be considered "stable", and SHOULD be used by servers when creating new rooms.
 
 # MLS Considerations
 
@@ -610,7 +666,7 @@ authorization of a given event are:
 
    1. If it has any `prev_events`, reject.
    2. If the domain of the `room_id` is not the same domain as the `sender`, reject.
-   3. If `content.room_version` is not `I.1`, reject. **TODO**: Incorporate room versions properly.
+   3. If `content.room_version` is not `I.1`, reject.
    4. Otherwise, allow.
 
 4. Considering the event's `auth_events`:
@@ -867,6 +923,8 @@ Matrix currently uses an HTTPS+JSON transport for this.
 # IANA Considerations
 
 The `m.*` namespace likely needs formal registration in some capacity.
+
+The `I.*` namespace likely needs formal registration in some capacity.
 
 --- back
 
