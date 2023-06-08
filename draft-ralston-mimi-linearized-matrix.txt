@@ -5,7 +5,7 @@
 More Instant Messaging Interoperability                       T. Ralston
 Internet-Draft                                                M. Hodgson
 Intended status: Standards Track        The Matrix.org Foundation C.I.C.
-Expires: 8 December 2023                                     6 June 2023
+Expires: 10 December 2023                                    8 June 2023
 
 
                          Linearized Matrix API
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 December 2023.
+   This Internet-Draft will expire on 10 December 2023.
 
 Copyright Notice
 
@@ -79,38 +79,40 @@ Table of Contents
    3.  Architecture
      3.1.  Server names / domain names
      3.2.  Rooms
+       3.2.1.  Room Versions
      3.3.  Users
      3.4.  Devices
      3.5.  Events
        3.5.1.  Linearized PDU
        3.5.2.  State events
        3.5.3.  Event types
-   4.  MLS Considerations
-     4.1.  Server-side Room Model
-     4.2.  Client-side Room Model
-   5.  Event Signing & Authorization
-     5.1.  Checks performed upon receipt of a PDU/event
-     5.2.  Rejection
-     5.3.  Soft failure
-     5.4.  Authorization rules
-       5.4.1.  Auth events selection
-       5.4.2.  Auth rules algorithm
-     5.5.  Signing
-       5.5.1.  Canonical JSON
-       5.5.2.  Signing arbitrary objects
-       5.5.3.  Signing events
-       5.5.4.  Checking a signature
-     5.6.  Hashes
-       5.6.1.  Content hash calculation
-       5.6.2.  Reference hash
-     5.7.  Unpadded Base64
-   6.  Hub transfers
-   7.  Transport
-   8.  Security Considerations
-   9.  IANA Considerations
-   10. References
-     10.1.  Normative References
-     10.2.  Informative References
+   4.  Initial Room Version
+   5.  MLS Considerations
+     5.1.  Server-side Room Model
+     5.2.  Client-side Room Model
+   6.  Event Signing & Authorization
+     6.1.  Checks performed upon receipt of a PDU/event
+     6.2.  Rejection
+     6.3.  Soft failure
+     6.4.  Authorization rules
+       6.4.1.  Auth events selection
+       6.4.2.  Auth rules algorithm
+     6.5.  Signing
+       6.5.1.  Canonical JSON
+       6.5.2.  Signing arbitrary objects
+       6.5.3.  Signing events
+       6.5.4.  Checking a signature
+     6.6.  Hashes
+       6.6.1.  Content hash calculation
+       6.6.2.  Reference hash
+     6.7.  Unpadded Base64
+   7.  Hub transfers
+   8.  Transport
+   9.  Security Considerations
+   10. IANA Considerations
+   11. References
+     11.1.  Normative References
+     11.2.  Informative References
    Acknowledgments
    Authors' Addresses
 
@@ -239,6 +241,64 @@ Table of Contents
    NOT exceed 255 characters.
 
    Room IDs are case sensitive.
+
+3.2.1.  Room Versions
+
+   *TODO*: We should consider naming this something else.
+
+   A room version is a set of algorithms which define how the room
+   operates, identified by a single string.  The primary purpose of a
+   room version is to prevent split-brains between servers attempting to
+   participate in the room.  This makes room versions immutable once
+   specified, preventing rooms from suddenly using a new set of rules
+   without all participating servers being aware of the new rules.
+
+   Servers MUST support at least the room version described by this
+   document, but CAN support additional room versions as needed.  Room
+   versions prefixed with I. are reserved for use within the IETF
+   specification process.  Room versions consisting solely of 0-9 and .
+   are reserved for use by the Matrix protocol.
+
+   There is no implicit ordering or hierarchy to room versions.
+   Although there is a recommended default room version, some rooms
+   might benefit from features of a different room version.
+
+   Typically, a room version has the following algorithms defined:
+
+   *  Event authorization - The rules which govern when events are
+      accepted or rejected by a server.
+
+   *  Redaction - The specific rules to decide which fields are kept on
+      events when redacted.  This is used by the signing and hash
+      calculations and therefore must be consistent across
+      implementations.
+
+   *  Event format - Which fields are expected to be present on an event
+      (or PDU), and the schema for each.
+
+   *  Canonical JSON - How exactly to encode events using Canonical
+      JSON.  This is used by the signing algorithm and therefore must be
+      consistent across implementations.
+
+   Room versions are intentionally decoupled from the transport API,
+   meaning a server is capable of supporting multiple room versions at a
+   time.  For specification purposes, it'd be expected that a dedicated
+   document be used to specify a new room version.  An example of this
+   can be found in the existing Matrix Spec Change process as MSC3820
+   [MSC3820].
+
+   Each room version has a "stable" or "unstable" designation.  Stable
+   room versions can safely be used by rooms while unstable room
+   versions might contain bugs or are not yet adopted by a specification
+   process.
+
+   *TODO*: Matrix considers a version as stable once accepted through
+   FCP.  When would be the process equivalent for the IETF?
+
+   A room version string MUST NOT exceed 128 characters, MUST NOT be
+   empty, and MUST consist solely of [a-z0-9.-] characters.  Custom/
+   unspecified room versions should be prefixed using reverse domain
+   name notation to form a namespace (org.example.my_room_version).
 
 3.3.  Users
 
@@ -448,16 +508,7 @@ Table of Contents
    domain in the room_id.  The state_key MUST be an empty string.
 
    The content for a create event MUST have at least a room_version
-   field to denote what set of algorithms the room is using.  This
-   document as a whole describes a single room version identified as
-   I.1.
-
-   *Implementation note*: Currently I.1 is not a real thing.  Use
-   org.matrix.i-d.ralston-mimi-linearized-matrix.00 when testing against
-   other Linearized Matrix implementations.  This room version may be
-   updated later.
-
-   *TODO*: Describe room versions more?
+   field to denote what set of algorithms the room is using.
 
 3.5.3.2.  m.room.join_rules
 
@@ -561,7 +612,21 @@ Table of Contents
    *TODO*: Drop m.room.encryption and pack it into the create event
    instead?
 
-4.  MLS Considerations
+4.  Initial Room Version
+
+   As a whole, this document describes the I.1 room version.  Future
+   room versions can build upon this version's principles (or entirely
+   replace them) through dedicated drafts.
+
+   *Implementation note*: Currently I.1 is not a real thing.  Use
+   org.matrix.i-d.ralston-mimi-linearized-matrix.00 when testing against
+   other Linearized Matrix implementations.  This string may be updated
+   later to account for breaking changes.
+
+   I.1 shall be considered "stable", and SHOULD be used by servers when
+   creating new rooms.
+
+5.  MLS Considerations
 
    MIMI has a chartered requirement to use MLS for encryption, and MLS
    requires that all group members (devices) know of all other devices.
@@ -592,7 +657,7 @@ Table of Contents
    At this stage of drafting in the document, it is not clear which
    would be preferred.  Both are explored.
 
-4.1.  Server-side Room Model
+5.1.  Server-side Room Model
 
    In this model, servers handle the room state on behalf of devices.
    This gives the server an ability to apply access control at a user
@@ -626,7 +691,7 @@ Table of Contents
    *TODO*: We might also need DMLS to handle some of the server-side
    conflicts?
 
-4.2.  Client-side Room Model
+5.2.  Client-side Room Model
 
    Here, the room's state is completely managed within the MLS group.
    This provides a key advantage where servers become message-passing
@@ -647,7 +712,7 @@ Table of Contents
 
    *TODO*: This could be DMLS, state res, or both.
 
-5.  Event Signing & Authorization
+6.  Event Signing & Authorization
 
    There are a few aspects of an event which verify its authenticity and
    therefore whether it can be accepted into the room.  All of these
@@ -680,7 +745,7 @@ Table of Contents
 
    *TODO*: Does the hub's signature actually guard anything?
 
-5.1.  Checks performed upon receipt of a PDU/event
+6.1.  Checks performed upon receipt of a PDU/event
 
    When a hub receives an LPDU from a participant it adds the missing
    fields to create a fully formed PDU then sends that PDU back out to
@@ -715,25 +780,25 @@ Table of Contents
        state of the room (which may very well be the same as the step
        above).  If it fails, it is soft-failed.
 
-5.2.  Rejection
+6.2.  Rejection
 
    Events which are rejected are not relayed to any local clients and
    are not appended to the room in any way.  Within Linearized Matrix,
    events which reference rejected events are rejected themselves.
 
-5.3.  Soft failure
+6.3.  Soft failure
 
    When an event is "soft-failed" it should not be relayed to any local
    clients nor be used in auth_events.  The event is otherwise handled
    as per usual.
 
-5.4.  Authorization rules
+6.4.  Authorization rules
 
    These are the rules which govern whether an event is accepted into
    the room, depending on the state events surrounding that event.  A
    given event is checked against multiple different sets of state.
 
-5.4.1.  Auth events selection
+6.4.1.  Auth events selection
 
    The auth_events on an event MUST consist of the following state
    events, with the exception of an m.room.create event which has no
@@ -755,7 +820,7 @@ Table of Contents
 
    *TODO*: Talk about restricted room joins here?
 
-5.4.2.  Auth rules algorithm
+6.4.2.  Auth rules algorithm
 
    With consideration for default/calculated power levels, the ordered
    rules which affect authorization of a given event are:
@@ -775,8 +840,7 @@ Table of Contents
         2.  If the domain of the room_id is not the same domain as the
             sender, reject.
 
-        3.  If content.room_version is not I.1, reject. *TODO*:
-            Incorporate room versions properly.
+        3.  If content.room_version is not I.1, reject.
 
         4.  Otherwise, allow.
 
@@ -949,7 +1013,7 @@ Table of Contents
    *TODO*: If we want to enforce a single hub in a room, we'd do so here
    with auth rules.
 
-5.5.  Signing
+6.5.  Signing
 
    All servers, including hubs and participants, publish an ed25519
    [RFC8032] signing key to be used by other servers when verifying
@@ -959,7 +1023,7 @@ Table of Contents
    ed25519 key today?  See https://hdevalence.ca/blog/2020-10-04-its-
    25519am
 
-5.5.1.  Canonical JSON
+6.5.1.  Canonical JSON
 
    When signing a JSON object, such as an event, it is important that
    the bytes be ordered in the same way for everyone.  Otherwise, the
@@ -970,7 +1034,7 @@ Table of Contents
    *TODO*: Matrix currently doesn't use RFC8785, but it should (or
    similar).
 
-5.5.2.  Signing arbitrary objects
+6.5.2.  Signing arbitrary objects
 
    Though events receive a lot of signing, it is often necessary for a
    server to sign arbitary, non-event, payloads as well.  For example,
@@ -982,7 +1046,7 @@ Table of Contents
    JSON are then signed using the ed25519 signing key for the server.
    The resulting signature is then encoded using unpadded base64.
 
-5.5.3.  Signing events
+6.5.3.  Signing events
 
    Signing events is very similar to signing an arbitary object, however
    with a note that an event is first redacted before signing.  This
@@ -992,7 +1056,7 @@ Table of Contents
    Note that the content hash covers the event's contents in case of
    redaction.
 
-5.5.3.1.  Redacting an event
+6.5.3.1.  Redacting an event
 
    All fields at the top level except the following are stripped from
    the event:
@@ -1033,7 +1097,7 @@ Table of Contents
 
    *  m.room.history_visibility retains history_visibility.
 
-5.5.4.  Checking a signature
+6.5.4.  Checking a signature
 
    If the signatures field is missing, doesn't contain the entity that
    is expected to have done the signing (a server name), doesn't have a
@@ -1047,7 +1111,7 @@ Table of Contents
 
    Otherwise, the check passes.
 
-5.6.  Hashes
+6.6.  Hashes
 
    An event is covered by two hashes: a content hash and a reference
    hash.  The content hash covers the unredacted event to ensure it was
@@ -1055,7 +1119,7 @@ Table of Contents
    fields of the event, including content hashes, and serves as the
    event's ID.
 
-5.6.1.  Content hash calculation
+6.6.1.  Content hash calculation
 
    1.  Remove any existing unsigned, signatures, and hashes fields.
 
@@ -1065,7 +1129,7 @@ Table of Contents
 
    4.  Encode the hash using unpadded base64.
 
-5.6.2.  Reference hash
+6.6.2.  Reference hash
 
    1.  Redact the event.
 
@@ -1077,7 +1141,7 @@ Table of Contents
 
    5.  Encode the hash using URL-safe unpadded base64.
 
-5.7.  Unpadded Base64
+6.7.  Unpadded Base64
 
    Throughout this document, "unpadded base64" is used to represent
    binary values as strings.  Base64 is as specified by [RFC4648], and
@@ -1092,7 +1156,7 @@ Table of Contents
    with - and _ respectively.  The unpadded behaviour is as described
    above.
 
-6.  Hub transfers
+7.  Hub transfers
 
    *TODO*: This section, if we want a single canonical hub in the room.
    Some expected problems in this area are: who signs the transfer
@@ -1100,7 +1164,7 @@ Table of Contents
 
    *TODO*: Is this section better placed in the MSC for now?
 
-7.  Transport
+8.  Transport
 
    *TODO*: This section, though this is likely (should be?) to be a
    dedicated I-D.
@@ -1110,17 +1174,19 @@ Table of Contents
 
    Matrix currently uses an HTTPS+JSON transport for this.
 
-8.  Security Considerations
+9.  Security Considerations
 
    *TODO*: Expand upon this section.
 
-9.  IANA Considerations
+10.  IANA Considerations
 
    The m.* namespace likely needs formal registration in some capacity.
 
-10.  References
+   The I.* namespace likely needs formal registration in some capacity.
 
-10.1.  Normative References
+11.  References
+
+11.1.  Normative References
 
    [I-D.ralston-mimi-terminology]
               Ralston, T., "MIMI Terminology", Work in Progress,
@@ -1161,12 +1227,16 @@ Table of Contents
               DOI 10.17487/RFC8785, June 2020,
               <https://www.rfc-editor.org/rfc/rfc8785>.
 
-10.2.  Informative References
+11.2.  Informative References
 
    [DMLS]     Chathi, H., "Decentralised MLS", 29 May 2023,
               <https://gitlab.matrix.org/matrix-org/mls-ts/-
               /blob/48efb972075233c3a0f3e3ca01c4d4f888342205/
               decentralised.org>.
+
+   [MSC3820]  Ralston, T., "MSC3820: Room Version 11", 8 June 2023,
+              <https://github.com/matrix-org/matrix-spec-proposals/
+              pull/3820>.
 
    [MSC3995]  Ralston, T., "MSC3995: [WIP] Linearized Matrix", 12 April
               2023, <https://github.com/matrix-org/matrix-spec-
