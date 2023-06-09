@@ -87,6 +87,10 @@ existing room model. This document does *not* explore how to interconnect Linear
 Matrix with the existing Matrix room model - interested readers may wish to review
 MSC3995 {{MSC3995}} within the Matrix Specification process.
 
+At a high level, a central server is designated as the "hub" server, responsible for
+ensuring events in a given room are provided to all other participants equally. Servers
+communicate with each other over HTTPS and JSON, using the specified API endpoints.
+
 # Conventions and Definitions
 
 This document uses {{!I-D.ralston-mimi-terminology}} where possible.
@@ -214,6 +218,8 @@ Typically, a room version has the following algorithms defined:
   for each.
 * Canonical JSON - How exactly to encode events using Canonical JSON. This is used by the signing
   algorithm and therefore must be consistent across implementations.
+* Hub selection - The rules which identify the current hub server in a room, and transfering that
+  responsibility to another server if needed.
 
 Room versions are intentionally decoupled from the transport API, meaning a server is capable
 of supporting multiple room versions at a time. For specification purposes, it'd be expected
@@ -492,74 +498,22 @@ implementations. This string may be updated later to account for breaking change
 
 `I.1` shall be considered "stable", and SHOULD be used by servers when creating new rooms.
 
+The hub server MUST enforce the room version's algorithms upon the room. Participant servers
+SHOULD enforce the room version's algorithm, but can opt to believe the hub server if they
+wish.
+
 # MLS Considerations
 
-MIMI has a chartered requirement to use MLS for encryption, and MLS requires that all group
-members (devices) know of all other devices. If we consider each Matrix room to have an MLS
-group, we encounter scenarios where the room and group membership might diverge or otherwise
-not be equivalent.
+MIMI has a chartered requirement to use Messaging Layer Security (MLS) {{!I-D.ietf-mls-protocol}}
+{{!I-D.ietf-mls-architecture}} for encryption, and MLS requires that all group members (devices)
+know of all other devices.
 
-In a traditional Matrix room, membership is not managed at a per-device level but rather a
-per-user level. Devices are authenticated to use the room by being attached to a user. This
-model doesn't work in MLS, though.
+Each Linearized Matrix room has a single MLS Group associated with it, starting with the
+`m.room.create` event in the room.
 
-A couple of options present themselves:
+**TODO**: Details on how key material is stored/shared within the room.
 
-1. Keep managing the room state at the server level, as is traditional for Matrix, and define
-   a set of rules/methods for engaging devices/users in the room with the MLS group. Servers
-   have an ability to instruct devices on how/when to add/remove MLS group members, but not
-   an ability to handle the MLS Proposals and Commits directly.
-
-2. Coordinate a room's state at the device level, leaving servers to figure out how to push
-   events between servers (and by extension, other devices). Servers would not have knowledge
-   or ability to reject proposals based on authorization beyond transport-level authenticity
-   concerns.
-
-At this stage of drafting in the document, it is not clear which would be preferred. Both are
-explored.
-
-## Server-side Room Model
-
-In this model, servers handle the room state on behalf of devices. This gives the server an
-ability to apply access control at a user level, and instruct other devices on when/how to
-add or remove devices from the underlying MLS group. The server does not have an ability to
-participate in the MLS group directly.
-
-This is how traditional Matrix rooms work by handling state changes (user membership, etc)
-in cleartext for everyone to see. A user's devices would be tracked and added/removed from
-the MLS group as needed.
-
-The exact rules for how a user's devices become engaged with the MLS group is not yet defined.
-
-An advantage over this model compared to client-side is the server is able to reduce the
-client's traffic by rejecting events earlier and deal with conflicts that may arise, keeping
-the conversation as linear as possible for the client.
-
-A clear disadvantage is that without cross-signing or other cryptographic mechanism, the server
-would be able to add malicious devices to its users and therefore the MLS group. A precise
-mitigation strategy is not yet defined by this document, but would involve building verifiable
-trust in a device before it is allowed to participate in the MLS group.
-
-The existing model used by Linearized Matrix is covered by "Event Signing & Authorization"
-later in this document.
-
-**TODO**: We might also need DMLS to handle some of the server-side conflicts?
-
-## Client-side Room Model
-
-Here, the room's state is completely managed within the MLS group. This provides a key advantage
-where servers become message-passing nodes (in essence), but increases implementation complexity
-on the clients/devices.
-
-Much of this model is based around the server-side model discussed above: event authorization rules,
-redactions, etc still behave the same, but on the client-side instead. The server would likely be
-responsible for ensuring incoming events are properly signed, but otherwise leave it up to clients to
-accept or reject them into their internal linked list.
-
-A potential consequence of this model is clients needing to implement a conflict resolution algorithm
-despite having linear room history. This is due to clients receiving MLS messages out of guaranteed order.
-
-**TODO**: This could be DMLS, state res, or both.
+**TODO**: What does `m.room.encrypted` (user message) look like here?
 
 # Event Signing & Authorization
 
@@ -919,6 +873,15 @@ Matrix currently uses an HTTPS+JSON transport for this.
 # Security Considerations
 
 **TODO**: Expand upon this section.
+
+With the combined use of MLS and server-side enforcement, the server theoretically has an ability to
+add a malicious device to the MLS group and receive decryptable messages. Authenticity of devices needs
+to be established to ensure a user's devices are actually a user's devices.
+
+**TODO**: Should we bring Matrix's cross-signing here?
+
+Servers retain the ability to control/puppet their own users due to no strong cryptographic link between
+the sending device and the event which gets emitted.
 
 # IANA Considerations
 
