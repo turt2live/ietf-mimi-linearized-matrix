@@ -309,7 +309,9 @@ An event has many other fields:
   clients can, for example, exclude important fields, use invalid value types, or otherwise
   attempt to disrupt a client - receivers should treat the event with care while processing.
 
-* `hashes` (object; required) - Keyed by hash algorithm, the *content hash* for the event.
+* `hashes` (object; required) - Keyed by hash algorithm, the *content hash* for the event. A special
+  `lpdu` key is used to cover the Linearized PDU hashes. `lpdu` is structured the same way as `hashes`,
+  though without the `lpdu` key being an option.
 
 * `signatures` (object; required) - Keyed first by domain name then by key ID, the signatures for
   the event.
@@ -350,6 +352,9 @@ An example may be:
     "membership": "invite"
   },
   "hashes": {
+    "lpdu": {
+      "sha256": "<unpadded base64>"
+    },
     "sha256": "<unpadded base64>"
   },
   "signatures": {
@@ -380,14 +385,14 @@ they are sending to the hub:
 
 * `auth_events` - the participant cannot reliably determine what allows it to send the event.
 * `prev_events` - the participant cannot reliably know what event precedes theirs.
-* `hashes` - the hashes cover the above two fields.
+* `hashes` (except `hashes.lpdu`) - top-level hashes normally cover the above two fields.
+
+The participant server *does* populate the `hashes.lpdu` object, covering a *content hash* to give
+authenticity to the sender's contents.
 
 The participant server will receive an echo of the fully-formed event from the hub once appended.
 To ensure authenticity, the participant server signs this "Linearized PDU" or "LPDU" using the
 normal event *signing algorithm*.
-
-**TODO**: While a signature is great, it doesn't cover the content. We need to fix `hashes` to
-actually support an LPDU hash alongside a full-blown content hash.
 
 ### State events
 
@@ -825,7 +830,10 @@ fields of the event, including content hashes, and serves as the event's ID.
 
 ### Content hash calculation
 
-1. Remove any existing `unsigned`, `signatures`, and `hashes` fields.
+1. Remove any existing `unsigned` and `signatures` fields.
+   1. If calculating an LPDU's content hash, remove any existing `hashes` field as well.
+   2. If *not* calculating an LPDU's content hash, remove any existing fields under `hashes` except
+      for `lpdu`.
 2. Encode the object using canonical JSON.
 3. Hash the resulting bytes with SHA-256 {{!RFC6234}}.
 4. Encode the hash using unpadded base64.
