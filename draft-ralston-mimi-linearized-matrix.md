@@ -867,6 +867,182 @@ area are: who signs the transfer event? who *sends* the transfer event? how does
 
 # Transport
 
+Servers need to be able to communicate with each other to share events and other information about rooms.
+This document specifies a wire transport which uses JSON {{!RFC7159}} over HTTPS {{!RFC2818}}. Servers
+MUST provide a TLS certificate signed by a known Certificate Authority.
+
+Requesting servers are ultimately responsible for the Certificate Authorities they place trust in, however
+servers SHOULD trust authorities which would commonly be trusted by an operating system or web browser.
+
+Servers SHOULD respect SNI when making requests where possible: a SNI should be sent for the certificate
+which is expected.
+
+**TODO**: This is where we'd mention IPs again, if we choose to accept those as identifiers.
+
+## API Standards
+
+All HTTP `POST` and `PUT` endpoints require the sending server to supply a (potentially empty) JSON
+object as the request body. Requesting servers SHOULD supply a `Content-Type` header of `application/json`
+for such requests.
+
+All endpoints which require a server to respond with a JSON object MUST include a `Content-Type` header
+of `application/json`.
+
+All JSON data, in requests or responses, MUST be encoded using UTF-8 {{!RFC3629}}.
+
+API endpoints should be roughly RESTful in nature.
+
+**TODO**: Specify HTTP and TLS version.
+
+### Errors
+
+All errors are represented by an error code defined by this document and an accompanied HTTP status code.
+It is possible for a HTTP status code to map to multiple error codes, and it's possible for an error
+code to map to multiple HTTP status codes.
+
+When a server is returning an error to a caller, it MUST use the most appropriate error response defined
+by the endpoint. If no appropriate error response is specified, the server SHOULD use `M_UNKNOWN` as the
+error code and `500 Internal Server Error` as the HTTP status code.
+
+Errors are represented as JSON objects, requiring a `Content-Type: application/json` response header:
+
+~~~ json
+{
+  "errcode": "M_UNKNOWN",
+  "error": "Something went wrong."
+}
+~~~
+
+`errcode` is required and denotes the error code. `error` is an optional human-readable description of
+the error. `error` can be as precise or vague as the responding server desires - the strings in this
+document are suggestions.
+
+Some common error codes are:
+
+* `M_UNKNOWN` - An unknown error has occurred.
+* `M_FORBIDDEN` - The caller is not permitted to access the resource. For example, trying to join a room
+  the user does not have an invite for.
+* `M_NOT_JSON` - The request did not contain valid JSON. Must be accompanied by a `400 Bad Request` HTTP
+  status code.
+* `M_BAD_JSON` - The request did contain valid JSON, but it was missing required keys or was malformed in
+   another way. Must be accompanied by a `400 Bad Request` HTTP status code.
+* `M_LIMIT_EXCEEDED` - Too many requests have been sent. The caller should wait before trying the request
+  again.
+* `M_TOO_LARGE` - The request was too large for the receiver to handle.
+
+### Unsupported Endpoints
+
+If a server receives a request for an unsupported or otherwise unknown endpoint, the server MUST respond
+with an HTTP `404 Not Found` status code and `M_UNRECOGNIZED` error code. If the request was for a known
+endpoint, but wrong HTTP method, a `405 Method Not Allowed` HTTP status code and `M_UNRECOGNIZED` error
+code.
+
+### Malformed Requests
+
+If a server is expecting JSON in the request body but receives something else, it MUST respond with an
+HTTP status code of `400 Bad Request` and error code `M_NOT_JSON`. If the request contains JSON, and is
+for a known endpoint, but otherwise missing required keys or is malformed, the server MUST respond with
+an HTTP status code of `400 Bad Request` and error code `M_BAD_JSON`. Where possible, `error` for
+`M_BAD_JSON` should describe the missing keys or other parsing error.
+
+### Transaction Identifiers
+
+Where endpoints use HTTP `PUT`, it is typical for a "transaction ID" to be specified in the path
+parameters. This transaction ID MUST ONLY be used for making requests idempotent - if a server receives
+two (or more) requests with the same transaction ID, it MUST return the same response for each and only
+process the request body once. It is assumed that requests using the same transaction ID also contain
+the same request body between calls.
+
+A transaction ID only needs to be unique per-endpoint and per-sending server. A server's transaction IDs
+do not affect requests made by other servers or made to other endpoints by the same server.
+
+### Rate Limiting
+
+Servers SHOULD implement rate limiting semantics to reduce the risk of being overloaded. Endpoints which
+support being rate limited are annotated in this document.
+
+If a rate limit is encountered, the server MUST respond with an HTTP `429 Too Many Requests` status code
+and `M_LIMIT_EXCEEDED` error code. If applicable, the server should additionally include a
+`retry_after_ms` integer field on the error response to denote how long the caller should wait before
+retrying, in milliseconds.
+
+~~~ json
+{
+  "errcode": "M_LIMIT_EXCEEDED",
+  "error": "Too many requests. Reduce the rate at which you are contacting this server.",
+  "retry_after_ms": 10254
+}
+~~~
+
+### Trailing Slashes Matter
+
+Unless otherwise specified, requests made to endpoints with a trailing slash are to be treated as unknown
+endpoints by servers.
+
+## Resolving Server Names
+
+In order to make a request to another server, the caller needs to know where that server is located.
+
+Similar to email, it is strongly recommended that a server uses their public-facing domain name as their
+server name. This will cause identifiers like user IDs to have the shape `@alice:example.org`. Servers
+SHOULD NOT use `matrix.example.org`, `linearized-matrix.example.org`, etc as their server name.
+
+A server owner might not wish to serve its Linearized Matrix traffic off of the domain implied by its
+users' IDs. A server can change the IP/port for traffic using SRV DNS records {{!RFC2782}}, or can change
+the entire domain name using `.well-known` delegation described below.
+
+Server operators should note that `.well-known` delegation is generally recommended as it is both easier
+to set up and gives better control over where traffic is sent. It also changes which TLS certificate must
+be presented for HTTP communications.
+
+The following steps are used to resolve a server name to an IP address and port. The target server MUST
+present a valid TLS certificate for the name described in each step. The requesting server MUST use a
+HTTP `Host` header with the value described in each step.
+
+As a reminder, a server name consists of `<hostname>[:<port>]`.
+
+1. If `<hostname>` is an IP literal, then that IP address should be used together with the given port
+   number, or 8448 if no port is given.
+
+   TLS certificate: `<hostname>` (always without port).
+   Host header: `<hostname>` or `<hostname>:<port>` if a port was specified.
+
+2. If `<hostname>` is not an IP literal, and the server name includes an explicit `<port>`, resolve the
+   hostname to an IP address using CNAME {{!RFC1034}} {{!RFC2181}}, AAAA {{!RFC3596}}, or A {{!RFC1035}}
+   DNS records. Requests are made to the resolved IP address and port number.
+
+   TLS certificate: `<hostname>` (always without port).
+   Host header: `<hostname>:<port>`
+
+3. If `<hostname>` is not an IP literal, a regular (non-Matrix) HTTPS request is made to
+  `https://<hostname>/.well-known/matrix/server`, expecting the schema defined by the implied endpoint.
+
+    If the hostname is not an IP literal, a regular HTTPS request is made to
+   `https://<hostname>/.well-known/matrix/server`, expecting the schema defined later in this section. 30x
+   redirects should be followed, however redirection loops should be avoided. Responses (successful or
+   otherwise) to the `.well-known` endpoint should be cached by the requesting server. Servers should
+   respect cache control headers present on the response, or use a sensible default when headers are not
+   present, such as 24 hours. Servers should additionally impose a maximum cache time for responses: 48
+   hours is recommended. Errors are recommended to be cache for up to an hour, and servers are encouraged
+   to exponentially back off for repeated failures.
+
+   **TODO**: Make this step shorter.
+
+   If the response is invalid (bad JSON, missing properties, non-200 HTTP status code, etc), skip to
+   step 4. If the response is valid, the `m.server` property is parsed as
+   `<delegated_hostname>[:<delegated_port>]` and processed as follows:
+
+   1. If `<delegated_hostname>` is an IP literal, then that IP address should be used together with the
+      `<delegated_port>` or 8448 if no port is provided. The target server must present a valid
+      certificate for the IP address (without port). Requests must be made with a `Host` header containing
+      the IP address and port, if a port was included.
+
+   2. If `<delegated_hostname>` is not an IP literal, and `<delegated_port>` is present,
+      an IP address is discovered by looking up CNAME, AAAA, or A records for `<delegated_hostname>`. The
+      resulting IP address is used alongside the `<delegated_port>`. Requests must be made with a `Host`
+      header of `<delegated_hostname>:<delegated_port>`. The target server must prevent a valid
+      certificate for `<delegated_hostname>`.
+
 **TODO**: This section, though this is likely (should be?) to be a dedicated I-D.
 
 Topics:
