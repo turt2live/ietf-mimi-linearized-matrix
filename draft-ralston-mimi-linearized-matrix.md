@@ -1017,6 +1017,8 @@ As a reminder, a server name consists of `<hostname>[:<port>]`.
 3. If `<hostname>` is not an IP literal, a regular (non-Matrix) HTTPS request is made to
   `https://<hostname>/.well-known/matrix/server`, expecting the schema defined by the implied endpoint.
 
+  <!--
+
     If the hostname is not an IP literal, a regular HTTPS request is made to
    `https://<hostname>/.well-known/matrix/server`, expecting the schema defined later in this section. 30x
    redirects should be followed, however redirection loops should be avoided. Responses (successful or
@@ -1042,6 +1044,10 @@ As a reminder, a server name consists of `<hostname>[:<port>]`.
       resulting IP address is used alongside the `<delegated_port>`. Requests must be made with a `Host`
       header of `<delegated_hostname>:<delegated_port>`. The target server must prevent a valid
       certificate for `<delegated_hostname>`.
+
+-->
+
+# TODO: Remainder of transport
 
 **TODO**: This section, though this is likely (should be?) to be a dedicated I-D.
 
