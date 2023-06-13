@@ -5,7 +5,7 @@
 More Instant Messaging Interoperability                       T. Ralston
 Internet-Draft                                                M. Hodgson
 Intended status: Standards Track        The Matrix.org Foundation C.I.C.
-Expires: 11 December 2023                                    9 June 2023
+Expires: 15 December 2023                                   13 June 2023
 
 
                          Linearized Matrix API
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 11 December 2023.
+   This Internet-Draft will expire on 15 December 2023.
 
 Copyright Notice
 
@@ -106,11 +106,20 @@ Table of Contents
      6.7.  Unpadded Base64
    7.  Hub transfers
    8.  Transport
-   9.  Security Considerations
-   10. IANA Considerations
-   11. References
-     11.1.  Normative References
-     11.2.  Informative References
+     8.1.  API Standards
+       8.1.1.  Errors
+       8.1.2.  Unsupported Endpoints
+       8.1.3.  Malformed Requests
+       8.1.4.  Transaction Identifiers
+       8.1.5.  Rate Limiting
+       8.1.6.  Trailing Slashes Matter
+     8.2.  Resolving Server Names
+   9.  TODO: Remainder of transport
+   10. Security Considerations
+   11. IANA Considerations
+   12. References
+     12.1.  Normative References
+     12.2.  Informative References
    Acknowledgments
    Authors' Addresses
 
@@ -394,7 +403,9 @@ Table of Contents
       should treat the event with care while processing.
 
    *  hashes (object; required) - Keyed by hash algorithm, the _content
-      hash_ for the event.
+      hash_ for the event.  A special lpdu key is used to cover the
+      Linearized PDU hashes. lpdu is structured the same way as hashes,
+      though without the lpdu key being an option.
 
    *  signatures (object; required) - Keyed first by domain name then by
       key ID, the signatures for the event.
@@ -441,6 +452,9 @@ Table of Contents
        "membership": "invite"
      },
      "hashes": {
+       "lpdu": {
+         "sha256": "<unpadded base64>"
+       },
        "sha256": "<unpadded base64>"
      },
      "signatures": {
@@ -476,16 +490,17 @@ Table of Contents
    *  prev_events - the participant cannot reliably know what event
       precedes theirs.
 
-   *  hashes - the hashes cover the above two fields.
+   *  hashes (except hashes.lpdu) - top-level hashes normally cover the
+      above two fields.
+
+   The participant server _does_ populate the hashes.lpdu object,
+   covering a _content hash_ to give authenticity to the sender's
+   contents.
 
    The participant server will receive an echo of the fully-formed event
    from the hub once appended.  To ensure authenticity, the participant
    server signs this "Linearized PDU" or "LPDU" using the normal event
    _signing algorithm_.
-
-   *TODO*: While a signature is great, it doesn't cover the content.  We
-   need to fix hashes to actually support an LPDU hash alongside a full-
-   blown content hash.
 
 3.5.2.  State events
 
@@ -1060,7 +1075,13 @@ Table of Contents
 
 6.6.1.  Content hash calculation
 
-   1.  Remove any existing unsigned, signatures, and hashes fields.
+   1.  Remove any existing unsigned and signatures fields.
+
+       1.  If calculating an LPDU's content hash, remove any existing
+           hashes field as well.
+
+       2.  If _not_ calculating an LPDU's content hash, remove any
+           existing fields under hashes except for lpdu.
 
    2.  Encode the object using canonical JSON.
 
@@ -1105,6 +1126,221 @@ Table of Contents
 
 8.  Transport
 
+   Servers need to be able to communicate with each other to share
+   events and other information about rooms.  This document specifies a
+   wire transport which uses JSON [RFC7159] over HTTPS [RFC2818].
+   Servers MUST provide a TLS certificate signed by a known Certificate
+   Authority.
+
+   Requesting servers are ultimately responsible for the Certificate
+   Authorities they place trust in, however servers SHOULD trust
+   authorities which would commonly be trusted by an operating system or
+   web browser.
+
+   Servers SHOULD respect SNI when making requests where possible: a SNI
+   should be sent for the certificate which is expected.
+
+   *TODO*: This is where we'd mention IPs again, if we choose to accept
+   those as identifiers.
+
+8.1.  API Standards
+
+   All HTTP POST and PUT endpoints require the sending server to supply
+   a (potentially empty) JSON object as the request body.  Requesting
+   servers SHOULD supply a Content-Type header of application/json for
+   such requests.
+
+   All endpoints which require a server to respond with a JSON object
+   MUST include a Content-Type header of application/json.
+
+   All JSON data, in requests or responses, MUST be encoded using UTF-8
+   [RFC3629].
+
+   API endpoints should be roughly RESTful in nature.
+
+   *TODO*: Specify HTTP and TLS version.
+
+8.1.1.  Errors
+
+   All errors are represented by an error code defined by this document
+   and an accompanied HTTP status code.  It is possible for a HTTP
+   status code to map to multiple error codes, and it's possible for an
+   error code to map to multiple HTTP status codes.
+
+   When a server is returning an error to a caller, it MUST use the most
+   appropriate error response defined by the endpoint.  If no
+   appropriate error response is specified, the server SHOULD use
+   M_UNKNOWN as the error code and 500 Internal Server Error as the HTTP
+   status code.
+
+   Errors are represented as JSON objects, requiring a Content-Type:
+   application/json response header:
+
+   {
+     "errcode": "M_UNKNOWN",
+     "error": "Something went wrong."
+   }
+
+   errcode is required and denotes the error code. error is an optional
+   human-readable description of the error. error can be as precise or
+   vague as the responding server desires - the strings in this document
+   are suggestions.
+
+   Some common error codes are:
+
+   *  M_UNKNOWN - An unknown error has occurred.
+
+   *  M_FORBIDDEN - The caller is not permitted to access the resource.
+      For example, trying to join a room the user does not have an
+      invite for.
+
+   *  M_NOT_JSON - The request did not contain valid JSON.  Must be
+      accompanied by a 400 Bad Request HTTP status code.
+
+   *  M_BAD_JSON - The request did contain valid JSON, but it was
+      missing required keys or was malformed in another way.  Must be
+      accompanied by a 400 Bad Request HTTP status code.
+
+   *  M_LIMIT_EXCEEDED - Too many requests have been sent.  The caller
+      should wait before trying the request again.
+
+   *  M_TOO_LARGE - The request was too large for the receiver to
+      handle.
+
+8.1.2.  Unsupported Endpoints
+
+   If a server receives a request for an unsupported or otherwise
+   unknown endpoint, the server MUST respond with an HTTP 404 Not Found
+   status code and M_UNRECOGNIZED error code.  If the request was for a
+   known endpoint, but wrong HTTP method, a 405 Method Not Allowed HTTP
+   status code and M_UNRECOGNIZED error code.
+
+8.1.3.  Malformed Requests
+
+   If a server is expecting JSON in the request body but receives
+   something else, it MUST respond with an HTTP status code of 400 Bad
+   Request and error code M_NOT_JSON.  If the request contains JSON, and
+   is for a known endpoint, but otherwise missing required keys or is
+   malformed, the server MUST respond with an HTTP status code of 400
+   Bad Request and error code M_BAD_JSON.  Where possible, error for
+   M_BAD_JSON should describe the missing keys or other parsing error.
+
+8.1.4.  Transaction Identifiers
+
+   Where endpoints use HTTP PUT, it is typical for a "transaction ID" to
+   be specified in the path parameters.  This transaction ID MUST ONLY
+   be used for making requests idempotent - if a server receives two (or
+   more) requests with the same transaction ID, it MUST return the same
+   response for each and only process the request body once.  It is
+   assumed that requests using the same transaction ID also contain the
+   same request body between calls.
+
+   A transaction ID only needs to be unique per-endpoint and per-sending
+   server.  A server's transaction IDs do not affect requests made by
+   other servers or made to other endpoints by the same server.
+
+8.1.5.  Rate Limiting
+
+   Servers SHOULD implement rate limiting semantics to reduce the risk
+   of being overloaded.  Endpoints which support being rate limited are
+   annotated in this document.
+
+   If a rate limit is encountered, the server MUST respond with an HTTP
+   429 Too Many Requests status code and M_LIMIT_EXCEEDED error code.
+   If applicable, the server should additionally include a
+   retry_after_ms integer field on the error response to denote how long
+   the caller should wait before retrying, in milliseconds.
+
+   {
+     "errcode": "M_LIMIT_EXCEEDED",
+     "error": "Too many requests. Reduce the rate at which you are contacting this server.",
+     "retry_after_ms": 10254
+   }
+
+8.1.6.  Trailing Slashes Matter
+
+   Unless otherwise specified, requests made to endpoints with a
+   trailing slash are to be treated as unknown endpoints by servers.
+
+8.2.  Resolving Server Names
+
+   In order to make a request to another server, the caller needs to
+   know where that server is located.
+
+   Similar to email, it is strongly recommended that a server uses their
+   public-facing domain name as their server name.  This will cause
+   identifiers like user IDs to have the shape @alice:example.org.
+   Servers SHOULD NOT use matrix.example.org, linearized-
+   matrix.example.org, etc as their server name.
+
+   A server owner might not wish to serve its Linearized Matrix traffic
+   off of the domain implied by its users' IDs.  A server can change the
+   IP/port for traffic using SRV DNS records [RFC2782], or can change
+   the entire domain name using .well-known delegation described below.
+
+   Server operators should note that .well-known delegation is generally
+   recommended as it is both easier to set up and gives better control
+   over where traffic is sent.  It also changes which TLS certificate
+   must be presented for HTTP communications.
+
+   The following steps are used to resolve a server name to an IP
+   address and port.  The target server MUST present a valid TLS
+   certificate for the name described in each step.  The requesting
+   server MUST use a HTTP Host header with the value described in each
+   step.
+
+   As a reminder, a server name consists of <hostname>[:<port>].
+
+   1.  If <hostname> is an IP literal, then that IP address should be
+       used together with the given port number, or 8448 if no port is
+       given.
+
+       TLS certificate: <hostname> (always without port).  Host header:
+       <hostname> or <hostname>:<port> if a port was specified.
+
+   2.  If <hostname> is not an IP literal, and the server name includes
+       an explicit <port>, resolve the hostname to an IP address using
+       CNAME [RFC1034] [RFC2181], AAAA [RFC3596], or A [RFC1035] DNS
+       records.  Requests are made to the resolved IP address and port
+       number.
+
+       TLS certificate: <hostname> (always without port).  Host header:
+       <hostname>:<port>
+
+   3.  If <hostname> is not an IP literal, a regular (non-Matrix) HTTPS
+       request is made to https://<hostname>/.well-known/matrix/server,
+       expecting the schema defined by the implied endpoint.
+
+   <!--
+
+If the hostname is not an IP literal, a regular HTTPS request is made to    `https://<hostname>/.well-known/matrix/server`, expecting the schema defined later in this section. 30x    redirects should be followed, however redirection loops should be avoided. Responses (successful or    otherwise) to the `.well-known` endpoint should be cached by the requesting server. Servers should    respect cache control headers present on the response, or use a sensible default when headers are not    present, such as 24 hours. Servers should additionally impose a maximum cache time for responses: 48    hours is recommended. Errors are recommended to be cache for up to an hour, and servers are encouraged    to exponentially back off for repeated failures.
+
+   *TODO*: Make this step shorter.
+
+   If the response is invalid (bad JSON, missing properties, non-200
+   HTTP status code, etc), skip to step 4.  If the response is valid,
+   the m.server property is parsed as
+   <delegated_hostname>[:<delegated_port>] and processed as follows:
+
+   1.  If <delegated_hostname> is an IP literal, then that IP address
+       should be used together with the <delegated_port> or 8448 if no
+       port is provided.  The target server must present a valid
+       certificate for the IP address (without port).  Requests must be
+       made with a Host header containing the IP address and port, if a
+       port was included.
+
+   2.  If <delegated_hostname> is not an IP literal, and
+       <delegated_port> is present, an IP address is discovered by
+       looking up CNAME, AAAA, or A records for <delegated_hostname>.
+       The resulting IP address is used alongside the <delegated_port>.
+       Requests must be made with a Host header of
+       <delegated_hostname>:<delegated_port>.  The target server must
+       prevent a valid certificate for <delegated_hostname>.
+
+   -->
+
+9.  TODO: Remainder of transport
+
    *TODO*: This section, though this is likely (should be?) to be a
    dedicated I-D.
 
@@ -1113,7 +1349,7 @@ Table of Contents
 
    Matrix currently uses an HTTPS+JSON transport for this.
 
-9.  Security Considerations
+10.  Security Considerations
 
    *TODO*: Expand upon this section.
 
@@ -1129,15 +1365,15 @@ Table of Contents
    no strong cryptographic link between the sending device and the event
    which gets emitted.
 
-10.  IANA Considerations
+11.  IANA Considerations
 
    The m.* namespace likely needs formal registration in some capacity.
 
    The I.* namespace likely needs formal registration in some capacity.
 
-11.  References
+12.  References
 
-11.1.  Normative References
+12.1.  Normative References
 
    [I-D.ietf-mls-architecture]
               Beurdouche, B., Rescorla, E., Omara, E., Inguva, S., and
@@ -1157,14 +1393,40 @@ Table of Contents
 
    [I-D.ralston-mimi-terminology]
               Ralston, T., "MIMI Terminology", Work in Progress,
-              Internet-Draft, draft-ralston-mimi-terminology-00, 11
-              April 2023, <https://datatracker.ietf.org/doc/html/draft-
-              ralston-mimi-terminology-00>.
+              Internet-Draft, draft-ralston-mimi-terminology-01, 9 June
+              2023, <https://datatracker.ietf.org/doc/html/draft-
+              ralston-mimi-terminology-01>.
+
+   [RFC1034]  Mockapetris, P., "Domain names - concepts and facilities",
+              STD 13, RFC 1034, DOI 10.17487/RFC1034, November 1987,
+              <https://www.rfc-editor.org/rfc/rfc1034>.
+
+   [RFC1035]  Mockapetris, P., "Domain names - implementation and
+              specification", STD 13, RFC 1035, DOI 10.17487/RFC1035,
+              November 1987, <https://www.rfc-editor.org/rfc/rfc1035>.
 
    [RFC1123]  Braden, R., Ed., "Requirements for Internet Hosts -
               Application and Support", STD 3, RFC 1123,
               DOI 10.17487/RFC1123, October 1989,
               <https://www.rfc-editor.org/rfc/rfc1123>.
+
+   [RFC2181]  Elz, R. and R. Bush, "Clarifications to the DNS
+              Specification", RFC 2181, DOI 10.17487/RFC2181, July 1997,
+              <https://www.rfc-editor.org/rfc/rfc2181>.
+
+   [RFC2782]  Gulbrandsen, A., Vixie, P., and L. Esibov, "A DNS RR for
+              specifying the location of services (DNS SRV)", RFC 2782,
+              DOI 10.17487/RFC2782, February 2000,
+              <https://www.rfc-editor.org/rfc/rfc2782>.
+
+   [RFC2818]  Rescorla, E., "HTTP Over TLS", RFC 2818,
+              DOI 10.17487/RFC2818, May 2000,
+              <https://www.rfc-editor.org/rfc/rfc2818>.
+
+   [RFC3596]  Thomson, S., Huitema, C., Ksinant, V., and M. Souissi,
+              "DNS Extensions to Support IP Version 6", STD 88,
+              RFC 3596, DOI 10.17487/RFC3596, October 2003,
+              <https://www.rfc-editor.org/rfc/rfc3596>.
 
    [RFC3629]  Yergeau, F., "UTF-8, a transformation format of ISO
               10646", STD 63, RFC 3629, DOI 10.17487/RFC3629, November
@@ -1178,6 +1440,10 @@ Table of Contents
               (SHA and SHA-based HMAC and HKDF)", RFC 6234,
               DOI 10.17487/RFC6234, May 2011,
               <https://www.rfc-editor.org/rfc/rfc6234>.
+
+   [RFC7159]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
+              Interchange Format", RFC 7159, DOI 10.17487/RFC7159, March
+              2014, <https://www.rfc-editor.org/rfc/rfc7159>.
 
    [RFC8032]  Josefsson, S. and I. Liusvaara, "Edwards-Curve Digital
               Signature Algorithm (EdDSA)", RFC 8032,
@@ -1194,7 +1460,7 @@ Table of Contents
               DOI 10.17487/RFC8785, June 2020,
               <https://www.rfc-editor.org/rfc/rfc8785>.
 
-11.2.  Informative References
+12.2.  Informative References
 
    [DMLS]     Chathi, H., "Decentralised MLS", 29 May 2023,
               <https://gitlab.matrix.org/matrix-org/mls-ts/-
