@@ -892,7 +892,7 @@ All JSON data, in requests or responses, MUST be encoded using UTF-8 {{!RFC3629}
 
 API endpoints should be roughly RESTful in nature.
 
-**TODO**: Specify HTTP and TLS version.
+**TODO**: Specify HTTP and TLS version. Probably http/2 and tls 1.3?
 
 ### Errors
 
@@ -1001,51 +1001,87 @@ HTTP `Host` header with the value described in each step.
 
 As a reminder, a server name consists of `<hostname>[:<port>]`.
 
-1. If `<hostname>` is an IP literal, then that IP address should be used together with the given port
+1. If `<hostname>` is an IP literal, then that IP address is to be used together with the given port
    number, or 8448 if no port is given.
 
-   TLS certificate: `<hostname>` (always without port).
-   Host header: `<hostname>` or `<hostname>:<port>` if a port was specified.
+   TLS certificate: `<hostname>` (always without port)
+   Host header: `<hostname>` or `<hostname>:<port>` if a port was specified
 
-2. If `<hostname>` is not an IP literal, and the server name includes an explicit `<port>`, resolve the
-   hostname to an IP address using CNAME {{!RFC1034}} {{!RFC2181}}, AAAA {{!RFC3596}}, or A {{!RFC1035}}
-   DNS records. Requests are made to the resolved IP address and port number.
+2. If `<hostname>` is not an IP literal, and an explicit `<port>` is present, resolve `<hostname>` to
+   an IP address using CNAME {{!RFC1034}} {{!RFC2181}}, AAAA {{!RFC3596}}, or A {{!RFC1035}} DNS
+   records. Requests are made to the resolved IP address and port number.
 
-   TLS certificate: `<hostname>` (always without port).
+   TLS certificate: `<hostname>` (always without port)
    Host header: `<hostname>:<port>`
 
 3. If `<hostname>` is not an IP literal, a regular (non-Matrix) HTTPS request is made to
-  `https://<hostname>/.well-known/matrix/server`, expecting the schema defined by the implied endpoint.
+   `https://<hostname>/.well-known/matrix/server`, expecting the schema defined by the implied endpoint.
+   If the response is invalid (bad/not JSON, missing properties, non-200 response, etc), skip to Step 4.
+   If the response is valid, the `m.server` property is parsed as `<delegated_hostname>[:<delegated_port>]`.
 
-  <!--
+   1. If `<delegated_hostname>` is an IP literal, then that IP address is to be used together with the
+      given port number, or 8448 if no port is given.
 
-    If the hostname is not an IP literal, a regular HTTPS request is made to
-   `https://<hostname>/.well-known/matrix/server`, expecting the schema defined later in this section. 30x
-   redirects should be followed, however redirection loops should be avoided. Responses (successful or
-   otherwise) to the `.well-known` endpoint should be cached by the requesting server. Servers should
-   respect cache control headers present on the response, or use a sensible default when headers are not
-   present, such as 24 hours. Servers should additionally impose a maximum cache time for responses: 48
-   hours is recommended. Errors are recommended to be cache for up to an hour, and servers are encouraged
-   to exponentially back off for repeated failures.
+      TLS certificate: `<delegated_hostname>` (always without port)
+      Host header: `<delegated_hostname>` or `<delegated_hostname>:<delegated_port>` if a port was specified
 
-   **TODO**: Make this step shorter.
+   2. If `<delegated_hostname>` is not an IP literal, and `<delegated_port>` is present, resolve
+      `<delegated_hostname>` to an IP address using CNAME, AAAA, or A DNS records. Requests are made to the
+      resolved IP address and port number.
 
-   If the response is invalid (bad JSON, missing properties, non-200 HTTP status code, etc), skip to
-   step 4. If the response is valid, the `m.server` property is parsed as
-   `<delegated_hostname>[:<delegated_port>]` and processed as follows:
+      TLS certificate: `<delegated_hostname>` (always without port)
+      Host header: `<delegated_hostname>:<delegated_port>`
 
-   1. If `<delegated_hostname>` is an IP literal, then that IP address should be used together with the
-      `<delegated_port>` or 8448 if no port is provided. The target server must present a valid
-      certificate for the IP address (without port). Requests must be made with a `Host` header containing
-      the IP address and port, if a port was included.
+   3. If `<delegated_hostname>` is not an IP literal and no `<delegated_port>` is present, an SRV DNS
+      record is resolved for `_matrix._tcp.<delegated_hostname>`. This may result in another hostname
+      and port to be resolved using AAAA or A DNS records. Requests are made to the resolved IP address
+      and port number.
 
-   2. If `<delegated_hostname>` is not an IP literal, and `<delegated_port>` is present,
-      an IP address is discovered by looking up CNAME, AAAA, or A records for `<delegated_hostname>`. The
-      resulting IP address is used alongside the `<delegated_port>`. Requests must be made with a `Host`
-      header of `<delegated_hostname>:<delegated_port>`. The target server must prevent a valid
-      certificate for `<delegated_hostname>`.
+      TLS certificate: `<delegated_hostname>`
+      Host header: `<delegated_hostname>` (without port)
 
--->
+   4. If no SRV record is found, an IP address is resolved for `<delegated_hostname>` is resolved using
+      CNAME, AAAA, or A DNS records. Requests are made to the resolved IP address with port number 8448.
+
+      TLS certificate: `<delegated_hostname>`
+      Host header: `<delegated_hostname>` (without port)
+
+4. If the `.well-known` call from Step 3 resulted in an invalid response, an SRV DNS record is resolved
+   for `_matrix._tcp.<hostname>`. This may result in another hostname and port to be resolved using AAAA
+   or A DNS records. Requests are made to the resolved IP address and port number.
+
+   TLS certificate: `<hostname>` (always without port)
+   Host header: `<hostname>` (without port)
+
+5. If the `.well-known` call from Step 3 resulted in an invalid response, and the SRV record from Step 4
+   was not found, and IP address is resolved using CNAME, AAAA, or A DNS records. Requests are made to the
+   resolved IP address and port 8448.
+
+   TLS certificate: `<hostname>` (always without port)
+   Host header: `<hostname>` (without port)
+
+We require `<[delegated_]hostname>` rather than `<srv_hostname>` in Steps 3.3, 3.4, 4, and 5 for a couple
+reasons:
+
+1. DNS is largely insecure (not all domains use DNSSEC {{?RFC9364}}), so the target of the SRV record must
+   prove it is a valid delegate/target for `<[delegated_]hostname>` via TLS.
+2. Section 6.2.1 of RFC 6125 {{!RFC6125}} recommends this approach, and is consistent with other applications
+   which use SRV records (such as Section 13.7.2.1 of RFC 6120/XMPP {{?RFC6120}}).
+
+Server implementations and owners should additionally note that the target of a SRV record MUST NOT be a CNAME,
+as per RFC 2782 {{!RFC2782}}:
+
+> the name MUST NOT be an alias (in the sense of RFC 1034 or RFC 2181)
+
+{{!RFC1034}} {{!RFC2181}}
+
+## .well-known
+
+**TODO**
+
+30x redirection followed, don't loop
+Respect cache control headers, up to 48 hours for successful responses (24h default). Errors cached for
+at most 1 hour. Exponential backoff.
 
 # TODO: Remainder of transport
 
