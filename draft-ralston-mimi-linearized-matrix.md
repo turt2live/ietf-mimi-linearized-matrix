@@ -969,7 +969,7 @@ retrying, in milliseconds.
 ~~~ json
 {
   "errcode": "M_LIMIT_EXCEEDED",
-  "error": "Too many requests. Reduce the rate at which you are contacting this server.",
+  "error": "Too many requests. Try again later.",
   "retry_after_ms": 10254
 }
 ~~~
@@ -1005,6 +1005,7 @@ As a reminder, a server name consists of `<hostname>[:<port>]`.
    number, or 8448 if no port is given.
 
    TLS certificate: `<hostname>` (always without port)
+
    Host header: `<hostname>` or `<hostname>:<port>` if a port was specified
 
 2. If `<hostname>` is not an IP literal, and an explicit `<port>` is present, resolve `<hostname>` to
@@ -1012,6 +1013,7 @@ As a reminder, a server name consists of `<hostname>[:<port>]`.
    records. Requests are made to the resolved IP address and port number.
 
    TLS certificate: `<hostname>` (always without port)
+
    Host header: `<hostname>:<port>`
 
 3. If `<hostname>` is not an IP literal, a regular (non-Matrix) HTTPS request is made to
@@ -1023,6 +1025,7 @@ As a reminder, a server name consists of `<hostname>[:<port>]`.
       given port number, or 8448 if no port is given.
 
       TLS certificate: `<delegated_hostname>` (always without port)
+
       Host header: `<delegated_hostname>` or `<delegated_hostname>:<delegated_port>` if a port was specified
 
    2. If `<delegated_hostname>` is not an IP literal, and `<delegated_port>` is present, resolve
@@ -1030,6 +1033,7 @@ As a reminder, a server name consists of `<hostname>[:<port>]`.
       resolved IP address and port number.
 
       TLS certificate: `<delegated_hostname>` (always without port)
+
       Host header: `<delegated_hostname>:<delegated_port>`
 
    3. If `<delegated_hostname>` is not an IP literal and no `<delegated_port>` is present, an SRV DNS
@@ -1038,12 +1042,14 @@ As a reminder, a server name consists of `<hostname>[:<port>]`.
       and port number.
 
       TLS certificate: `<delegated_hostname>`
+
       Host header: `<delegated_hostname>` (without port)
 
    4. If no SRV record is found, an IP address is resolved for `<delegated_hostname>` is resolved using
       CNAME, AAAA, or A DNS records. Requests are made to the resolved IP address with port number 8448.
 
       TLS certificate: `<delegated_hostname>`
+
       Host header: `<delegated_hostname>` (without port)
 
 4. If the `.well-known` call from Step 3 resulted in an invalid response, an SRV DNS record is resolved
@@ -1051,6 +1057,7 @@ As a reminder, a server name consists of `<hostname>[:<port>]`.
    or A DNS records. Requests are made to the resolved IP address and port number.
 
    TLS certificate: `<hostname>` (always without port)
+
    Host header: `<hostname>` (without port)
 
 5. If the `.well-known` call from Step 3 resulted in an invalid response, and the SRV record from Step 4
@@ -1058,6 +1065,7 @@ As a reminder, a server name consists of `<hostname>[:<port>]`.
    resolved IP address and port 8448.
 
    TLS certificate: `<hostname>` (always without port)
+
    Host header: `<hostname>` (without port)
 
 We require `<[delegated_]hostname>` rather than `<srv_hostname>` in Steps 3.3, 3.4, 4, and 5 for a couple
