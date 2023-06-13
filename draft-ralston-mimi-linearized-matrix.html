@@ -1305,6 +1305,9 @@ Matrix.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2">
                 <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-resolving-server-names" class="internal xref">Resolving Server Names</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3">
+                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-well-known" class="internal xref">.well-known</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
@@ -2467,7 +2470,7 @@ area are: who signs the transfer event? who <em>sends</em> the transfer event? h
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-transport" class="section-name selfRef">Transport</a>
       </h2>
 <p id="section-8-1">Servers need to be able to communicate with each other to share events and other information about rooms.
-This document specifies a wire transport which uses JSON <span>[<a href="#RFC7159" class="cite xref">RFC7159</a>]</span> over HTTPS <span>[<a href="#RFC2818" class="cite xref">RFC2818</a>]</span>. Servers
+This document specifies a wire transport which uses JSON <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span> over HTTPS <span>[<a href="#RFC2818" class="cite xref">RFC2818</a>]</span>. Servers
 MUST provide a TLS certificate signed by a known Certificate Authority.<a href="#section-8-1" class="pilcrow">¶</a></p>
 <p id="section-8-2">Requesting servers are ultimately responsible for the Certificate Authorities they place trust in, however
 servers SHOULD trust authorities which would commonly be trusted by an operating system or web browser.<a href="#section-8-2" class="pilcrow">¶</a></p>
@@ -2486,7 +2489,7 @@ for such requests.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
 of <code>application/json</code>.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
 <p id="section-8.1-3">All JSON data, in requests or responses, MUST be encoded using UTF-8 <span>[<a href="#RFC3629" class="cite xref">RFC3629</a>]</span>.<a href="#section-8.1-3" class="pilcrow">¶</a></p>
 <p id="section-8.1-4">API endpoints should be roughly RESTful in nature.<a href="#section-8.1-4" class="pilcrow">¶</a></p>
-<p id="section-8.1-5"><strong>TODO</strong>: Specify HTTP and TLS version.<a href="#section-8.1-5" class="pilcrow">¶</a></p>
+<p id="section-8.1-5"><strong>TODO</strong>: Specify HTTP and TLS version. Probably http/2 and tls 1.3?<a href="#section-8.1-5" class="pilcrow">¶</a></p>
 <div id="errors">
 <section id="section-8.1.1">
           <h4 id="name-errors">
@@ -2628,48 +2631,105 @@ HTTP <code>Host</code> header with the value described in each step.<a href="#se
 <p id="section-8.2-6">As a reminder, a server name consists of <code>&lt;hostname&gt;[:&lt;port&gt;]</code>.<a href="#section-8.2-6" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-8.2-7">
 <li id="section-8.2-7.1">
-            <p id="section-8.2-7.1.1">If <code>&lt;hostname&gt;</code> is an IP literal, then that IP address should be used together with the given port
+            <p id="section-8.2-7.1.1">If <code>&lt;hostname&gt;</code> is an IP literal, then that IP address is to be used together with the given port
 number, or 8448 if no port is given.<a href="#section-8.2-7.1.1" class="pilcrow">¶</a></p>
 <p id="section-8.2-7.1.2">
-TLS certificate: <code>&lt;hostname&gt;</code> (always without port).
-Host header: <code>&lt;hostname&gt;</code> or <code>&lt;hostname&gt;:&lt;port&gt;</code> if a port was specified.<a href="#section-8.2-7.1.2" class="pilcrow">¶</a></p>
+TLS certificate: <code>&lt;hostname&gt;</code> (always without port)
+Host header: <code>&lt;hostname&gt;</code> or <code>&lt;hostname&gt;:&lt;port&gt;</code> if a port was specified<a href="#section-8.2-7.1.2" class="pilcrow">¶</a></p>
 </li>
           <li id="section-8.2-7.2">
-            <p id="section-8.2-7.2.1">If <code>&lt;hostname&gt;</code> is not an IP literal, and the server name includes an explicit <code>&lt;port&gt;</code>, resolve the
-hostname to an IP address using CNAME <span>[<a href="#RFC1034" class="cite xref">RFC1034</a>]</span> <span>[<a href="#RFC2181" class="cite xref">RFC2181</a>]</span>, AAAA <span>[<a href="#RFC3596" class="cite xref">RFC3596</a>]</span>, or A <span>[<a href="#RFC1035" class="cite xref">RFC1035</a>]</span>
-DNS records. Requests are made to the resolved IP address and port number.<a href="#section-8.2-7.2.1" class="pilcrow">¶</a></p>
+            <p id="section-8.2-7.2.1">If <code>&lt;hostname&gt;</code> is not an IP literal, and an explicit <code>&lt;port&gt;</code> is present, resolve <code>&lt;hostname&gt;</code> to
+an IP address using CNAME <span>[<a href="#RFC1034" class="cite xref">RFC1034</a>]</span> <span>[<a href="#RFC2181" class="cite xref">RFC2181</a>]</span>, AAAA <span>[<a href="#RFC3596" class="cite xref">RFC3596</a>]</span>, or A <span>[<a href="#RFC1035" class="cite xref">RFC1035</a>]</span> DNS
+records. Requests are made to the resolved IP address and port number.<a href="#section-8.2-7.2.1" class="pilcrow">¶</a></p>
 <p id="section-8.2-7.2.2">
-TLS certificate: <code>&lt;hostname&gt;</code> (always without port).
+TLS certificate: <code>&lt;hostname&gt;</code> (always without port)
 Host header: <code>&lt;hostname&gt;:&lt;port&gt;</code><a href="#section-8.2-7.2.2" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-8.2-7.3">If <code>&lt;hostname&gt;</code> is not an IP literal, a regular (non-Matrix) HTTPS request is made to
-  <code>https://&lt;hostname&gt;/.well-known/matrix/server</code>, expecting the schema defined by the implied endpoint.<a href="#section-8.2-7.3" class="pilcrow">¶</a>
+          <li id="section-8.2-7.3">
+            <p id="section-8.2-7.3.1">If <code>&lt;hostname&gt;</code> is not an IP literal, a regular (non-Matrix) HTTPS request is made to
+<code>https://&lt;hostname&gt;/.well-known/matrix/server</code>, expecting the schema defined by the implied endpoint.
+If the response is invalid (bad/not JSON, missing properties, non-200 response, etc), skip to Step 4.
+If the response is valid, the <code>m.server</code> property is parsed as <code>&lt;delegated_hostname&gt;[:&lt;delegated_port&gt;]</code>.<a href="#section-8.2-7.3.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-8.2-7.3.2">
+<li id="section-8.2-7.3.2.1">
+                <p id="section-8.2-7.3.2.1.1">If <code>&lt;delegated_hostname&gt;</code> is an IP literal, then that IP address is to be used together with the
+given port number, or 8448 if no port is given.<a href="#section-8.2-7.3.2.1.1" class="pilcrow">¶</a></p>
+<p id="section-8.2-7.3.2.1.2">
+TLS certificate: <code>&lt;delegated_hostname&gt;</code> (always without port)
+Host header: <code>&lt;delegated_hostname&gt;</code> or <code>&lt;delegated_hostname&gt;:&lt;delegated_port&gt;</code> if a port was specified<a href="#section-8.2-7.3.2.1.2" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-8.2-7.3.2.2">
+                <p id="section-8.2-7.3.2.2.1">If <code>&lt;delegated_hostname&gt;</code> is not an IP literal, and <code>&lt;delegated_port&gt;</code> is present, resolve
+<code>&lt;delegated_hostname&gt;</code> to an IP address using CNAME, AAAA, or A DNS records. Requests are made to the
+resolved IP address and port number.<a href="#section-8.2-7.3.2.2.1" class="pilcrow">¶</a></p>
+<p id="section-8.2-7.3.2.2.2">
+TLS certificate: <code>&lt;delegated_hostname&gt;</code> (always without port)
+Host header: <code>&lt;delegated_hostname&gt;:&lt;delegated_port&gt;</code><a href="#section-8.2-7.3.2.2.2" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-8.2-7.3.2.3">
+                <p id="section-8.2-7.3.2.3.1">If <code>&lt;delegated_hostname&gt;</code> is not an IP literal and no <code>&lt;delegated_port&gt;</code> is present, an SRV DNS
+record is resolved for <code>_matrix._tcp.&lt;delegated_hostname&gt;</code>. This may result in another hostname
+and port to be resolved using AAAA or A DNS records. Requests are made to the resolved IP address
+and port number.<a href="#section-8.2-7.3.2.3.1" class="pilcrow">¶</a></p>
+<p id="section-8.2-7.3.2.3.2">
+TLS certificate: <code>&lt;delegated_hostname&gt;</code>
+Host header: <code>&lt;delegated_hostname&gt;</code> (without port)<a href="#section-8.2-7.3.2.3.2" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-8.2-7.3.2.4">
+                <p id="section-8.2-7.3.2.4.1">If no SRV record is found, an IP address is resolved for <code>&lt;delegated_hostname&gt;</code> is resolved using
+CNAME, AAAA, or A DNS records. Requests are made to the resolved IP address with port number 8448.<a href="#section-8.2-7.3.2.4.1" class="pilcrow">¶</a></p>
+<p id="section-8.2-7.3.2.4.2">
+TLS certificate: <code>&lt;delegated_hostname&gt;</code>
+Host header: <code>&lt;delegated_hostname&gt;</code> (without port)<a href="#section-8.2-7.3.2.4.2" class="pilcrow">¶</a></p>
+</li>
+            </ol>
+</li>
+          <li id="section-8.2-7.4">
+            <p id="section-8.2-7.4.1">If the <code>.well-known</code> call from Step 3 resulted in an invalid response, an SRV DNS record is resolved
+for <code>_matrix._tcp.&lt;hostname&gt;</code>. This may result in another hostname and port to be resolved using AAAA
+or A DNS records. Requests are made to the resolved IP address and port number.<a href="#section-8.2-7.4.1" class="pilcrow">¶</a></p>
+<p id="section-8.2-7.4.2">
+TLS certificate: <code>&lt;hostname&gt;</code> (always without port)
+Host header: <code>&lt;hostname&gt;</code> (without port)<a href="#section-8.2-7.4.2" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-8.2-7.5">
+            <p id="section-8.2-7.5.1">If the <code>.well-known</code> call from Step 3 resulted in an invalid response, and the SRV record from Step 4
+was not found, and IP address is resolved using CNAME, AAAA, or A DNS records. Requests are made to the
+resolved IP address and port 8448.<a href="#section-8.2-7.5.1" class="pilcrow">¶</a></p>
+<p id="section-8.2-7.5.2">
+TLS certificate: <code>&lt;hostname&gt;</code> (always without port)
+Host header: <code>&lt;hostname&gt;</code> (without port)<a href="#section-8.2-7.5.2" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-8.2-8">&lt;!--<a href="#section-8.2-8" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-8.2-9">
-<pre>
-If the hostname is not an IP literal, a regular HTTPS request is made to    `https://&lt;hostname&gt;/.well-known/matrix/server`, expecting the schema defined later in this section. 30x    redirects should be followed, however redirection loops should be avoided. Responses (successful or    otherwise) to the `.well-known` endpoint should be cached by the requesting server. Servers should    respect cache control headers present on the response, or use a sensible default when headers are not    present, such as 24 hours. Servers should additionally impose a maximum cache time for responses: 48    hours is recommended. Errors are recommended to be cache for up to an hour, and servers are encouraged    to exponentially back off for repeated failures.
-</pre><a href="#section-8.2-9" class="pilcrow">¶</a>
+<p id="section-8.2-8">We require <code>&lt;[delegated_]hostname&gt;</code> rather than <code>&lt;srv_hostname&gt;</code> in Steps 3.3, 3.4, 4, and 5 for a couple
+reasons:<a href="#section-8.2-8" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-8.2-9">
+<li id="section-8.2-9.1">DNS is largely insecure (not all domains use DNSSEC <span>[<a href="#RFC9364" class="cite xref">RFC9364</a>]</span>), so the target of the SRV record must
+prove it is a valid delegate/target for <code>&lt;[delegated_]hostname&gt;</code> via TLS.<a href="#section-8.2-9.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-8.2-9.2">Section 6.2.1 of RFC 6125 <span>[<a href="#RFC6125" class="cite xref">RFC6125</a>]</span> recommends this approach, and is consistent with other applications
+which use SRV records (such as Section 13.7.2.1 of RFC 6120/XMPP <span>[<a href="#RFC6120" class="cite xref">RFC6120</a>]</span>).<a href="#section-8.2-9.2" class="pilcrow">¶</a>
+</li>
+        </ol>
+<p id="section-8.2-10">Server implementations and owners should additionally note that the target of a SRV record MUST NOT be a CNAME,
+as per RFC 2782 <span>[<a href="#RFC2782" class="cite xref">RFC2782</a>]</span>:<a href="#section-8.2-10" class="pilcrow">¶</a></p>
+<ul class="normal ulEmpty">
+<li class="normal ulEmpty" id="section-8.2-11.1">
+            <p id="section-8.2-11.1.1">the name MUST NOT be an alias (in the sense of RFC 1034 or RFC 2181)<a href="#section-8.2-11.1.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-8.2-12"><span>[<a href="#RFC1034" class="cite xref">RFC1034</a>]</span> <span>[<a href="#RFC2181" class="cite xref">RFC2181</a>]</span><a href="#section-8.2-12" class="pilcrow">¶</a></p>
+</section>
 </div>
-<p id="section-8.2-10"><strong>TODO</strong>: Make this step shorter.<a href="#section-8.2-10" class="pilcrow">¶</a></p>
-<p id="section-8.2-11">If the response is invalid (bad JSON, missing properties, non-200 HTTP status code, etc), skip to
-   step 4. If the response is valid, the <code>m.server</code> property is parsed as
-   <code>&lt;delegated_hostname&gt;[:&lt;delegated_port&gt;]</code> and processed as follows:<a href="#section-8.2-11" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-8.2-12">
-<li id="section-8.2-12.1">If <code>&lt;delegated_hostname&gt;</code> is an IP literal, then that IP address should be used together with the
-<code>&lt;delegated_port&gt;</code> or 8448 if no port is provided. The target server must present a valid
-certificate for the IP address (without port). Requests must be made with a <code>Host</code> header containing
-the IP address and port, if a port was included.<a href="#section-8.2-12.1" class="pilcrow">¶</a>
-</li>
-          <li id="section-8.2-12.2">If <code>&lt;delegated_hostname&gt;</code> is not an IP literal, and <code>&lt;delegated_port&gt;</code> is present,
-an IP address is discovered by looking up CNAME, AAAA, or A records for <code>&lt;delegated_hostname&gt;</code>. The
-resulting IP address is used alongside the <code>&lt;delegated_port&gt;</code>. Requests must be made with a <code>Host</code>
-header of <code>&lt;delegated_hostname&gt;:&lt;delegated_port&gt;</code>. The target server must prevent a valid
-certificate for <code>&lt;delegated_hostname&gt;</code>.<a href="#section-8.2-12.2" class="pilcrow">¶</a>
-</li>
-        </ol>
-<p id="section-8.2-13">--&gt;<a href="#section-8.2-13" class="pilcrow">¶</a></p>
+<div id="well-known">
+<section id="section-8.3">
+        <h3 id="name-well-known">
+<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-well-known" class="section-name selfRef">.well-known</a>
+        </h3>
+<p id="section-8.3-1"><strong>TODO</strong><a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<p id="section-8.3-2">30x redirection followed, don't loop
+Respect cache control headers, up to 48 hours for successful responses (24h default). Errors cached for
+at most 1 hour. Exponential backoff.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2769,13 +2829,13 @@ the sending device and the event which gets emitted.<a href="#section-10-4" clas
         <dd>
 <span class="refAuthor">Josefsson, S.</span>, <span class="refTitle">"The Base16, Base32, and Base64 Data Encodings"</span>, <span class="seriesInfo">RFC 4648</span>, <span class="seriesInfo">DOI 10.17487/RFC4648</span>, <time datetime="2006-10" class="refDate">October 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4648">https://www.rfc-editor.org/rfc/rfc4648</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC6125">[RFC6125]</dt>
+        <dd>
+<span class="refAuthor">Saint-Andre, P.</span> and <span class="refAuthor">J. Hodges</span>, <span class="refTitle">"Representation and Verification of Domain-Based Application Service Identity within Internet Public Key Infrastructure Using X.509 (PKIX) Certificates in the Context of Transport Layer Security (TLS)"</span>, <span class="seriesInfo">RFC 6125</span>, <span class="seriesInfo">DOI 10.17487/RFC6125</span>, <time datetime="2011-03" class="refDate">March 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6125">https://www.rfc-editor.org/rfc/rfc6125</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC6234">[RFC6234]</dt>
         <dd>
 <span class="refAuthor">Eastlake 3rd, D.</span> and <span class="refAuthor">T. Hansen</span>, <span class="refTitle">"US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)"</span>, <span class="seriesInfo">RFC 6234</span>, <span class="seriesInfo">DOI 10.17487/RFC6234</span>, <time datetime="2011-05" class="refDate">May 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6234">https://www.rfc-editor.org/rfc/rfc6234</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC7159">[RFC7159]</dt>
-        <dd>
-<span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"The JavaScript Object Notation (JSON) Data Interchange Format"</span>, <span class="seriesInfo">RFC 7159</span>, <span class="seriesInfo">DOI 10.17487/RFC7159</span>, <time datetime="2014-03" class="refDate">March 2014</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7159">https://www.rfc-editor.org/rfc/rfc7159</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8032">[RFC8032]</dt>
         <dd>
@@ -2805,8 +2865,16 @@ the sending device and the event which gets emitted.<a href="#section-10-4" clas
 <span class="refAuthor">Ralston, T.</span>, <span class="refTitle">"MSC3820: Room Version 11"</span>, <time datetime="2023-06-08" class="refDate">8 June 2023</time>, <span>&lt;<a href="https://github.com/matrix-org/matrix-spec-proposals/pull/3820">https://github.com/matrix-org/matrix-spec-proposals/pull/3820</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="MSC3995">[MSC3995]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Ralston, T.</span>, <span class="refTitle">"MSC3995: [WIP] Linearized Matrix"</span>, <time datetime="2023-04-12" class="refDate">12 April 2023</time>, <span>&lt;<a href="https://github.com/matrix-org/matrix-spec-proposals/pull/3995">https://github.com/matrix-org/matrix-spec-proposals/pull/3995</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6120">[RFC6120]</dt>
+        <dd>
+<span class="refAuthor">Saint-Andre, P.</span>, <span class="refTitle">"Extensible Messaging and Presence Protocol (XMPP): Core"</span>, <span class="seriesInfo">RFC 6120</span>, <span class="seriesInfo">DOI 10.17487/RFC6120</span>, <time datetime="2011-03" class="refDate">March 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6120">https://www.rfc-editor.org/rfc/rfc6120</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9364">[RFC9364]</dt>
+      <dd>
+<span class="refAuthor">Hoffman, P.</span>, <span class="refTitle">"DNS Security Extensions (DNSSEC)"</span>, <span class="seriesInfo">BCP 237</span>, <span class="seriesInfo">RFC 9364</span>, <span class="seriesInfo">DOI 10.17487/RFC9364</span>, <time datetime="2023-02" class="refDate">February 2023</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9364">https://www.rfc-editor.org/rfc/rfc9364</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
