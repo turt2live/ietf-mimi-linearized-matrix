@@ -868,7 +868,7 @@ area are: who signs the transfer event? who *sends* the transfer event? how does
 # Transport
 
 Servers need to be able to communicate with each other to share events and other information about rooms.
-This document specifies a wire transport which uses JSON {{!RFC7159}} over HTTPS {{!RFC2818}}. Servers
+This document specifies a wire transport which uses JSON {{!RFC8259}} over HTTPS {{!RFC2818}}. Servers
 MUST provide a TLS certificate signed by a known Certificate Authority.
 
 Requesting servers are ultimately responsible for the Certificate Authorities they place trust in, however
