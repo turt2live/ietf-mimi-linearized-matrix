@@ -408,6 +408,22 @@ the room). In Linearized Matrix, a simple approach to calculating current state 
 over all events in order, overwriting the key-tuple for state events in an adjacent map. That
 map becomes "current state" when the loop is finished.
 
+### Size Limits
+
+A complete event (PDU) MUST NOT exceed 65536 bytes, including any signatures, and encoded as
+Canonical JSON.
+
+There are additional restrictions on the value of the following keys:
+
+* `sender` MUST NOT exceed 255 bytes (including domain).
+* `room_id` MUST NOT exceed 255 bytes.
+* `state_key` MUST NOT exceed 255 bytes.
+* `type` MUST NOT exceed 255 bytes.
+
+Some event types have additional size restrictions which are specified in the description of the
+event. Additional keys not listed above have no limit other than the implied 65536 byte limit
+for the entire event.
+
 ### Event types
 
 Linearized Matrix defines the following event types:
@@ -556,10 +572,10 @@ formed PDU then sends that PDU back out to all participants, including the origi
 When a server (hub or participant) receives a PDU, it:
 
 1. Verifies the event is in a valid shape. This will mean ensuring the required schema is
-   met and of the correct type (there is a string `type`, etc). Note that the event may
-   have additional fields in various places, such as at the top level or within `content`:
-   the receiver should ensure these additional fields do not cause the event to be invalid.
-   If the event fails this validation, it is dropped.
+   met and of the correct type (there is a string `type`, etc) and that the size limits are
+   honoured. Note that the event may have additional fields in various places, such as at
+   the top level or within `content`: the receiver should ensure these additional fields
+   do not cause the event to be invalid. If the event fails this validation, it is dropped.
 
 2. Ensures the required signatures are present and valid. If the event fails this, it is
    dropped.
