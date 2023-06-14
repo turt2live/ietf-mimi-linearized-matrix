@@ -977,7 +977,14 @@ retrying, in milliseconds.
 ### Trailing Slashes Matter
 
 Unless otherwise specified, requests made to endpoints with a trailing slash are to be treated as unknown
-endpoints by servers.
+endpoints by servers. Similarly, all endpoints in this document assume the resolved domain (see Resolving
+Server Names) does *not* contain a trailing slash.
+
+A "base URL" for a server is, for example, `https://example.org`.
+
+An endpoint is specified as `/path/to/resource`.
+
+Together, this makes the "request URL" `https://example.org/path/to/resource` with no trailing slash.
 
 ## Resolving Server Names
 
