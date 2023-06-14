@@ -111,29 +111,29 @@ Further terms are introduced in-context within this document.
 For a given conversation/room:
 
 ~~~ aasvg
-       .------------.                                  .------------.
-      |   Client A   |                                |   Client B   |
-       '-----------+'                                  '-----------+'
-        ^          |                                    ^          |
-        |          |  Client-Server API                 |          |
-        |          V                                    |          V
-    +---+--------------+                            +---+--------------+
-    |                  +----------( events )------->|                  |
-    | Provider/Server  |                            | Provider/Server  |
-    |        A         |<---------( events )--------+        B         |
-    +-----+------------+     Server-Server API      +------------------+
-          |     ^
-          |     |                                   +------------------+
-          |     +-----------------( events )--------+                  |
-          |                                         | Provider/Server  |
-          +-----------------------( events )------->|        C         |
-                                                    +--------------+---+
-                                                        ^          |
-                                                        |          |
-                                                        |          V
-                                                       .+-----------.
-                                                      |   Client C   |
-                                                       '------------'
+   .------------.                                  .------------.
+  |   Client A   |                                |   Client B   |
+   '---------+--'                                  '---------+--'
+      ^      |                                        ^      |
+      |      |  Client-Server API                     |      |
+      |      V                                        |      V
++-----+------------+                            +-----+------------+
+|                  +----------( events )------->|                  |
+| Provider/Server  |                            | Provider/Server  |
+|        A         |<---------( events )--------+        B         |
++-----+------------+     Server-Server API      +------------------+
+      |     ^
+      |     |                      +------------------+
+      |     +----( events )--------+                  |
+      |                            | Provider/Server  |
+      +----------( events )------->|        C         |
+                                   +------------+-----+
+                                         ^      |
+                                         |      |
+                                         |      V
+                                      .--+---------.
+                                     |   Client C   |
+                                      '------------'
 ~~~
 
 In this diagram, Server A is acting as a hub for the other two servers. Servers B and C do
@@ -359,10 +359,10 @@ An example may be:
   },
   "signatures": {
     "first.example.org": {
-      "ed25519:1": "<unpadded base64 for signature covering whole event>"
+      "ed25519:1": "<unpadded base64 signature covering whole event>"
     },
     "second.example.org": {
-      "ed25519:1": "<unpadded base64 for signature covering LPDU>"
+      "ed25519:1": "<unpadded base64 signature covering LPDU>"
     }
   },
   "auth_events": ["$first", "$second"],
@@ -1120,6 +1120,10 @@ are present.
 
 Error responses (non-200) SHOULD be cached for no longer than 1 hour. Callers SHOULD exponentially back off (to a
 defined limit) upon receiving repeated error responses.
+
+## Request Authentication
+
+**TODO**: This section.
 
 # TODO: Remainder of transport
 
