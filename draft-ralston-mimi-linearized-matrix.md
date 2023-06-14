@@ -1068,8 +1068,7 @@ As a reminder, a server name consists of `<hostname>[:<port>]`.
 
    Host header: `<hostname>` (without port)
 
-We require `<[delegated_]hostname>` rather than `<srv_hostname>` in Steps 3.3, 3.4, 4, and 5 for a couple
-reasons:
+We require `<[delegated_]hostname>` rather than `<srv_hostname>` in Steps 3.3 and 4 for the following reasons:
 
 1. DNS is largely insecure (not all domains use DNSSEC {{?RFC9364}}), so the target of the SRV record must
    prove it is a valid delegate/target for `<[delegated_]hostname>` via TLS.
@@ -1083,26 +1082,47 @@ as per RFC 2782 {{!RFC2782}}:
 
 {{!RFC1034}} {{!RFC2181}}
 
-## .well-known
+### `GET /.well-known/matrix/server`
 
-**TODO**
+Used by the server name resolution approach to determine a delegated hostname for a given server. 30x HTTP
+redirection MUST be followed, though loops SHOULD be avoided. Normal X.509 certificate validation is applied
+to this endpoint (not the specific validation required by the server name resolution steps) {{?RFC5280}}.
 
-30x redirection followed, don't loop
-Respect cache control headers, up to 48 hours for successful responses (24h default). Errors cached for
-at most 1 hour. Exponential backoff.
+**Rate-limited**: No.
+
+**Authentication required**: No.
+
+This HTTP endpoint does not specify any request parameters or body.
+
+`200 OK` response:
+
+~~~ json
+{
+   "m.server": "delegated.example.org:8448"
+}
+~~~
+
+`m.server` is a required response field. Responses SHOULD have a `Content-Type` HTTP header of `application/json`,
+however servers parsing the response should assume that the body is JSON regardless of `Content-Type` header.
+Failures in parsing the JSON or otherwise invalid data that prevents parsing MUST NOT result in discovery failure.
+Instead, the caller is expected to move on to the next step of the name resolution approach.
+
+Cache control headers SHOULD be respected on a `200 OK` response. Callers SHOULD impose a maximum cache time of
+48 hours, regardless of cache control headers. A default of 24 hours SHOULD be used when no cache control headers
+are present.
+
+Error responses (non-200) SHOULD be cached for no longer than 1 hour. Callers SHOULD exponentially back off (to a
+defined limit) upon receiving repeated error responses.
 
 # TODO: Remainder of transport
 
-**TODO**: This section, though this is likely (should be?) to be a dedicated I-D.
+**TODO**: This section.
 
 Topics:
-* Server discovery
 * Publishing of signing keys
 * Sending events between servers
 * Media handling
 * etc
-
-Matrix currently uses an HTTPS+JSON transport for this.
 
 # Security Considerations
 
