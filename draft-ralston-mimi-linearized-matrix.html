@@ -1205,7 +1205,10 @@ Matrix.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
                     <p id="section-toc.1-1.3.2.5.2.2.1"><a href="#section-3.5.2" class="auto internal xref">3.5.2</a>.  <a href="#name-state-events" class="internal xref">State events</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5.2.3">
-                    <p id="section-toc.1-1.3.2.5.2.3.1"><a href="#section-3.5.3" class="auto internal xref">3.5.3</a>.  <a href="#name-event-types" class="internal xref">Event types</a></p>
+                    <p id="section-toc.1-1.3.2.5.2.3.1"><a href="#section-3.5.3" class="auto internal xref">3.5.3</a>.  <a href="#name-size-limits" class="internal xref">Size Limits</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.5.2.4">
+                    <p id="section-toc.1-1.3.2.5.2.4.1"><a href="#section-3.5.4" class="auto internal xref">3.5.4</a>.  <a href="#name-event-types" class="internal xref">Event types</a></p>
 </li>
                 </ul>
 </li>
@@ -1774,136 +1777,163 @@ over all events in order, overwriting the key-tuple for state events in an adjac
 map becomes "current state" when the loop is finished.<a href="#section-3.5.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="event-types">
+<div id="size-limits">
 <section id="section-3.5.3">
-          <h4 id="name-event-types">
-<a href="#section-3.5.3" class="section-number selfRef">3.5.3. </a><a href="#name-event-types" class="section-name selfRef">Event types</a>
+          <h4 id="name-size-limits">
+<a href="#section-3.5.3" class="section-number selfRef">3.5.3. </a><a href="#name-size-limits" class="section-name selfRef">Size Limits</a>
           </h4>
-<p id="section-3.5.3-1">Linearized Matrix defines the following event types:<a href="#section-3.5.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.3-1">A complete event (PDU) MUST NOT exceed 65536 bytes, including any signatures, and encoded as
+Canonical JSON.<a href="#section-3.5.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.3-2">There are additional restrictions on the value of the following keys:<a href="#section-3.5.3-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.5.3-3.1">
+              <code>sender</code> MUST NOT exceed 255 bytes (including domain).<a href="#section-3.5.3-3.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-3.5.3-3.2">
+              <code>room_id</code> MUST NOT exceed 255 bytes.<a href="#section-3.5.3-3.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-3.5.3-3.3">
+              <code>state_key</code> MUST NOT exceed 255 bytes.<a href="#section-3.5.3-3.3" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-3.5.3-3.4">
+              <code>type</code> MUST NOT exceed 255 bytes.<a href="#section-3.5.3-3.4" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-3.5.3-4">Some event types have additional size restrictions which are specified in the description of the
+event. Additional keys not listed above have no limit other than the implied 65536 byte limit
+for the entire event.<a href="#section-3.5.3-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="event-types">
+<section id="section-3.5.4">
+          <h4 id="name-event-types">
+<a href="#section-3.5.4" class="section-number selfRef">3.5.4. </a><a href="#name-event-types" class="section-name selfRef">Event types</a>
+          </h4>
+<p id="section-3.5.4-1">Linearized Matrix defines the following event types:<a href="#section-3.5.4-1" class="pilcrow">¶</a></p>
 <div id="mroomcreate">
-<section id="section-3.5.3.1">
+<section id="section-3.5.4.1">
             <h5 id="name-mroomcreate">
-<a href="#section-3.5.3.1" class="section-number selfRef">3.5.3.1. </a><a href="#name-mroomcreate" class="section-name selfRef"><code>m.room.create</code></a>
+<a href="#section-3.5.4.1" class="section-number selfRef">3.5.4.1. </a><a href="#name-mroomcreate" class="section-name selfRef"><code>m.room.create</code></a>
             </h5>
-<p id="section-3.5.3.1-1">The very first event in the room. It MUST NOT have any <code>auth_events</code> or <code>prev_events</code>, and the
+<p id="section-3.5.4.1-1">The very first event in the room. It MUST NOT have any <code>auth_events</code> or <code>prev_events</code>, and the
 domain of the <code>sender</code> MUST be the same as the domain in the <code>room_id</code>. The <code>state_key</code> MUST
-be an empty string.<a href="#section-3.5.3.1-1" class="pilcrow">¶</a></p>
-<p id="section-3.5.3.1-2">The <code>content</code> for a create event MUST have at least a <code>room_version</code> field to denote what set
-of algorithms the room is using.<a href="#section-3.5.3.1-2" class="pilcrow">¶</a></p>
+be an empty string.<a href="#section-3.5.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.1-2">The <code>content</code> for a create event MUST have at least a <code>room_version</code> field to denote what set
+of algorithms the room is using.<a href="#section-3.5.4.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="mroomjoinrules">
-<section id="section-3.5.3.2">
+<section id="section-3.5.4.2">
             <h5 id="name-mroomjoin_rules">
-<a href="#section-3.5.3.2" class="section-number selfRef">3.5.3.2. </a><a href="#name-mroomjoin_rules" class="section-name selfRef"><code>m.room.join_rules</code></a>
+<a href="#section-3.5.4.2" class="section-number selfRef">3.5.4.2. </a><a href="#name-mroomjoin_rules" class="section-name selfRef"><code>m.room.join_rules</code></a>
             </h5>
-<p id="section-3.5.3.2-1">Defines whether users can join without an invite and other similar conditions. The <code>state_key</code>
-MUST be an empty string.<a href="#section-3.5.3.2-1" class="pilcrow">¶</a></p>
-<p id="section-3.5.3.2-2">The <code>content</code> for a join rules event MUST have at least a <code>join_rule</code> field to denote the
-join policy for the room. Allowable values are:<a href="#section-3.5.3.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.2-1">Defines whether users can join without an invite and other similar conditions. The <code>state_key</code>
+MUST be an empty string.<a href="#section-3.5.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.2-2">The <code>content</code> for a join rules event MUST have at least a <code>join_rule</code> field to denote the
+join policy for the room. Allowable values are:<a href="#section-3.5.4.2-2" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-3.5.3.2-3.1">
-                <code>public</code> - anyone can join without an invite.<a href="#section-3.5.3.2-3.1" class="pilcrow">¶</a>
+<li class="normal" id="section-3.5.4.2-3.1">
+                <code>public</code> - anyone can join without an invite.<a href="#section-3.5.4.2-3.1" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-3.5.3.2-3.2">
-                <code>knock</code> - users must receive an invite to join, and can request an invite (knock) too.<a href="#section-3.5.3.2-3.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-3.5.4.2-3.2">
+                <code>knock</code> - users must receive an invite to join, and can request an invite (knock) too.<a href="#section-3.5.4.2-3.2" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-3.5.3.2-3.3">
-                <code>invite</code> - users must receive an invite to join.<a href="#section-3.5.3.2-3.3" class="pilcrow">¶</a>
+              <li class="normal" id="section-3.5.4.2-3.3">
+                <code>invite</code> - users must receive an invite to join.<a href="#section-3.5.4.2-3.3" class="pilcrow">¶</a>
 </li>
             </ul>
-<p id="section-3.5.3.2-4"><strong>TODO</strong>: Describe <code>restricted</code> (and <code>knock_restricted</code>) rooms?<a href="#section-3.5.3.2-4" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.2-4"><strong>TODO</strong>: Describe <code>restricted</code> (and <code>knock_restricted</code>) rooms?<a href="#section-3.5.4.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="mroommember">
-<section id="section-3.5.3.3">
+<section id="section-3.5.4.3">
             <h5 id="name-mroommember">
-<a href="#section-3.5.3.3" class="section-number selfRef">3.5.3.3. </a><a href="#name-mroommember" class="section-name selfRef"><code>m.room.member</code></a>
+<a href="#section-3.5.4.3" class="section-number selfRef">3.5.4.3. </a><a href="#name-mroommember" class="section-name selfRef"><code>m.room.member</code></a>
             </h5>
-<p id="section-3.5.3.3-1">Defines the membership for a user in the room. If the user does not have a membership event then
-they are presumed to be in the <code>leave</code> state.<a href="#section-3.5.3.3-1" class="pilcrow">¶</a></p>
-<p id="section-3.5.3.3-2">The <code>state_key</code> MUST be a non-empty string denotating the user ID the membership is affecting.<a href="#section-3.5.3.3-2" class="pilcrow">¶</a></p>
-<p id="section-3.5.3.3-3">The <code>content</code> for a membership event MUST have at least a <code>membership</code> field to denote the
-membership state for the user. Allowable values are:<a href="#section-3.5.3.3-3" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.3-1">Defines the membership for a user in the room. If the user does not have a membership event then
+they are presumed to be in the <code>leave</code> state.<a href="#section-3.5.4.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.3-2">The <code>state_key</code> MUST be a non-empty string denotating the user ID the membership is affecting.<a href="#section-3.5.4.3-2" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.3-3">The <code>content</code> for a membership event MUST have at least a <code>membership</code> field to denote the
+membership state for the user. Allowable values are:<a href="#section-3.5.4.3-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-3.5.3.3-4.1">
+<li class="normal" id="section-3.5.4.3-4.1">
                 <code>leave</code> - not participating in the room. If the <code>state_key</code> and <code>sender</code> do not match, this was
-a kick rather than voluntary leave.<a href="#section-3.5.3.3-4.1" class="pilcrow">¶</a>
+a kick rather than voluntary leave.<a href="#section-3.5.4.3-4.1" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-3.5.3.3-4.2">
-                <code>join</code> - participating in the room.<a href="#section-3.5.3.3-4.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-3.5.4.3-4.2">
+                <code>join</code> - participating in the room.<a href="#section-3.5.4.3-4.2" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-3.5.3.3-4.3">
-                <code>knock</code> - requesting an invite to the room.<a href="#section-3.5.3.3-4.3" class="pilcrow">¶</a>
+              <li class="normal" id="section-3.5.4.3-4.3">
+                <code>knock</code> - requesting an invite to the room.<a href="#section-3.5.4.3-4.3" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-3.5.3.3-4.4">
-                <code>invite</code> - invited to participate in the room.<a href="#section-3.5.3.3-4.4" class="pilcrow">¶</a>
+              <li class="normal" id="section-3.5.4.3-4.4">
+                <code>invite</code> - invited to participate in the room.<a href="#section-3.5.4.3-4.4" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-3.5.3.3-4.5">
+              <li class="normal" id="section-3.5.4.3-4.5">
                 <code>ban</code> - implies kicked/not participating. Cannot be invited or join the room without being
-unbanned first (moderator sends a kick, essentially).<a href="#section-3.5.3.3-4.5" class="pilcrow">¶</a>
+unbanned first (moderator sends a kick, essentially).<a href="#section-3.5.4.3-4.5" class="pilcrow">¶</a>
 </li>
             </ul>
-<p id="section-3.5.3.3-5">The <em>auth rules</em> define how these membership states interact and what legal transitions are possible.
-For example, preventing users from unbanning themselves falls under the auth rules.<a href="#section-3.5.3.3-5" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.3-5">The <em>auth rules</em> define how these membership states interact and what legal transitions are possible.
+For example, preventing users from unbanning themselves falls under the auth rules.<a href="#section-3.5.4.3-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="mroompowerlevels">
-<section id="section-3.5.3.4">
+<section id="section-3.5.4.4">
             <h5 id="name-mroompower_levels">
-<a href="#section-3.5.3.4" class="section-number selfRef">3.5.3.4. </a><a href="#name-mroompower_levels" class="section-name selfRef"><code>m.room.power_levels</code></a>
+<a href="#section-3.5.4.4" class="section-number selfRef">3.5.4.4. </a><a href="#name-mroompower_levels" class="section-name selfRef"><code>m.room.power_levels</code></a>
             </h5>
-<p id="section-3.5.3.4-1">Defines what given users can and can't do, as well as which event types they are able to send.
-The enforcement of these power levels is determined by the <em>auth rules</em>.<a href="#section-3.5.3.4-1" class="pilcrow">¶</a></p>
-<p id="section-3.5.3.4-2">The <code>state_key</code> MUST be an empty string.<a href="#section-3.5.3.4-2" class="pilcrow">¶</a></p>
-<p id="section-3.5.3.4-3">The <code>content</code> for a power levels event SHOULD have at least the following:<a href="#section-3.5.3.4-3" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.4-1">Defines what given users can and can't do, as well as which event types they are able to send.
+The enforcement of these power levels is determined by the <em>auth rules</em>.<a href="#section-3.5.4.4-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.4-2">The <code>state_key</code> MUST be an empty string.<a href="#section-3.5.4.4-2" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.4-3">The <code>content</code> for a power levels event SHOULD have at least the following:<a href="#section-3.5.4.4-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-3.5.3.4-4.1">
-                <code>ban</code> (integer) - the level required to ban a user. Defaults to <code>50</code> if unspecified.<a href="#section-3.5.3.4-4.1" class="pilcrow">¶</a>
+<li class="normal" id="section-3.5.4.4-4.1">
+                <code>ban</code> (integer) - the level required to ban a user. Defaults to <code>50</code> if unspecified.<a href="#section-3.5.4.4-4.1" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-3.5.3.4-4.2">
-                <code>kick</code> (integer) - the level required to kick a user. Defaults to <code>50</code> if unspecified.<a href="#section-3.5.3.4-4.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-3.5.4.4-4.2">
+                <code>kick</code> (integer) - the level required to kick a user. Defaults to <code>50</code> if unspecified.<a href="#section-3.5.4.4-4.2" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-3.5.3.4-4.3">
-                <code>invite</code> (integer) - the level required to invite a user. Defaults to <code>0</code> if unspecified.<a href="#section-3.5.3.4-4.3" class="pilcrow">¶</a>
+              <li class="normal" id="section-3.5.4.4-4.3">
+                <code>invite</code> (integer) - the level required to invite a user. Defaults to <code>0</code> if unspecified.<a href="#section-3.5.4.4-4.3" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-3.5.3.4-4.4">
+              <li class="normal" id="section-3.5.4.4-4.4">
                 <code>redact</code> (integer) - the level required to redact an event sent by another user. Defaults
-to <code>50</code> if unspecified.<a href="#section-3.5.3.4-4.4" class="pilcrow">¶</a>
+to <code>50</code> if unspecified.<a href="#section-3.5.4.4-4.4" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-3.5.3.4-4.5">
+              <li class="normal" id="section-3.5.4.4-4.5">
                 <code>events</code> (map) - keyed by event type string, the level required to send that event type to
-the room. Defaults to an empty map if unspecified.<a href="#section-3.5.3.4-4.5" class="pilcrow">¶</a>
+the room. Defaults to an empty map if unspecified.<a href="#section-3.5.4.4-4.5" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-3.5.3.4-4.6">
+              <li class="normal" id="section-3.5.4.4-4.6">
                 <code>events_default</code> (integer) - the level required to send events in the room. Overridden by
-the <code>events</code> map. Defaults to <code>0</code> if unspecified.<a href="#section-3.5.3.4-4.6" class="pilcrow">¶</a>
+the <code>events</code> map. Defaults to <code>0</code> if unspecified.<a href="#section-3.5.4.4-4.6" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-3.5.3.4-4.7">
+              <li class="normal" id="section-3.5.4.4-4.7">
                 <code>state_default</code> (integer) - the level required to send state events in the room. Overridden
-by the <code>events</code> map. Defaults to <code>50</code> if unspecified.<a href="#section-3.5.3.4-4.7" class="pilcrow">¶</a>
+by the <code>events</code> map. Defaults to <code>50</code> if unspecified.<a href="#section-3.5.4.4-4.7" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-3.5.3.4-4.8">
+              <li class="normal" id="section-3.5.4.4-4.8">
                 <code>users</code> (map) - keyed by user ID, the level of that user. Defaults to an empty map if
-unspecified.<a href="#section-3.5.3.4-4.8" class="pilcrow">¶</a>
+unspecified.<a href="#section-3.5.4.4-4.8" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-3.5.3.4-4.9">
+              <li class="normal" id="section-3.5.4.4-4.9">
                 <code>users_default</code> (integer) - the level for users. Overridden by the <code>users</code> map. Defaults to
-<code>0</code> if unspecified.<a href="#section-3.5.3.4-4.9" class="pilcrow">¶</a>
+<code>0</code> if unspecified.<a href="#section-3.5.4.4-4.9" class="pilcrow">¶</a>
 </li>
             </ul>
-<p id="section-3.5.3.4-5"><strong>TODO</strong>: Include notifications for at-room here too?<a href="#section-3.5.3.4-5" class="pilcrow">¶</a></p>
-<p id="section-3.5.3.4-6">Note that if no power levels event is specified in the room then the room creator (<code>sender</code> of
-the <code>m.room.create</code> state event) has a default power level of 100.<a href="#section-3.5.3.4-6" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.4-5"><strong>TODO</strong>: Include notifications for at-room here too?<a href="#section-3.5.4.4-5" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.4-6">Note that if no power levels event is specified in the room then the room creator (<code>sender</code> of
+the <code>m.room.create</code> state event) has a default power level of 100.<a href="#section-3.5.4.4-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="todo-other-events">
-<section id="section-3.5.3.5">
+<section id="section-3.5.4.5">
             <h5 id="name-todo-other-events">
-<a href="#section-3.5.3.5" class="section-number selfRef">3.5.3.5. </a><a href="#name-todo-other-events" class="section-name selfRef">TODO: Other events</a>
+<a href="#section-3.5.4.5" class="section-number selfRef">3.5.4.5. </a><a href="#name-todo-other-events" class="section-name selfRef">TODO: Other events</a>
             </h5>
-<p id="section-3.5.3.5-1"><strong>TODO</strong>: <code>m.room.name</code>, <code>m.room.topic</code>, <code>m.room.avatar</code>, <code>m.room.encryption</code>, <code>m.room.history_visibility</code><a href="#section-3.5.3.5-1" class="pilcrow">¶</a></p>
-<p id="section-3.5.3.5-2"><strong>TODO</strong>: Drop <code>m.room.encryption</code> and pack it into the create event instead?<a href="#section-3.5.3.5-2" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.5-1"><strong>TODO</strong>: <code>m.room.name</code>, <code>m.room.topic</code>, <code>m.room.avatar</code>, <code>m.room.encryption</code>, <code>m.room.history_visibility</code><a href="#section-3.5.4.5-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.5-2"><strong>TODO</strong>: Drop <code>m.room.encryption</code> and pack it into the create event instead?<a href="#section-3.5.4.5-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1976,10 +2006,10 @@ formed PDU then sends that PDU back out to all participants, including the origi
 <p id="section-6.1-2">When a server (hub or participant) receives a PDU, it:<a href="#section-6.1-2" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.1-3">
 <li id="section-6.1-3.1">Verifies the event is in a valid shape. This will mean ensuring the required schema is
-met and of the correct type (there is a string <code>type</code>, etc). Note that the event may
-have additional fields in various places, such as at the top level or within <code>content</code>:
-the receiver should ensure these additional fields do not cause the event to be invalid.
-If the event fails this validation, it is dropped.<a href="#section-6.1-3.1" class="pilcrow">¶</a>
+met and of the correct type (there is a string <code>type</code>, etc) and that the size limits are
+honoured. Note that the event may have additional fields in various places, such as at
+the top level or within <code>content</code>: the receiver should ensure these additional fields
+do not cause the event to be invalid. If the event fails this validation, it is dropped.<a href="#section-6.1-3.1" class="pilcrow">¶</a>
 </li>
           <li id="section-6.1-3.2">Ensures the required signatures are present and valid. If the event fails this, it is
 dropped.<a href="#section-6.1-3.2" class="pilcrow">¶</a>
@@ -2772,7 +2802,109 @@ defined limit) upon receiving repeated error responses.<a href="#section-8.2.1-9
         <h3 id="name-request-authentication">
 <a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-request-authentication" class="section-name selfRef">Request Authentication</a>
         </h3>
-<p id="section-8.3-1"><strong>TODO</strong>: This section.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<p id="section-8.3-1">Most endpoints in this document require authentication to prove which server is making the request. This is done
+using public key digital signatures.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<p id="section-8.3-2">The request method, target, and body are signed by wrapping them in a JSON object then using the "Signing Arbitrary
+Objects" algorithm. The resulting signatures are added as an <code>Authorization</code> header with an auth scheme of <code>X-Matrix</code>.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
+<p id="section-8.3-3">Note that the target (<code>uri</code>) field should include the full path, including the <code>?</code> and any query parameters if
+present, but should not include the hostname or <code>https:</code> scheme.<a href="#section-8.3-3" class="pilcrow">¶</a></p>
+<p id="section-8.3-4"><strong>TODO</strong>: Define an ordering algorithm for the query string.<a href="#section-8.3-4" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-8.3-5">
+<li id="section-8.3-5.1">
+            <p id="section-8.3-5.1.1">Sign the following JSON template:
+~~~ json
+{
+   "method": "GET",
+   "uri": "/path/to/endpoint?with_qs=true",
+   "origin": "requesting.server.name.example.org",
+   "destination": "target.server.name.example.org",
+   "content": {"json_request_body": true}
+}
+~~~<a href="#section-8.3-5.1.1" class="pilcrow">¶</a></p>
+<p id="section-8.3-5.1.2"><code>content</code> is simply the JSON-encoded request body. For <code>GET</code> requests or ones without a request body, use an empty
+JSON object instead.<a href="#section-8.3-5.1.2" class="pilcrow">¶</a></p>
+<p id="section-8.3-5.1.3">
+In both <code>origin</code> and <code>destination</code>, the server name is the one <em>before</em> resolution/delegation. The same applies to
+the remainder of the authorization process.<a href="#section-8.3-5.1.3" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-8.3-5.2">
+            <p id="section-8.3-5.2.1">Append the signatures to the object:<a href="#section-8.3-5.2.1" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-8.3-5.2.2">
+<pre>
+{
+   "method": "GET",
+   "uri": "/path/to/endpoint?with_qs=true",
+   "origin": "requesting.server.name.example.org",
+   "destination": "target.server.name.example.org",
+   "content": {"json_request_body": true},
+   "signatures": {
+      "requesting.server.name.example.org": {
+         "ed25519:0": "&lt;unpadded base64 encoded signature&gt;"
+      }
+   }
+}
+</pre><a href="#section-8.3-5.2.2" class="pilcrow">¶</a>
+</div>
+</li>
+          <li id="section-8.3-5.3">
+            <p id="section-8.3-5.3.1">Add the signature header, copying the implied field values:<a href="#section-8.3-5.3.1" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.3-5.3.2">
+<pre>
+GET /path/to/endpoint?with_qs=true
+Authorization: X-Matrix origin="requesting.server.name.example.org",
+   destination="target.server.name.example.org",
+   key="ed25519:0",
+   sig="&lt;unpadded base64 encoded signature&gt;"
+Content-Type: application/json
+
+{"json_request_body": true}
+</pre><a href="#section-8.3-5.3.2" class="pilcrow">¶</a>
+</div>
+<p id="section-8.3-5.3.3">
+Linebreaks within <code>Authorization</code> are for clarity and are non-normative.<a href="#section-8.3-5.3.3" class="pilcrow">¶</a></p>
+<p id="section-8.3-5.3.4">
+The format of the Authorization header matches Section 11.4 of RFC 9110 <span>[<a href="#RFC9110" class="cite xref">RFC9110</a>]</span>. The header begins with an
+authorization scheme of <code>X-Matrix</code>, followed by one or more spaces, followed by an (unordered) comma-separated
+list of parameters written as name=value pairs. The names are case insensitive, though the values are. The values
+must be enclosed in quotes if they contain characters which are not allowed in a <code>token</code>, as defined by Section
+5.6.2 of RFC 9110 <span>[<a href="#RFC9110" class="cite xref">RFC9110</a>]</span>. If a value is a valid <code>token</code> it may not be enclosed in quotes. Quoted values
+MAY contain backslash-escaped characters. When parsing the header, the recipient must unescape the characters.<a href="#section-8.3-5.3.4" class="pilcrow">¶</a></p>
+<p id="section-8.3-5.3.5">
+The exact parameters are as follows. Unknown parameters are ignored and MUST NOT result in authentication errors.<a href="#section-8.3-5.3.5" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-8.3-5.3.6.1">
+                <code>origin</code> - The name of the sending server. MUST match the <code>origin</code> in the signed JSON.<a href="#section-8.3-5.3.6.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-8.3-5.3.6.2">
+                <code>destination</code> - The name of the receiving server. MUST match the <code>destination</code> in the signed JSON.<a href="#section-8.3-5.3.6.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-8.3-5.3.6.3">
+                <code>key</code> - The ID, including algorithm name, of the sending server's signing key used to sign the request.<a href="#section-8.3-5.3.6.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-8.3-5.3.6.4">
+                <code>signature</code> - The unpadded base64 encoded signature from step 2.<a href="#section-8.3-5.3.6.4" class="pilcrow">¶</a>
+</li>
+            </ul>
+</li>
+        </ol>
+<p id="section-8.3-6">A receiving server validates the Authorization header by composing the JSON object represented in step 2 (all fields
+filled in, sending server's signature added) and validating the signature per elsewhere in this document.<a href="#section-8.3-6" class="pilcrow">¶</a></p>
+<p id="section-8.3-7">Responses from a server are authenticated using TLS and do not have additional signing requirements.<a href="#section-8.3-7" class="pilcrow">¶</a></p>
+<p id="section-8.3-8">A server with multiple signing keys SHOULD include an <code>Authorization</code> header for each signing key. Receiving servers
+MUST validate all <code>Authorization</code> headers. A failure in any of the headers MUST result in an authentication error,
+if the endpoint requires authentication. Failure to provide an <code>Authorization</code> header on an endpoint MUST result in
+an authentication error if the endpoint requires authentication. <code>Authentication</code> headers are ignored on endpoints
+which do not require authentication.<a href="#section-8.3-8" class="pilcrow">¶</a></p>
+<p id="section-8.3-9">An authentication error is a HTTP <code>401 Unauthorized</code> status code and <code>M_FORBIDDEN</code> error code. For example:<a href="#section-8.3-9" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-8.3-10">
+<pre>
+{
+   "errcode": "M_FORBIDDEN",
+   "error": "Signature error on request."
+}
+</pre><a href="#section-8.3-10" class="pilcrow">¶</a>
+</div>
+<p id="section-8.3-11"><strong>TODO</strong>: Describe signing key endpoints.<a href="#section-8.3-11" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2887,8 +3019,12 @@ the sending device and the event which gets emitted.<a href="#section-10-4" clas
 <span class="refAuthor">Bray, T., Ed.</span>, <span class="refTitle">"The JavaScript Object Notation (JSON) Data Interchange Format"</span>, <span class="seriesInfo">STD 90</span>, <span class="seriesInfo">RFC 8259</span>, <span class="seriesInfo">DOI 10.17487/RFC8259</span>, <time datetime="2017-12" class="refDate">December 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8259">https://www.rfc-editor.org/rfc/rfc8259</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8785">[RFC8785]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Rundgren, A.</span>, <span class="refAuthor">Jordan, B.</span>, and <span class="refAuthor">S. Erdtman</span>, <span class="refTitle">"JSON Canonicalization Scheme (JCS)"</span>, <span class="seriesInfo">RFC 8785</span>, <span class="seriesInfo">DOI 10.17487/RFC8785</span>, <time datetime="2020-06" class="refDate">June 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8785">https://www.rfc-editor.org/rfc/rfc8785</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9110">[RFC9110]</dt>
+      <dd>
+<span class="refAuthor">Fielding, R., Ed.</span>, <span class="refAuthor">Nottingham, M., Ed.</span>, and <span class="refAuthor">J. Reschke, Ed.</span>, <span class="refTitle">"HTTP Semantics"</span>, <span class="seriesInfo">STD 97</span>, <span class="seriesInfo">RFC 9110</span>, <span class="seriesInfo">DOI 10.17487/RFC9110</span>, <time datetime="2022-06" class="refDate">June 2022</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9110">https://www.rfc-editor.org/rfc/rfc9110</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>

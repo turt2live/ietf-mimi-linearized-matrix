@@ -85,7 +85,8 @@ Table of Contents
      3.5.  Events
        3.5.1.  Linearized PDU
        3.5.2.  State events
-       3.5.3.  Event types
+       3.5.3.  Size Limits
+       3.5.4.  Event types
    4.  Initial Room Version
    5.  MLS Considerations
    6.  Event Signing & Authorization
@@ -521,11 +522,31 @@ Table of Contents
    in order, overwriting the key-tuple for state events in an adjacent
    map.  That map becomes "current state" when the loop is finished.
 
-3.5.3.  Event types
+3.5.3.  Size Limits
+
+   A complete event (PDU) MUST NOT exceed 65536 bytes, including any
+   signatures, and encoded as Canonical JSON.
+
+   There are additional restrictions on the value of the following keys:
+
+   *  sender MUST NOT exceed 255 bytes (including domain).
+
+   *  room_id MUST NOT exceed 255 bytes.
+
+   *  state_key MUST NOT exceed 255 bytes.
+
+   *  type MUST NOT exceed 255 bytes.
+
+   Some event types have additional size restrictions which are
+   specified in the description of the event.  Additional keys not
+   listed above have no limit other than the implied 65536 byte limit
+   for the entire event.
+
+3.5.4.  Event types
 
    Linearized Matrix defines the following event types:
 
-3.5.3.1.  m.room.create
+3.5.4.1.  m.room.create
 
    The very first event in the room.  It MUST NOT have any auth_events
    or prev_events, and the domain of the sender MUST be the same as the
@@ -534,7 +555,7 @@ Table of Contents
    The content for a create event MUST have at least a room_version
    field to denote what set of algorithms the room is using.
 
-3.5.3.2.  m.room.join_rules
+3.5.4.2.  m.room.join_rules
 
    Defines whether users can join without an invite and other similar
    conditions.  The state_key MUST be an empty string.
@@ -551,7 +572,7 @@ Table of Contents
 
    *TODO*: Describe restricted (and knock_restricted) rooms?
 
-3.5.3.3.  m.room.member
+3.5.4.3.  m.room.member
 
    Defines the membership for a user in the room.  If the user does not
    have a membership event then they are presumed to be in the leave
@@ -581,7 +602,7 @@ Table of Contents
    legal transitions are possible.  For example, preventing users from
    unbanning themselves falls under the auth rules.
 
-3.5.3.4.  m.room.power_levels
+3.5.4.4.  m.room.power_levels
 
    Defines what given users can and can't do, as well as which event
    types they are able to send.  The enforcement of these power levels
@@ -628,7 +649,7 @@ Table of Contents
    room creator (sender of the m.room.create state event) has a default
    power level of 100.
 
-3.5.3.5.  TODO: Other events
+3.5.4.5.  TODO: Other events
 
    *TODO*: m.room.name, m.room.topic, m.room.avatar, m.room.encryption,
    m.room.history_visibility
@@ -711,11 +732,11 @@ Table of Contents
 
    1.  Verifies the event is in a valid shape.  This will mean ensuring
        the required schema is met and of the correct type (there is a
-       string type, etc).  Note that the event may have additional
-       fields in various places, such as at the top level or within
-       content: the receiver should ensure these additional fields do
-       not cause the event to be invalid.  If the event fails this
-       validation, it is dropped.
+       string type, etc) and that the size limits are honoured.  Note
+       that the event may have additional fields in various places, such
+       as at the top level or within content: the receiver should ensure
+       these additional fields do not cause the event to be invalid.  If
+       the event fails this validation, it is dropped.
 
    2.  Ensures the required signatures are present and valid.  If the
        event fails this, it is dropped.
@@ -1444,7 +1465,116 @@ Table of Contents
 
 8.3.  Request Authentication
 
-   *TODO*: This section.
+   Most endpoints in this document require authentication to prove which
+   server is making the request.  This is done using public key digital
+   signatures.
+
+   The request method, target, and body are signed by wrapping them in a
+   JSON object then using the "Signing Arbitrary Objects" algorithm.
+   The resulting signatures are added as an Authorization header with an
+   auth scheme of X-Matrix.
+
+   Note that the target (uri) field should include the full path,
+   including the ? and any query parameters if present, but should not
+   include the hostname or https: scheme.
+
+   *TODO*: Define an ordering algorithm for the query string.
+
+   1.  Sign the following JSON template: ~~~ json { "method": "GET",
+       "uri": "/path/to/endpoint?with_qs=true", "origin":
+       "requesting.server.name.example.org", "destination":
+       "target.server.name.example.org", "content":
+       {"json_request_body": true} } ~~~
+
+       content is simply the JSON-encoded request body.  For GET
+       requests or ones without a request body, use an empty JSON object
+       instead.
+
+       In both origin and destination, the server name is the one
+       _before_ resolution/delegation.  The same applies to the
+       remainder of the authorization process.
+
+   2.  Append the signatures to the object:
+
+      {
+         "method": "GET",
+         "uri": "/path/to/endpoint?with_qs=true",
+         "origin": "requesting.server.name.example.org",
+         "destination": "target.server.name.example.org",
+         "content": {"json_request_body": true},
+         "signatures": {
+            "requesting.server.name.example.org": {
+               "ed25519:0": "<unpadded base64 encoded signature>"
+            }
+         }
+      }
+
+   3.  Add the signature header, copying the implied field values:
+
+    GET /path/to/endpoint?with_qs=true
+    Authorization: X-Matrix origin="requesting.server.name.example.org",
+       destination="target.server.name.example.org",
+       key="ed25519:0",
+       sig="<unpadded base64 encoded signature>"
+    Content-Type: application/json
+
+    {"json_request_body": true}
+
+       Linebreaks within Authorization are for clarity and are non-
+       normative.
+
+       The format of the Authorization header matches Section 11.4 of
+       RFC 9110 [RFC9110].  The header begins with an authorization
+       scheme of X-Matrix, followed by one or more spaces, followed by
+       an (unordered) comma-separated list of parameters written as
+       name=value pairs.  The names are case insensitive, though the
+       values are.  The values must be enclosed in quotes if they
+       contain characters which are not allowed in a token, as defined
+       by Section 5.6.2 of RFC 9110 [RFC9110].  If a value is a valid
+       token it may not be enclosed in quotes.  Quoted values MAY
+       contain backslash-escaped characters.  When parsing the header,
+       the recipient must unescape the characters.
+
+       The exact parameters are as follows.  Unknown parameters are
+       ignored and MUST NOT result in authentication errors.
+
+       *  origin - The name of the sending server.  MUST match the
+          origin in the signed JSON.
+
+       *  destination - The name of the receiving server.  MUST match
+          the destination in the signed JSON.
+
+       *  key - The ID, including algorithm name, of the sending
+          server's signing key used to sign the request.
+
+       *  signature - The unpadded base64 encoded signature from step 2.
+
+   A receiving server validates the Authorization header by composing
+   the JSON object represented in step 2 (all fields filled in, sending
+   server's signature added) and validating the signature per elsewhere
+   in this document.
+
+   Responses from a server are authenticated using TLS and do not have
+   additional signing requirements.
+
+   A server with multiple signing keys SHOULD include an Authorization
+   header for each signing key.  Receiving servers MUST validate all
+   Authorization headers.  A failure in any of the headers MUST result
+   in an authentication error, if the endpoint requires authentication.
+   Failure to provide an Authorization header on an endpoint MUST result
+   in an authentication error if the endpoint requires authentication.
+   Authentication headers are ignored on endpoints which do not require
+   authentication.
+
+   An authentication error is a HTTP 401 Unauthorized status code and
+   M_FORBIDDEN error code.  For example:
+
+   {
+      "errcode": "M_FORBIDDEN",
+      "error": "Signature error on request."
+   }
+
+   *TODO*: Describe signing key endpoints.
 
 9.  TODO: Remainder of transport
 
@@ -1566,6 +1696,11 @@ Table of Contents
               Canonicalization Scheme (JCS)", RFC 8785,
               DOI 10.17487/RFC8785, June 2020,
               <https://www.rfc-editor.org/rfc/rfc8785>.
+
+   [RFC9110]  Fielding, R., Ed., Nottingham, M., Ed., and J. Reschke,
+              Ed., "HTTP Semantics", STD 97, RFC 9110,
+              DOI 10.17487/RFC9110, June 2022,
+              <https://www.rfc-editor.org/rfc/rfc9110>.
 
 12.2.  Informative References
 
