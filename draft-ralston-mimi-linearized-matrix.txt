@@ -115,6 +115,7 @@ Table of Contents
        8.1.6.  Trailing Slashes Matter
      8.2.  Resolving Server Names
        8.2.1.  GET /.well-known/matrix/server
+     8.3.  Request Authentication
    9.  TODO: Remainder of transport
    10. Security Considerations
    11. IANA Considerations
@@ -168,29 +169,29 @@ Table of Contents
 
    For a given conversation/room:
 
-       .------------.                                  .------------.
-      |   Client A   |                                |   Client B   |
-       '-----------+'                                  '-----------+'
-        ^          |                                    ^          |
-        |          |  Client-Server API                 |          |
-        |          V                                    |          V
-    +---+--------------+                            +---+--------------+
-    |                  +----------( events )------->|                  |
-    | Provider/Server  |                            | Provider/Server  |
-    |        A         |<---------( events )--------+        B         |
-    +-----+------------+     Server-Server API      +------------------+
-          |     ^
-          |     |                                   +------------------+
-          |     +-----------------( events )--------+                  |
-          |                                         | Provider/Server  |
-          +-----------------------( events )------->|        C         |
-                                                    +--------------+---+
-                                                        ^          |
-                                                        |          |
-                                                        |          V
-                                                       .+-----------.
-                                                      |   Client C   |
-                                                       '------------'
+      .------------.                                  .------------.
+     |   Client A   |                                |   Client B   |
+      '---------+--'                                  '---------+--'
+         ^      |                                        ^      |
+         |      |  Client-Server API                     |      |
+         |      V                                        |      V
+   +-----+------------+                            +-----+------------+
+   |                  +----------( events )------->|                  |
+   | Provider/Server  |                            | Provider/Server  |
+   |        A         |<---------( events )--------+        B         |
+   +-----+------------+     Server-Server API      +------------------+
+         |     ^
+         |     |                      +------------------+
+         |     +----( events )--------+                  |
+         |                            | Provider/Server  |
+         +----------( events )------->|        C         |
+                                      +------------+-----+
+                                            ^      |
+                                            |      |
+                                            |      V
+                                         .--+---------.
+                                        |   Client C   |
+                                         '------------'
 
    In this diagram, Server A is acting as a hub for the other two
    servers.  Servers B and C do not converse directly when sending
@@ -460,10 +461,10 @@ Table of Contents
      },
      "signatures": {
        "first.example.org": {
-         "ed25519:1": "<unpadded base64 for signature covering whole event>"
+         "ed25519:1": "<unpadded base64 signature covering whole event>"
        },
        "second.example.org": {
-         "ed25519:1": "<unpadded base64 for signature covering LPDU>"
+         "ed25519:1": "<unpadded base64 signature covering LPDU>"
        }
      },
      "auth_events": ["$first", "$second"],
@@ -1440,6 +1441,10 @@ Table of Contents
    Error responses (non-200) SHOULD be cached for no longer than 1 hour.
    Callers SHOULD exponentially back off (to a defined limit) upon
    receiving repeated error responses.
+
+8.3.  Request Authentication
+
+   *TODO*: This section.
 
 9.  TODO: Remainder of transport
 

@@ -1310,6 +1310,9 @@ Matrix.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
 </li>
                 </ul>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3">
+                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-request-authentication" class="internal xref">Request Authentication</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
@@ -1391,21 +1394,21 @@ A state event is a subclass of an event.<a href="#section-2-3.3" class="pilcrow"
 <p id="section-3-1">For a given conversation/room:<a href="#section-3-1" class="pilcrow">¶</a></p>
 <div id="section-3-2">
         <div class="alignLeft art-svg artwork" id="section-3-2.1">
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="416" width="552" viewBox="0 0 552 416" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="400" width="552" viewBox="0 0 552 400" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px">
             <path d="M 8,128 L 8,192" fill="none" stroke="black"></path>
-            <path d="M 40,72 L 40,128" fill="none" stroke="black"></path>
+            <path d="M 56,72 L 56,128" fill="none" stroke="black"></path>
             <path d="M 56,192 L 56,272" fill="none" stroke="black"></path>
             <path d="M 104,200 L 104,240" fill="none" stroke="black"></path>
-            <path d="M 128,64 L 128,120" fill="none" stroke="black"></path>
+            <path d="M 112,64 L 112,120" fill="none" stroke="black"></path>
             <path d="M 160,128 L 160,192" fill="none" stroke="black"></path>
+            <path d="M 288,224 L 288,288" fill="none" stroke="black"></path>
+            <path d="M 336,296 L 336,352" fill="none" stroke="black"></path>
             <path d="M 392,128 L 392,192" fill="none" stroke="black"></path>
-            <path d="M 392,224 L 392,288" fill="none" stroke="black"></path>
-            <path d="M 424,72 L 424,128" fill="none" stroke="black"></path>
-            <path d="M 424,296 L 424,352" fill="none" stroke="black"></path>
-            <path d="M 512,64 L 512,120" fill="none" stroke="black"></path>
-            <path d="M 512,288 L 512,344" fill="none" stroke="black"></path>
+            <path d="M 392,288 L 392,344" fill="none" stroke="black"></path>
+            <path d="M 440,72 L 440,128" fill="none" stroke="black"></path>
+            <path d="M 440,224 L 440,288" fill="none" stroke="black"></path>
+            <path d="M 496,64 L 496,120" fill="none" stroke="black"></path>
             <path d="M 544,128 L 544,192" fill="none" stroke="black"></path>
-            <path d="M 544,224 L 544,288" fill="none" stroke="black"></path>
             <path d="M 40,32 L 128,32" fill="none" stroke="black"></path>
             <path d="M 424,32 L 512,32" fill="none" stroke="black"></path>
             <path d="M 40,64 L 128,64" fill="none" stroke="black"></path>
@@ -1418,14 +1421,14 @@ A state event is a subclass of an event.<a href="#section-2-3.3" class="pilcrow"
             <path d="M 320,176 L 392,176" fill="none" stroke="black"></path>
             <path d="M 8,192 L 160,192" fill="none" stroke="black"></path>
             <path d="M 392,192 L 544,192" fill="none" stroke="black"></path>
-            <path d="M 392,224 L 544,224" fill="none" stroke="black"></path>
-            <path d="M 104,240 L 248,240" fill="none" stroke="black"></path>
-            <path d="M 320,240 L 392,240" fill="none" stroke="black"></path>
-            <path d="M 56,272 L 248,272" fill="none" stroke="black"></path>
-            <path d="M 320,272 L 384,272" fill="none" stroke="black"></path>
-            <path d="M 392,288 L 544,288" fill="none" stroke="black"></path>
-            <path d="M 424,352 L 512,352" fill="none" stroke="black"></path>
-            <path d="M 424,384 L 512,384" fill="none" stroke="black"></path>
+            <path d="M 288,224 L 440,224" fill="none" stroke="black"></path>
+            <path d="M 104,240 L 144,240" fill="none" stroke="black"></path>
+            <path d="M 216,240 L 288,240" fill="none" stroke="black"></path>
+            <path d="M 56,272 L 144,272" fill="none" stroke="black"></path>
+            <path d="M 216,272 L 280,272" fill="none" stroke="black"></path>
+            <path d="M 288,288 L 440,288" fill="none" stroke="black"></path>
+            <path d="M 320,352 L 408,352" fill="none" stroke="black"></path>
+            <path d="M 320,384 L 408,384" fill="none" stroke="black"></path>
             <path d="M 40,32 C 31.16936,32 24,39.16936 24,48" fill="none" stroke="black"></path>
             <path d="M 128,32 C 136.83064,32 144,39.16936 144,48" fill="none" stroke="black"></path>
             <path d="M 424,32 C 415.16936,32 408,39.16936 408,48" fill="none" stroke="black"></path>
@@ -1434,27 +1437,27 @@ A state event is a subclass of an event.<a href="#section-2-3.3" class="pilcrow"
             <path d="M 128,64 C 136.83064,64 144,56.83064 144,48" fill="none" stroke="black"></path>
             <path d="M 424,64 C 415.16936,64 408,56.83064 408,48" fill="none" stroke="black"></path>
             <path d="M 512,64 C 520.83064,64 528,56.83064 528,48" fill="none" stroke="black"></path>
-            <path d="M 424,352 C 415.16936,352 408,359.16936 408,368" fill="none" stroke="black"></path>
-            <path d="M 512,352 C 520.83064,352 528,359.16936 528,368" fill="none" stroke="black"></path>
-            <path d="M 424,384 C 415.16936,384 408,376.83064 408,368" fill="none" stroke="black"></path>
-            <path d="M 512,384 C 520.83064,384 528,376.83064 528,368" fill="none" stroke="black"></path>
-            <polygon class="arrowhead" points="520,344 508,338.4 508,349.6" fill="black" transform="rotate(90,512,344)"></polygon>
-            <polygon class="arrowhead" points="520,120 508,114.4 508,125.6" fill="black" transform="rotate(90,512,120)"></polygon>
-            <polygon class="arrowhead" points="432,296 420,290.4 420,301.6" fill="black" transform="rotate(270,424,296)"></polygon>
-            <polygon class="arrowhead" points="432,72 420,66.4 420,77.6" fill="black" transform="rotate(270,424,72)"></polygon>
-            <polygon class="arrowhead" points="392,272 380,266.4 380,277.6" fill="black" transform="rotate(0,384,272)"></polygon>
+            <path d="M 320,352 C 311.16936,352 304,359.16936 304,368" fill="none" stroke="black"></path>
+            <path d="M 408,352 C 416.83064,352 424,359.16936 424,368" fill="none" stroke="black"></path>
+            <path d="M 320,384 C 311.16936,384 304,376.83064 304,368" fill="none" stroke="black"></path>
+            <path d="M 408,384 C 416.83064,384 424,376.83064 424,368" fill="none" stroke="black"></path>
+            <polygon class="arrowhead" points="504,120 492,114.4 492,125.6" fill="black" transform="rotate(90,496,120)"></polygon>
+            <polygon class="arrowhead" points="448,72 436,66.4 436,77.6" fill="black" transform="rotate(270,440,72)"></polygon>
+            <polygon class="arrowhead" points="400,344 388,338.4 388,349.6" fill="black" transform="rotate(90,392,344)"></polygon>
             <polygon class="arrowhead" points="392,144 380,138.4 380,149.6" fill="black" transform="rotate(0,384,144)"></polygon>
+            <polygon class="arrowhead" points="344,296 332,290.4 332,301.6" fill="black" transform="rotate(270,336,296)"></polygon>
+            <polygon class="arrowhead" points="288,272 276,266.4 276,277.6" fill="black" transform="rotate(0,280,272)"></polygon>
             <polygon class="arrowhead" points="176,176 164,170.4 164,181.6" fill="black" transform="rotate(180,168,176)"></polygon>
-            <polygon class="arrowhead" points="136,120 124,114.4 124,125.6" fill="black" transform="rotate(90,128,120)"></polygon>
+            <polygon class="arrowhead" points="120,120 108,114.4 108,125.6" fill="black" transform="rotate(90,112,120)"></polygon>
             <polygon class="arrowhead" points="112,200 100,194.4 100,205.6" fill="black" transform="rotate(270,104,200)"></polygon>
-            <polygon class="arrowhead" points="48,72 36,66.4 36,77.6" fill="black" transform="rotate(270,40,72)"></polygon>
+            <polygon class="arrowhead" points="64,72 52,66.4 52,77.6" fill="black" transform="rotate(270,56,72)"></polygon>
             <g class="text">
               <text x="76" y="52">Client</text>
               <text x="112" y="52">A</text>
               <text x="460" y="52">Client</text>
               <text x="496" y="52">B</text>
-              <text x="200" y="100">Client-Server</text>
-              <text x="272" y="100">API</text>
+              <text x="184" y="100">Client-Server</text>
+              <text x="256" y="100">API</text>
               <text x="284" y="148">events</text>
               <text x="80" y="164">Provider/Server</text>
               <text x="464" y="164">Provider/Server</text>
@@ -1463,12 +1466,12 @@ A state event is a subclass of an event.<a href="#section-2-3.3" class="pilcrow"
               <text x="464" y="180">B</text>
               <text x="256" y="196">Server-Server</text>
               <text x="328" y="196">API</text>
-              <text x="284" y="244">events</text>
-              <text x="464" y="260">Provider/Server</text>
-              <text x="284" y="276">events</text>
-              <text x="464" y="276">C</text>
-              <text x="460" y="372">Client</text>
-              <text x="496" y="372">C</text>
+              <text x="180" y="244">events</text>
+              <text x="360" y="260">Provider/Server</text>
+              <text x="180" y="276">events</text>
+              <text x="360" y="276">C</text>
+              <text x="356" y="372">Client</text>
+              <text x="392" y="372">C</text>
             </g>
           </svg><a href="#section-3-2.1" class="pilcrow">¶</a>
 </div>
@@ -1712,10 +1715,10 @@ however.<a href="#section-3.5-7" class="pilcrow">¶</a></p>
   },
   "signatures": {
     "first.example.org": {
-      "ed25519:1": "&lt;unpadded base64 for signature covering whole event&gt;"
+      "ed25519:1": "&lt;unpadded base64 signature covering whole event&gt;"
     },
     "second.example.org": {
-      "ed25519:1": "&lt;unpadded base64 for signature covering LPDU&gt;"
+      "ed25519:1": "&lt;unpadded base64 signature covering LPDU&gt;"
     }
   },
   "auth_events": ["$first", "$second"],
@@ -2762,6 +2765,14 @@ are present.<a href="#section-8.2.1-8" class="pilcrow">¶</a></p>
 defined limit) upon receiving repeated error responses.<a href="#section-8.2.1-9" class="pilcrow">¶</a></p>
 </section>
 </div>
+</section>
+</div>
+<div id="request-authentication">
+<section id="section-8.3">
+        <h3 id="name-request-authentication">
+<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-request-authentication" class="section-name selfRef">Request Authentication</a>
+        </h3>
+<p id="section-8.3-1"><strong>TODO</strong>: This section.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
