@@ -1139,7 +1139,101 @@ defined limit) upon receiving repeated error responses.
 
 ## Request Authentication
 
-**TODO**: This section.
+Most endpoints in this document require authentication to prove which server is making the request. This is done
+using public key digital signatures.
+
+The request method, target, and body are signed by wrapping them in a JSON object then using the "Signing Arbitrary
+Objects" algorithm. The resulting signatures are added as an `Authorization` header with an auth scheme of `X-Matrix`.
+
+Note that the target (`uri`) field should include the full path, including the `?` and any query parameters if
+present, but should not include the hostname or `https:` scheme.
+
+**TODO**: Define an ordering algorithm for the query string.
+
+1. Sign the following JSON template:
+   ~~~ json
+   {
+      "method": "GET",
+      "uri": "/path/to/endpoint?with_qs=true",
+      "origin": "requesting.server.name.example.org",
+      "destination": "target.server.name.example.org",
+      "content": {"json_request_body": true}
+   }
+   ~~~
+
+   `content` is simply the JSON-encoded request body. For `GET` requests or ones without a request body, use an empty
+   JSON object instead.
+
+   In both `origin` and `destination`, the server name is the one *before* resolution/delegation. The same applies to
+   the remainder of the authorization process.
+
+2. Append the signatures to the object:
+
+   ~~~ json
+   {
+      "method": "GET",
+      "uri": "/path/to/endpoint?with_qs=true",
+      "origin": "requesting.server.name.example.org",
+      "destination": "target.server.name.example.org",
+      "content": {"json_request_body": true},
+      "signatures": {
+         "requesting.server.name.example.org": {
+            "ed25519:0": "<unpadded base64 encoded signature>"
+         }
+      }
+   }
+   ~~~
+
+3. Add the signature header, copying the implied field values:
+
+   ~~~
+   GET /path/to/endpoint?with_qs=true
+   Authorization: X-Matrix origin="requesting.server.name.example.org",
+      destination="target.server.name.example.org",
+      key="ed25519:0",
+      sig="<unpadded base64 encoded signature>"
+   Content-Type: application/json
+
+   {"json_request_body": true}
+   ~~~
+
+   Linebreaks within `Authorization` are for clarity and are non-normative.
+
+   The format of the Authorization header matches Section 11.4 of RFC 9110 {{!RFC9110}}. The header begins with an
+   authorization scheme of `X-Matrix`, followed by one or more spaces, followed by an (unordered) comma-separated
+   list of parameters written as name=value pairs. The names are case insensitive, though the values are. The values
+   must be enclosed in quotes if they contain characters which are not allowed in a `token`, as defined by Section
+   5.6.2 of RFC 9110 {{!RFC9110}}. If a value is a valid `token` it may not be enclosed in quotes. Quoted values
+   MAY contain backslash-escaped characters. When parsing the header, the recipient must unescape the characters.
+
+   The exact parameters are as follows. Unknown parameters are ignored and MUST NOT result in authentication errors.
+
+   * `origin` - The name of the sending server. MUST match the `origin` in the signed JSON.
+   * `destination` - The name of the receiving server. MUST match the `destination` in the signed JSON.
+   * `key` - The ID, including algorithm name, of the sending server's signing key used to sign the request.
+   * `signature` - The unpadded base64 encoded signature from step 2.
+
+A receiving server validates the Authorization header by composing the JSON object represented in step 2 (all fields
+filled in, sending server's signature added) and validating the signature per elsewhere in this document.
+
+Responses from a server are authenticated using TLS and do not have additional signing requirements.
+
+A server with multiple signing keys SHOULD include an `Authorization` header for each signing key. Receiving servers
+MUST validate all `Authorization` headers. A failure in any of the headers MUST result in an authentication error,
+if the endpoint requires authentication. Failure to provide an `Authorization` header on an endpoint MUST result in
+an authentication error if the endpoint requires authentication. `Authentication` headers are ignored on endpoints
+which do not require authentication.
+
+An authentication error is a HTTP `401 Unauthorized` status code and `M_FORBIDDEN` error code. For example:
+
+~~~ json
+{
+   "errcode": "M_FORBIDDEN",
+   "error": "Signature error on request."
+}
+~~~
+
+**TODO**: Describe signing key endpoints.
 
 # TODO: Remainder of transport
 
