@@ -753,6 +753,10 @@ Table of Contents
        the room immediately before where the event would be inserted.
        If it fails, it is rejected.
 
+       *TODO*: Clarify that this step only applies if you're on the DAG
+       side.  On LM, this is the same as Step 6.  We may need to adjust
+       the rejection/soft-fail logic.
+
    6.  Ensures the event passes the authorization rules for the current
        state of the room (which may very well be the same as the step
        above).  If it fails, it is soft-failed.
@@ -1480,11 +1484,15 @@ Table of Contents
 
    *TODO*: Define an ordering algorithm for the query string.
 
-   1.  Sign the following JSON template: ~~~ json { "method": "GET",
-       "uri": "/path/to/endpoint?with_qs=true", "origin":
-       "requesting.server.name.example.org", "destination":
-       "target.server.name.example.org", "content":
-       {"json_request_body": true} } ~~~
+   1.  Sign the following JSON template:
+
+      {
+         "method": "GET",
+         "uri": "/path/to/endpoint?with_qs=true",
+         "origin": "requesting.server.name.example.org",
+         "destination": "target.server.name.example.org",
+         "content": {"json_request_body": true}
+      }
 
        content is simply the JSON-encoded request body.  For GET
        requests or ones without a request body, use an empty JSON object

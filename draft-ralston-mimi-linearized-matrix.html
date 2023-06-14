@@ -2021,8 +2021,11 @@ copy.<a href="#section-6.1-3.3" class="pilcrow">¶</a>
           <li id="section-6.1-3.4">Ensures the event passes the authorization rules for the state identified by the event's
 <code>auth_events</code>. If it fails, it is rejected.<a href="#section-6.1-3.4" class="pilcrow">¶</a>
 </li>
-          <li id="section-6.1-3.5">Ensures the event passes the authorization rules for the state of the room immediately
-before where the event would be inserted. If it fails, it is rejected.<a href="#section-6.1-3.5" class="pilcrow">¶</a>
+          <li id="section-6.1-3.5">
+            <p id="section-6.1-3.5.1">Ensures the event passes the authorization rules for the state of the room immediately
+before where the event would be inserted. If it fails, it is rejected.<a href="#section-6.1-3.5.1" class="pilcrow">¶</a></p>
+<p id="section-6.1-3.5.2"><strong>TODO</strong>: Clarify that this step only applies if you're on the DAG side. On LM, this is
+the same as Step 6. We may need to adjust the rejection/soft-fail logic.<a href="#section-6.1-3.5.2" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.1-3.6">Ensures the event passes the authorization rules for the current state of the room (which
 may very well be the same as the step above). If it fails, it is soft-failed.<a href="#section-6.1-3.6" class="pilcrow">¶</a>
@@ -2811,8 +2814,9 @@ present, but should not include the hostname or <code>https:</code> scheme.<a hr
 <p id="section-8.3-4"><strong>TODO</strong>: Define an ordering algorithm for the query string.<a href="#section-8.3-4" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-8.3-5">
 <li id="section-8.3-5.1">
-            <p id="section-8.3-5.1.1">Sign the following JSON template:
-~~~ json
+            <p id="section-8.3-5.1.1">Sign the following JSON template:<a href="#section-8.3-5.1.1" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-8.3-5.1.2">
+<pre>
 {
    "method": "GET",
    "uri": "/path/to/endpoint?with_qs=true",
@@ -2820,12 +2824,13 @@ present, but should not include the hostname or <code>https:</code> scheme.<a hr
    "destination": "target.server.name.example.org",
    "content": {"json_request_body": true}
 }
-~~~<a href="#section-8.3-5.1.1" class="pilcrow">¶</a></p>
-<p id="section-8.3-5.1.2"><code>content</code> is simply the JSON-encoded request body. For <code>GET</code> requests or ones without a request body, use an empty
-JSON object instead.<a href="#section-8.3-5.1.2" class="pilcrow">¶</a></p>
-<p id="section-8.3-5.1.3">
+</pre><a href="#section-8.3-5.1.2" class="pilcrow">¶</a>
+</div>
+<p id="section-8.3-5.1.3"><code>content</code> is simply the JSON-encoded request body. For <code>GET</code> requests or ones without a request body, use an empty
+JSON object instead.<a href="#section-8.3-5.1.3" class="pilcrow">¶</a></p>
+<p id="section-8.3-5.1.4">
 In both <code>origin</code> and <code>destination</code>, the server name is the one <em>before</em> resolution/delegation. The same applies to
-the remainder of the authorization process.<a href="#section-8.3-5.1.3" class="pilcrow">¶</a></p>
+the remainder of the authorization process.<a href="#section-8.3-5.1.4" class="pilcrow">¶</a></p>
 </li>
           <li id="section-8.3-5.2">
             <p id="section-8.3-5.2.1">Append the signatures to the object:<a href="#section-8.3-5.2.1" class="pilcrow">¶</a></p>
