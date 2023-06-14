@@ -109,6 +109,7 @@ Changes from v11 are:
   * For the majority of cases, Matrix's existing canonical JSON implementation is *close enough*.
 * Content hash: the algorithm has changed to account for LPDU hashes.
 * Redactions: `hub_server` is preserved as a top-level field.
+* Event format: `depth` has no meaning. It is additionally removed from the redaction algorithm.
 
 These are adopted as the unstable room version `org.matrix.i-d.ralston-mimi-linearized-matrix.02`.
 
@@ -255,4 +256,6 @@ and participants can choose their favourite, creating small clusters of LM serve
 
 ## HTTP API Changes
 
-TBD.
+* `GET /_matrix/key/v2/server` now returns an *optional* top-level boolean `m.linearized` field. If `true`, the
+  server *only* supports Linearized Matrix and cannot handle full-mesh/DAG aspects. These servers are participants
+  and sometimes hubs. The field is part of the signature.

@@ -841,6 +841,9 @@ the signature fails, the check fails.
 
 Otherwise, the check passes.
 
+**TODO**: Which specific signatures are required? If a server has multiple signing keys, possibly
+a combination of new and old, do we require all or some of them to sign?
+
 ## Hashes
 
 An event is covered by two hashes: a content hash and a reference hash. The content hash covers the
@@ -1237,17 +1240,195 @@ An authentication error is a HTTP `401 Unauthorized` status code and `M_FORBIDDE
 }
 ~~~
 
-**TODO**: Describe signing key endpoints.
+### Retrieving Server Keys
+
+A server's signing keys are published under `/_matrix/key/v2/server` and can be queried through notary
+servers under `/_matrix/key/v2/query/:serverName`. Notary servers simply call `/_matrix/key/v2/server`
+on the target server, sign the response, and cache it for some time. This allows the target server to
+go offline for a period of time without affecting their previously sent events.
+
+The signing keys published by a server are used by request authentication, event/LPDU signing, and other
+places where a server needs to sign a JSON object.
+
+The approach used here is borrowed from the Perspectives Project {{PerspectivesProject}}, modified to
+cover the server's ed25519 keys and to use JSON instead of XML. The advantage of this system is it allows
+each server to pick which notaries it trusts, and can contact multiple notaries to corroborate the keys
+returned by any given notary.
+
+All servers MUST implement the `/_matrix/key/v2` endpoints. This is to prevent only a few servers
+implementing notary capabilities, which would make the system no better than having a single trusted
+root.
+
+Note that these endpoints operate outside the context of a room: a server does not need to participate
+in any shared rooms to be used as a notary by another server.
+
+#### `GET /_matrix/key/v2/server`
+
+Retrieves the server's signing keys. The server can have any number of active or inactive keys at a
+time, but SHOULD have at least 1 active key at all times.
+
+**Rate-limited**: No.
+
+**Authentication required**: No.
+
+This HTTP endpoint does not specify any request parameters or body.
+
+`200 OK` response:
+
+~~~ json
+{
+   "server_name": "example.org",
+   "valid_until_ts": 1686776437176,
+   "m.linearized": true,
+   "verify_keys": {
+      "ed25519:0": {
+         "key": "<unpadded base64 encoded public key>"
+      }
+   },
+   "old_verify_keys": {
+      "ed25519:bad": {
+         "expired_ts": 1586776437176,
+         "key": "<unpadded base64 encoded public key>"
+      }
+   },
+   "signatures": {
+      "example.org": {
+         "ed25519:0": "<unpadded base64 encoded signature>"
+      }
+   }
+}
+~~~
+
+`server_name` MUST be the name of the server (before resolution) which is returning the keys.
+
+`valid_until_ts` is the integer timestamp (milliseconds since Unix epoch) for when the server's keys
+should be  re-fetched. When processing the response, `valid_until_ts` MUST be treated as the lesser of
+`valid_until_ts` and 7  days into the future to prevent attackers publishing long-lived keys the server
+is unable to revoke.
+
+**TODO**: What does it mean to require events have an `origin_server_ts` which is less than that of
+`valid_until_ts`? Do we reject the event, soft-fail it, or do something else? Do we only do this on the
+hub?
+
+`m.linearized` is an optional boolean, but SHOULD be present and set to `true`. Semantics for `false`
+and not being present apply to contexts outside of this document.
+
+`verify_keys` are the current signing keys for the server, keyed by the combined key algorithm and
+version.  Together, the algorithm and version form a "Key ID", used throughout this document. The
+algorithm MUST be  `ed25519`. The version MUST ONLY have characters consisting of `[a-zA-Z0-9_]`.
+The algorithm and version are joined with a `:`.
+
+The object value for each key ID under `verify_keys` is simply the `key`, consisting of the unpadded
+base64 encoded public key matching that algorithm and version.
+
+`old_verify_keys` are similar to `verify_keys`, but have an additional required `expired_ts` property
+to denote when the key ceased usage.
+
+**TODO**: What about events sent with `old_verify_keys`?
+
+For request authentication, only keys listed under `verify_keys` are honoured. If another key is
+referenced by the `Authorization` headers, the request fails authentication.
+
+Notaries should cache a 200 OK response for half of its lifetime to avoid serving stale values.
+Responding servers should avoid returning responses which expire in less than an hour to avoid
+repeated requests. Requesting servers should limit how frequently they query for keys to avoid
+flooding a server with requests.
+
+If the server fails to respond to this request, notaries should continue to return the last response
+they received from the server so that the signatures of old events can still be checked.
+
+#### `GET /_matrix/key/v2/query/:serverName`
+
+This is one of two endpoints for querying a server's keys through another server. The notary (receiving)
+server will attempt to refresh its cached copy of the target server's keys through `/_matrix/key/v2/server`,
+falling back to any cached values if needed.
+
+**Rate-limited**: No.
+
+**Authentication required**: No.
+
+Path parameters:
+
+* `:serverName` - the target server's name to retrieve keys for.
+
+Query parameters:
+
+* `minimum_valid_until_ts` (integer; optional) - The time in milliseconds since the Unix epoch the target
+  server's keys will need to be valid until to be useful to the caller. If not specified the notary server's
+  current time will be used.
+
+Request body: None applicable.
+
+`200 OK` response:
+
+~~~ json
+{
+   "server_keys": [
+      {/* server key */}
+   ]
+}
+~~~
+
+`server_keys` is the array of keys (see `/_matrix/key/v2/server` response format) for the target server. If
+the target server could not be reached and the notary has no cached keys, this array is empty. If the keys
+do not meet `minimum_valid_until_ts`, they are not included.
+
+The notary server MUST sign each key returned in `server_keys` by at least one of its own signing keys. The
+calling server MUST validate all signatures on the objects.
+
+#### `POST /_matrix/key/v2/query`
+
+A bulk version of `/_matrix/key/v2/query/:serverName`. The same behaviour applies to this endpoint.
+
+**Rate-limited**: No.
+
+**Authentication required**: No.
+
+Path parameters: None applicable.
+
+Query parameters: None applicable.
+
+Request body:
+
+~~~ json
+{
+   "server_keys": {
+      "example.org": {
+         "ed25519:0": {
+            "minimum_valid_until_ts": 1686783382189
+         }
+      }
+   }
+}
+~~~
+
+`server_keys` is required and is the search criteria. The object value is first keyed by server name which
+maps to another object keyed by Key ID, mapping to the specific criteria. If no key IDs are given in the
+request, all of the server's known keys are queried. If no servers are given in the request, the response
+MUST contain an empty `server_keys` array.
+
+`minimum_valid_until_ts` holds the same meaning as in `/_matrix/key/v2/query/:serverName`.
+
+`200 OK` response:
+
+Same as `/_matrix/key/v2/query/:serverName` with the following added details.
+
+Responding servers SHOULD only return signed key objects for the key IDs requested by the caller, however
+servers CAN respond with more keys than requested. The caller is expected to filter the response if needed.
 
 # TODO: Remainder of transport
 
 **TODO**: This section.
 
 Topics:
-* Publishing of signing keys
 * Sending events between servers
 * Media handling
 * etc
+
+# TODOs & Open Questions
+
+Should we include `/_matrix/federation/v1/version` in here? It's used by federation testers, but not
+really anything else.
 
 # Security Considerations
 
