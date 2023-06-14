@@ -590,6 +590,9 @@ When a server (hub or participant) receives a PDU, it:
 5. Ensures the event passes the authorization rules for the state of the room immediately
    before where the event would be inserted. If it fails, it is rejected.
 
+   **TODO**: Clarify that this step only applies if you're on the DAG side. On LM, this is
+   the same as Step 6. We may need to adjust the rejection/soft-fail logic.
+
 6. Ensures the event passes the authorization rules for the current state of the room (which
    may very well be the same as the step above). If it fails, it is soft-failed.
 
@@ -1151,6 +1154,7 @@ present, but should not include the hostname or `https:` scheme.
 **TODO**: Define an ordering algorithm for the query string.
 
 1. Sign the following JSON template:
+
    ~~~ json
    {
       "method": "GET",
