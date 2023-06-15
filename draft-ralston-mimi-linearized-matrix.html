@@ -1385,22 +1385,26 @@ communicate with each other over HTTPS and JSON, using the specified API endpoin
       <h2 id="name-conventions-and-definitions">
 <a href="#section-2" class="section-number selfRef">2. </a><a href="#name-conventions-and-definitions" class="section-name selfRef">Conventions and Definitions</a>
       </h2>
-<p id="section-2-1">This document uses <span>[<a href="#I-D.ralston-mimi-terminology" class="cite xref">I-D.ralston-mimi-terminology</a>]</span> where possible.<a href="#section-2-1" class="pilcrow">¶</a></p>
-<p id="section-2-2">This document additionally uses the following definitions:<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-2">This document uses <span>[<a href="#I-D.ralston-mimi-terminology" class="cite xref">I-D.ralston-mimi-terminology</a>]</span> where possible.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-3">This document additionally uses the following definitions:<a href="#section-2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-2-3.1">
-          <strong>Room</strong>: Synonymous with "conversation" from I-D.ralston-mimi-terminology.<a href="#section-2-3.1" class="pilcrow">¶</a>
+<li class="normal" id="section-2-4.1">
+          <strong>Room</strong>: Synonymous with "conversation" from I-D.ralston-mimi-terminology.<a href="#section-2-4.1" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-2-3.2">
-          <strong>Room Member</strong>: Synonymous with "conversation member" from I-D.ralston-mimi-terminology.<a href="#section-2-3.2" class="pilcrow">¶</a>
+        <li class="normal" id="section-2-4.2">
+          <strong>Room Member</strong>: Synonymous with "conversation member" from I-D.ralston-mimi-terminology.<a href="#section-2-4.2" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-2-3.3">
+        <li class="normal" id="section-2-4.3">
           <strong>State Event</strong>: Synonymous with "conversation property" from I-D.ralston-mimi-terminology.
-A state event is a subclass of an event.<a href="#section-2-3.3" class="pilcrow">¶</a>
+A state event is a subclass of an event.<a href="#section-2-4.3" class="pilcrow">¶</a>
 </li>
       </ul>
-<p id="section-2-4">Further terms are introduced in-context within this document.<a href="#section-2-4" class="pilcrow">¶</a></p>
-<p id="section-2-5"><strong>TODO</strong>: We should move/copy those definitions up here anyways.<a href="#section-2-5" class="pilcrow">¶</a></p>
+<p id="section-2-5">Further terms are introduced in-context within this document.<a href="#section-2-5" class="pilcrow">¶</a></p>
+<p id="section-2-6"><strong>TODO</strong>: We should move/copy those definitions up here anyways.<a href="#section-2-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="architecture">
@@ -1520,7 +1524,7 @@ forced to use a single hub)<a href="#section-3-7" class="pilcrow">¶</a></p>
 <a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-server-names-domain-names" class="section-name selfRef">Server names / domain names</a>
         </h3>
 <p id="section-3.1-1">Throughout this document servers are referred to as having a "domain name" or "server name".
-A server name MUST be compliant with RFC 1123 (Section 2.1) <span>[<a href="#RFC1123" class="cite xref">RFC1123</a>]</span>.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+A server name <span class="bcp14">MUST</span> be compliant with RFC 1123 (Section 2.1) <span>[<a href="#RFC1123" class="cite xref">RFC1123</a>]</span>.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
 <p id="section-3.1-2"><strong>TODO</strong>: Should we incorporate Matrix's IPv6 extension, or are we able to assume that
 everyone will be using non-literal hostnames?<a href="#section-3.1-2" class="pilcrow">¶</a></p>
 <p id="section-3.1-3"><strong>TODO</strong>: Do we really need to make this case sensitive? Matrix does, but is that correct?<a href="#section-3.1-3" class="pilcrow">¶</a></p>
@@ -1545,7 +1549,7 @@ entirely of the characters <code>[0-9a-zA-Z._~-]</code>.<a href="#section-3.2-5"
 <p id="section-3.2-6">The domain portion of a room ID does <em>NOT</em> indicate the room is "hosted" or served by that
 domain. The domain is used as a namespace to prevent another server from maliciously taking
 over a room. The server represented by that domain may no longer be participating in the room.<a href="#section-3.2-6" class="pilcrow">¶</a></p>
-<p id="section-3.2-7">The total length (including the sigil and domain) of a room ID MUST NOT exceed 255 characters.<a href="#section-3.2-7" class="pilcrow">¶</a></p>
+<p id="section-3.2-7">The total length (including the sigil and domain) of a room ID <span class="bcp14">MUST NOT</span> exceed 255 characters.<a href="#section-3.2-7" class="pilcrow">¶</a></p>
 <p id="section-3.2-8">Room IDs are case sensitive.<a href="#section-3.2-8" class="pilcrow">¶</a></p>
 <div id="room-versions">
 <section id="section-3.2.1">
@@ -1558,7 +1562,7 @@ string. The primary purpose of a room version is to prevent split-brains between
 to participate in the room. This makes room versions immutable once specified, preventing rooms
 from suddenly using a new set of rules without all participating servers being aware of the new
 rules.<a href="#section-3.2.1-2" class="pilcrow">¶</a></p>
-<p id="section-3.2.1-3">Servers MUST support at least the room version described by this document, but CAN support
+<p id="section-3.2.1-3">Servers <span class="bcp14">MUST</span> support at least the room version described by this document, but CAN support
 additional room versions as needed. Room versions prefixed with <code>I.</code> are reserved for use within
 the IETF specification process. Room versions consisting solely of <code>0-9</code> and <code>.</code> are reserved for
 use by the Matrix protocol.<a href="#section-3.2.1-3" class="pilcrow">¶</a></p>
@@ -1590,7 +1594,7 @@ used by rooms while unstable room versions might contain bugs or are not yet ado
 specification process.<a href="#section-3.2.1-8" class="pilcrow">¶</a></p>
 <p id="section-3.2.1-9"><strong>TODO</strong>: Matrix considers a version as stable once accepted through FCP. When would be the
 process equivalent for the IETF?<a href="#section-3.2.1-9" class="pilcrow">¶</a></p>
-<p id="section-3.2.1-10">A room version string MUST NOT exceed 128 characters, MUST NOT be empty, and MUST consist solely
+<p id="section-3.2.1-10">A room version string <span class="bcp14">MUST NOT</span> exceed 128 characters, <span class="bcp14">MUST NOT</span> be empty, and <span class="bcp14">MUST</span> consist solely
 of <code>[a-z0-9.-]</code> characters. Custom/unspecified room versions should be prefixed using reverse
 domain name notation to form a namespace (<code>org.example.my_room_version</code>).<a href="#section-3.2.1-10" class="pilcrow">¶</a></p>
 </section>
@@ -1609,13 +1613,13 @@ a client. In Linearized Matrix, all users have a User ID to distinguish them:<a 
 @&lt;localpart&gt;:&lt;domain&gt;
 </pre><a href="#section-3.3-2" class="pilcrow">¶</a>
 </div>
-<p id="section-3.3-3">The localpart portion of the user ID is expected to be human-readable, MUST NOT be empty,
-and MUST consist solely of <code>[0-9a-z._=-/]</code> characters. Note that user IDs <em>cannot</em> contain
+<p id="section-3.3-3">The localpart portion of the user ID is expected to be human-readable, <span class="bcp14">MUST NOT</span> be empty,
+and <span class="bcp14">MUST</span> consist solely of <code>[0-9a-z._=-/]</code> characters. Note that user IDs <em>cannot</em> contain
 uppercase letters in the localpart.<a href="#section-3.3-3" class="pilcrow">¶</a></p>
 <p id="section-3.3-4">The domain portion indicates which server allocated the ID, or would allocate the resource
 if the user doesn't exist yet. <code>@alice:first.example.org</code> is a different user on a different
 server from <code>@alice:second.example.org</code>, for example.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
-<p id="section-3.3-5">The total length (including the sigil and domain) of a user ID MUST NOT exceed 255 characters.<a href="#section-3.3-5" class="pilcrow">¶</a></p>
+<p id="section-3.3-5">The total length (including the sigil and domain) of a user ID <span class="bcp14">MUST NOT</span> exceed 255 characters.<a href="#section-3.3-5" class="pilcrow">¶</a></p>
 <p id="section-3.3-6">User IDs are case sensitive.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
 <p id="section-3.3-7"><strong>Note</strong>: User IDs are sometimes informally referenced as "MXIDs", short for "Matrix User IDs".<a href="#section-3.3-7" class="pilcrow">¶</a></p>
 <p id="section-3.3-8"><strong>Author's note</strong>: This draft assumes that an external system will resolve phone number to
@@ -1796,21 +1800,21 @@ map becomes "current state" when the loop is finished.<a href="#section-3.5.2-3"
           <h4 id="name-size-limits">
 <a href="#section-3.5.3" class="section-number selfRef">3.5.3. </a><a href="#name-size-limits" class="section-name selfRef">Size Limits</a>
           </h4>
-<p id="section-3.5.3-1">A complete event (PDU) MUST NOT exceed 65536 bytes, including any signatures, and encoded as
+<p id="section-3.5.3-1">A complete event (PDU) <span class="bcp14">MUST NOT</span> exceed 65536 bytes, including any signatures, and encoded as
 Canonical JSON.<a href="#section-3.5.3-1" class="pilcrow">¶</a></p>
 <p id="section-3.5.3-2">There are additional restrictions on the value of the following keys:<a href="#section-3.5.3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.5.3-3.1">
-              <code>sender</code> MUST NOT exceed 255 bytes (including domain).<a href="#section-3.5.3-3.1" class="pilcrow">¶</a>
+              <code>sender</code> <span class="bcp14">MUST NOT</span> exceed 255 bytes (including domain).<a href="#section-3.5.3-3.1" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-3.5.3-3.2">
-              <code>room_id</code> MUST NOT exceed 255 bytes.<a href="#section-3.5.3-3.2" class="pilcrow">¶</a>
+              <code>room_id</code> <span class="bcp14">MUST NOT</span> exceed 255 bytes.<a href="#section-3.5.3-3.2" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-3.5.3-3.3">
-              <code>state_key</code> MUST NOT exceed 255 bytes.<a href="#section-3.5.3-3.3" class="pilcrow">¶</a>
+              <code>state_key</code> <span class="bcp14">MUST NOT</span> exceed 255 bytes.<a href="#section-3.5.3-3.3" class="pilcrow">¶</a>
 </li>
             <li class="normal" id="section-3.5.3-3.4">
-              <code>type</code> MUST NOT exceed 255 bytes.<a href="#section-3.5.3-3.4" class="pilcrow">¶</a>
+              <code>type</code> <span class="bcp14">MUST NOT</span> exceed 255 bytes.<a href="#section-3.5.3-3.4" class="pilcrow">¶</a>
 </li>
           </ul>
 <p id="section-3.5.3-4">Some event types have additional size restrictions which are specified in the description of the
@@ -1829,10 +1833,10 @@ for the entire event.<a href="#section-3.5.3-4" class="pilcrow">¶</a></p>
             <h5 id="name-mroomcreate">
 <a href="#section-3.5.4.1" class="section-number selfRef">3.5.4.1. </a><a href="#name-mroomcreate" class="section-name selfRef"><code>m.room.create</code></a>
             </h5>
-<p id="section-3.5.4.1-1">The very first event in the room. It MUST NOT have any <code>auth_events</code> or <code>prev_events</code>, and the
-domain of the <code>sender</code> MUST be the same as the domain in the <code>room_id</code>. The <code>state_key</code> MUST
+<p id="section-3.5.4.1-1">The very first event in the room. It <span class="bcp14">MUST NOT</span> have any <code>auth_events</code> or <code>prev_events</code>, and the
+domain of the <code>sender</code> <span class="bcp14">MUST</span> be the same as the domain in the <code>room_id</code>. The <code>state_key</code> <span class="bcp14">MUST</span>
 be an empty string.<a href="#section-3.5.4.1-1" class="pilcrow">¶</a></p>
-<p id="section-3.5.4.1-2">The <code>content</code> for a create event MUST have at least a <code>room_version</code> field to denote what set
+<p id="section-3.5.4.1-2">The <code>content</code> for a create event <span class="bcp14">MUST</span> have at least a <code>room_version</code> field to denote what set
 of algorithms the room is using.<a href="#section-3.5.4.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1842,8 +1846,8 @@ of algorithms the room is using.<a href="#section-3.5.4.1-2" class="pilcrow">¶<
 <a href="#section-3.5.4.2" class="section-number selfRef">3.5.4.2. </a><a href="#name-mroomjoin_rules" class="section-name selfRef"><code>m.room.join_rules</code></a>
             </h5>
 <p id="section-3.5.4.2-1">Defines whether users can join without an invite and other similar conditions. The <code>state_key</code>
-MUST be an empty string.<a href="#section-3.5.4.2-1" class="pilcrow">¶</a></p>
-<p id="section-3.5.4.2-2">The <code>content</code> for a join rules event MUST have at least a <code>join_rule</code> field to denote the
+              <span class="bcp14">MUST</span> be an empty string.<a href="#section-3.5.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.2-2">The <code>content</code> for a join rules event <span class="bcp14">MUST</span> have at least a <code>join_rule</code> field to denote the
 join policy for the room. Allowable values are:<a href="#section-3.5.4.2-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.5.4.2-3.1">
@@ -1866,8 +1870,8 @@ join policy for the room. Allowable values are:<a href="#section-3.5.4.2-2" clas
             </h5>
 <p id="section-3.5.4.3-1">Defines the membership for a user in the room. If the user does not have a membership event then
 they are presumed to be in the <code>leave</code> state.<a href="#section-3.5.4.3-1" class="pilcrow">¶</a></p>
-<p id="section-3.5.4.3-2">The <code>state_key</code> MUST be a non-empty string denotating the user ID the membership is affecting.<a href="#section-3.5.4.3-2" class="pilcrow">¶</a></p>
-<p id="section-3.5.4.3-3">The <code>content</code> for a membership event MUST have at least a <code>membership</code> field to denote the
+<p id="section-3.5.4.3-2">The <code>state_key</code> <span class="bcp14">MUST</span> be a non-empty string denotating the user ID the membership is affecting.<a href="#section-3.5.4.3-2" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.3-3">The <code>content</code> for a membership event <span class="bcp14">MUST</span> have at least a <code>membership</code> field to denote the
 membership state for the user. Allowable values are:<a href="#section-3.5.4.3-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.5.4.3-4.1">
@@ -1899,8 +1903,8 @@ For example, preventing users from unbanning themselves falls under the auth rul
             </h5>
 <p id="section-3.5.4.4-1">Defines what given users can and can't do, as well as which event types they are able to send.
 The enforcement of these power levels is determined by the <em>auth rules</em>.<a href="#section-3.5.4.4-1" class="pilcrow">¶</a></p>
-<p id="section-3.5.4.4-2">The <code>state_key</code> MUST be an empty string.<a href="#section-3.5.4.4-2" class="pilcrow">¶</a></p>
-<p id="section-3.5.4.4-3">The <code>content</code> for a power levels event SHOULD have at least the following:<a href="#section-3.5.4.4-3" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.4-2">The <code>state_key</code> <span class="bcp14">MUST</span> be an empty string.<a href="#section-3.5.4.4-2" class="pilcrow">¶</a></p>
+<p id="section-3.5.4.4-3">The <code>content</code> for a power levels event <span class="bcp14">SHOULD</span> have at least the following:<a href="#section-3.5.4.4-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.5.4.4-4.1">
                 <code>ban</code> (integer) - the level required to ban a user. Defaults to <code>50</code> if unspecified.<a href="#section-3.5.4.4-4.1" class="pilcrow">¶</a>
@@ -1966,9 +1970,9 @@ upon this version's principles (or entirely replace them) through dedicated draf
 <p id="section-4-2"><strong>Implementation note</strong>: Currently <code>I.1</code> is not a real thing. Use
 <code>org.matrix.i-d.ralston-mimi-linearized-matrix.00</code> when testing against other Linearized Matrix
 implementations. This string may be updated later to account for breaking changes.<a href="#section-4-2" class="pilcrow">¶</a></p>
-<p id="section-4-3"><code>I.1</code> shall be considered "stable", and SHOULD be used by servers when creating new rooms.<a href="#section-4-3" class="pilcrow">¶</a></p>
-<p id="section-4-4">The hub server MUST enforce the room version's algorithms upon the room. Participant servers
-SHOULD enforce the room version's algorithm, but can opt to believe the hub server if they
+<p id="section-4-3"><code>I.1</code> shall be considered "stable", and <span class="bcp14">SHOULD</span> be used by servers when creating new rooms.<a href="#section-4-3" class="pilcrow">¶</a></p>
+<p id="section-4-4">The hub server <span class="bcp14">MUST</span> enforce the room version's algorithms upon the room. Participant servers
+<span class="bcp14">SHOULD</span> enforce the room version's algorithm, but can opt to believe the hub server if they
 wish.<a href="#section-4-4" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2079,7 +2083,7 @@ sets of state.<a href="#section-6.4-1" class="pilcrow">¶</a></p>
           <h4 id="name-auth-events-selection">
 <a href="#section-6.4.1" class="section-number selfRef">6.4.1. </a><a href="#name-auth-events-selection" class="section-name selfRef">Auth Events Selection</a>
           </h4>
-<p id="section-6.4.1-1">The <code>auth_events</code> on an event MUST consist of the following state events, with the exception
+<p id="section-6.4.1-1">The <code>auth_events</code> on an event <span class="bcp14">MUST</span> consist of the following state events, with the exception
 of an <code>m.room.create</code> event which has no <code>auth_events</code>.<a href="#section-6.4.1-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.4.1-2">
 <li id="section-6.4.1-2.1">The <code>m.room.create</code> state event.<a href="#section-6.4.1-2.1" class="pilcrow">¶</a>
@@ -2500,7 +2504,7 @@ for <code>lpdu</code>.<a href="#section-6.6.1-1.1.2.2" class="pilcrow">¶</a>
 <p id="section-6.7-1">Throughout this document, "unpadded base64" is used to represent binary values as strings. Base64 is
 as specified by <span>[<a href="#RFC4648" class="cite xref">RFC4648</a>]</span>, and <em>unpadded</em> base64 simply removes any <code>=</code> padding from the resulting
 string.<a href="#section-6.7-1" class="pilcrow">¶</a></p>
-<p id="section-6.7-2">Implementations SHOULD accept input with or without padding on base64 values.<a href="#section-6.7-2" class="pilcrow">¶</a></p>
+<p id="section-6.7-2">Implementations <span class="bcp14">SHOULD</span> accept input with or without padding on base64 values.<a href="#section-6.7-2" class="pilcrow">¶</a></p>
 <p id="section-6.7-3">Section 5 of <span>[<a href="#RFC4648" class="cite xref">RFC4648</a>]</span> describes <em>URL-safe</em> base64. The same changes are adopted here. Namely, the
 62nd and 63rd characters are replaced with <code>-</code> and <code>_</code> respectively. The unpadded behaviour is as
 described above.<a href="#section-6.7-3" class="pilcrow">¶</a></p>
@@ -2524,11 +2528,11 @@ area are: who signs the transfer event? who <em>sends</em> the transfer event? h
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-transport" class="section-name selfRef">Transport</a>
       </h2>
 <p id="section-8-1">Servers need to be able to communicate with each other to share events and other information about rooms.
-This document specifies a wire transport which uses JSON <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span> over HTTPS <span>[<a href="#RFC2818" class="cite xref">RFC2818</a>]</span>. Servers
-MUST provide a TLS certificate signed by a known Certificate Authority.<a href="#section-8-1" class="pilcrow">¶</a></p>
+This document specifies a wire transport which uses JSON <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span> over HTTPS <span>[<a href="#RFC9110" class="cite xref">RFC9110</a>]</span>. Servers
+<span class="bcp14">MUST</span> provide a TLS certificate signed by a known Certificate Authority.<a href="#section-8-1" class="pilcrow">¶</a></p>
 <p id="section-8-2">Requesting servers are ultimately responsible for the Certificate Authorities they place trust in, however
-servers SHOULD trust authorities which would commonly be trusted by an operating system or web browser.<a href="#section-8-2" class="pilcrow">¶</a></p>
-<p id="section-8-3">Servers SHOULD respect SNI when making requests where possible: a SNI should be sent for the certificate
+servers <span class="bcp14">SHOULD</span> trust authorities which would commonly be trusted by an operating system or web browser.<a href="#section-8-2" class="pilcrow">¶</a></p>
+<p id="section-8-3">Servers <span class="bcp14">SHOULD</span> respect SNI when making requests where possible: a SNI should be sent for the certificate
 which is expected.<a href="#section-8-3" class="pilcrow">¶</a></p>
 <p id="section-8-4"><strong>TODO</strong>: This is where we'd mention IPs again, if we choose to accept those as identifiers.<a href="#section-8-4" class="pilcrow">¶</a></p>
 <div id="api-standards">
@@ -2537,11 +2541,11 @@ which is expected.<a href="#section-8-3" class="pilcrow">¶</a></p>
 <a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-api-standards" class="section-name selfRef">API Standards</a>
         </h3>
 <p id="section-8.1-1">All HTTP <code>POST</code> and <code>PUT</code> endpoints require the sending server to supply a (potentially empty) JSON
-object as the request body. Requesting servers SHOULD supply a <code>Content-Type</code> header of <code>application/json</code>
+object as the request body. Requesting servers <span class="bcp14">SHOULD</span> supply a <code>Content-Type</code> header of <code>application/json</code>
 for such requests.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
-<p id="section-8.1-2">All endpoints which require a server to respond with a JSON object MUST include a <code>Content-Type</code> header
+<p id="section-8.1-2">All endpoints which require a server to respond with a JSON object <span class="bcp14">MUST</span> include a <code>Content-Type</code> header
 of <code>application/json</code>.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
-<p id="section-8.1-3">All JSON data, in requests or responses, MUST be encoded using UTF-8 <span>[<a href="#RFC3629" class="cite xref">RFC3629</a>]</span>.<a href="#section-8.1-3" class="pilcrow">¶</a></p>
+<p id="section-8.1-3">All JSON data, in requests or responses, <span class="bcp14">MUST</span> be encoded using UTF-8 <span>[<a href="#RFC3629" class="cite xref">RFC3629</a>]</span>.<a href="#section-8.1-3" class="pilcrow">¶</a></p>
 <p id="section-8.1-4">API endpoints should be roughly RESTful in nature.<a href="#section-8.1-4" class="pilcrow">¶</a></p>
 <p id="section-8.1-5"><strong>TODO</strong>: Specify HTTP and TLS version. Probably http/2 and tls 1.3?<a href="#section-8.1-5" class="pilcrow">¶</a></p>
 <div id="errors">
@@ -2552,8 +2556,8 @@ of <code>application/json</code>.<a href="#section-8.1-2" class="pilcrow">¶</a>
 <p id="section-8.1.1-1">All errors are represented by an error code defined by this document and an accompanied HTTP status code.
 It is possible for a HTTP status code to map to multiple error codes, and it's possible for an error
 code to map to multiple HTTP status codes.<a href="#section-8.1.1-1" class="pilcrow">¶</a></p>
-<p id="section-8.1.1-2">When a server is returning an error to a caller, it MUST use the most appropriate error response defined
-by the endpoint. If no appropriate error response is specified, the server SHOULD use <code>M_UNKNOWN</code> as the
+<p id="section-8.1.1-2">When a server is returning an error to a caller, it <span class="bcp14">MUST</span> use the most appropriate error response defined
+by the endpoint. If no appropriate error response is specified, the server <span class="bcp14">SHOULD</span> use <code>M_UNKNOWN</code> as the
 error code and <code>500 Internal Server Error</code> as the HTTP status code.<a href="#section-8.1.1-2" class="pilcrow">¶</a></p>
 <p id="section-8.1.1-3">Errors are represented as JSON objects, requiring a <code>Content-Type: application/json</code> response header:<a href="#section-8.1.1-3" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-8.1.1-4">
@@ -2599,7 +2603,7 @@ again.<a href="#section-8.1.1-7.5" class="pilcrow">¶</a>
           <h4 id="name-unsupported-endpoints">
 <a href="#section-8.1.2" class="section-number selfRef">8.1.2. </a><a href="#name-unsupported-endpoints" class="section-name selfRef">Unsupported Endpoints</a>
           </h4>
-<p id="section-8.1.2-1">If a server receives a request for an unsupported or otherwise unknown endpoint, the server MUST respond
+<p id="section-8.1.2-1">If a server receives a request for an unsupported or otherwise unknown endpoint, the server <span class="bcp14">MUST</span> respond
 with an HTTP <code>404 Not Found</code> status code and <code>M_UNRECOGNIZED</code> error code. If the request was for a known
 endpoint, but wrong HTTP method, a <code>405 Method Not Allowed</code> HTTP status code and <code>M_UNRECOGNIZED</code> error
 code.<a href="#section-8.1.2-1" class="pilcrow">¶</a></p>
@@ -2610,9 +2614,9 @@ code.<a href="#section-8.1.2-1" class="pilcrow">¶</a></p>
           <h4 id="name-malformed-requests">
 <a href="#section-8.1.3" class="section-number selfRef">8.1.3. </a><a href="#name-malformed-requests" class="section-name selfRef">Malformed Requests</a>
           </h4>
-<p id="section-8.1.3-1">If a server is expecting JSON in the request body but receives something else, it MUST respond with an
+<p id="section-8.1.3-1">If a server is expecting JSON in the request body but receives something else, it <span class="bcp14">MUST</span> respond with an
 HTTP status code of <code>400 Bad Request</code> and error code <code>M_NOT_JSON</code>. If the request contains JSON, and is
-for a known endpoint, but otherwise missing required keys or is malformed, the server MUST respond with
+for a known endpoint, but otherwise missing required keys or is malformed, the server <span class="bcp14">MUST</span> respond with
 an HTTP status code of <code>400 Bad Request</code> and error code <code>M_BAD_JSON</code>. Where possible, <code>error</code> for
 <code>M_BAD_JSON</code> should describe the missing keys or other parsing error.<a href="#section-8.1.3-1" class="pilcrow">¶</a></p>
 </section>
@@ -2623,8 +2627,8 @@ an HTTP status code of <code>400 Bad Request</code> and error code <code>M_BAD_J
 <a href="#section-8.1.4" class="section-number selfRef">8.1.4. </a><a href="#name-transaction-identifiers" class="section-name selfRef">Transaction Identifiers</a>
           </h4>
 <p id="section-8.1.4-1">Where endpoints use HTTP <code>PUT</code>, it is typical for a "transaction ID" to be specified in the path
-parameters. This transaction ID MUST ONLY be used for making requests idempotent - if a server receives
-two (or more) requests with the same transaction ID, it MUST return the same response for each and only
+parameters. This transaction ID <span class="bcp14">MUST</span> ONLY be used for making requests idempotent - if a server receives
+two (or more) requests with the same transaction ID, it <span class="bcp14">MUST</span> return the same response for each and only
 process the request body once. It is assumed that requests using the same transaction ID also contain
 the same request body between calls.<a href="#section-8.1.4-1" class="pilcrow">¶</a></p>
 <p id="section-8.1.4-2">A transaction ID only needs to be unique per-endpoint and per-sending server. A server's transaction IDs
@@ -2636,9 +2640,9 @@ do not affect requests made by other servers or made to other endpoints by the s
           <h4 id="name-rate-limiting">
 <a href="#section-8.1.5" class="section-number selfRef">8.1.5. </a><a href="#name-rate-limiting" class="section-name selfRef">Rate Limiting</a>
           </h4>
-<p id="section-8.1.5-1">Servers SHOULD implement rate limiting semantics to reduce the risk of being overloaded. Endpoints which
+<p id="section-8.1.5-1">Servers <span class="bcp14">SHOULD</span> implement rate limiting semantics to reduce the risk of being overloaded. Endpoints which
 support being rate limited are annotated in this document.<a href="#section-8.1.5-1" class="pilcrow">¶</a></p>
-<p id="section-8.1.5-2">If a rate limit is encountered, the server MUST respond with an HTTP <code>429 Too Many Requests</code> status code
+<p id="section-8.1.5-2">If a rate limit is encountered, the server <span class="bcp14">MUST</span> respond with an HTTP <code>429 Too Many Requests</code> status code
 and <code>M_LIMIT_EXCEEDED</code> error code. If applicable, the server should additionally include a
 <code>retry_after_ms</code> integer field on the error response to denote how long the caller should wait before
 retrying, in milliseconds.<a href="#section-8.1.5-2" class="pilcrow">¶</a></p>
@@ -2687,15 +2691,15 @@ to introduce breaking changes without raising an overall specification version.<
 <p id="section-8.2-1">In order to make a request to another server, the caller needs to know where that server is located.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 <p id="section-8.2-2">Similar to email, it is strongly recommended that a server uses their public-facing domain name as their
 server name. This will cause identifiers like user IDs to have the shape <code>@alice:example.org</code>. Servers
-SHOULD NOT use <code>matrix.example.org</code>, <code>linearized-matrix.example.org</code>, etc as their server name.<a href="#section-8.2-2" class="pilcrow">¶</a></p>
+<span class="bcp14">SHOULD NOT</span> use <code>matrix.example.org</code>, <code>linearized-matrix.example.org</code>, etc as their server name.<a href="#section-8.2-2" class="pilcrow">¶</a></p>
 <p id="section-8.2-3">A server owner might not wish to serve its Linearized Matrix traffic off of the domain implied by its
 users' IDs. A server can change the IP/port for traffic using SRV DNS records <span>[<a href="#RFC2782" class="cite xref">RFC2782</a>]</span>, or can change
 the entire domain name using <code>.well-known</code> delegation described below.<a href="#section-8.2-3" class="pilcrow">¶</a></p>
 <p id="section-8.2-4">Server operators should note that <code>.well-known</code> delegation is generally recommended as it is both easier
 to set up and gives better control over where traffic is sent. It also changes which TLS certificate must
 be presented for HTTP communications.<a href="#section-8.2-4" class="pilcrow">¶</a></p>
-<p id="section-8.2-5">The following steps are used to resolve a server name to an IP address and port. The target server MUST
-present a valid TLS certificate for the name described in each step. The requesting server MUST use a
+<p id="section-8.2-5">The following steps are used to resolve a server name to an IP address and port. The target server <span class="bcp14">MUST</span>
+present a valid TLS certificate for the name described in each step. The requesting server <span class="bcp14">MUST</span> use a
 HTTP <code>Host</code> header with the value described in each step.<a href="#section-8.2-5" class="pilcrow">¶</a></p>
 <p id="section-8.2-6">As a reminder, a server name consists of <code>&lt;hostname&gt;[:&lt;port&gt;]</code>.<a href="#section-8.2-6" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-8.2-7">
@@ -2787,11 +2791,11 @@ prove it is a valid delegate/target for <code>&lt;[delegated_]hostname&gt;</code
 which use SRV records (such as Section 13.7.2.1 of RFC 6120/XMPP <span>[<a href="#RFC6120" class="cite xref">RFC6120</a>]</span>).<a href="#section-8.2-9.2" class="pilcrow">¶</a>
 </li>
         </ol>
-<p id="section-8.2-10">Server implementations and owners should additionally note that the target of a SRV record MUST NOT be a CNAME,
+<p id="section-8.2-10">Server implementations and owners should additionally note that the target of a SRV record <span class="bcp14">MUST NOT</span> be a CNAME,
 as per RFC 2782 <span>[<a href="#RFC2782" class="cite xref">RFC2782</a>]</span>:<a href="#section-8.2-10" class="pilcrow">¶</a></p>
 <ul class="normal ulEmpty">
 <li class="normal ulEmpty" id="section-8.2-11.1">
-            <p id="section-8.2-11.1.1">the name MUST NOT be an alias (in the sense of RFC 1034 or RFC 2181)<a href="#section-8.2-11.1.1" class="pilcrow">¶</a></p>
+            <p id="section-8.2-11.1.1">the name <span class="bcp14">MUST NOT</span> be an alias (in the sense of RFC 1034 or RFC 2181)<a href="#section-8.2-11.1.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-8.2-12"><span>[<a href="#RFC1034" class="cite xref">RFC1034</a>]</span> <span>[<a href="#RFC2181" class="cite xref">RFC2181</a>]</span><a href="#section-8.2-12" class="pilcrow">¶</a></p>
@@ -2801,7 +2805,7 @@ as per RFC 2782 <span>[<a href="#RFC2782" class="cite xref">RFC2782</a>]</span>:
 <a href="#section-8.2.1" class="section-number selfRef">8.2.1. </a><a href="#name-get-well-known-matrix-serve" class="section-name selfRef"><code>GET /.well-known/matrix/server</code></a>
           </h4>
 <p id="section-8.2.1-1">Used by the server name resolution approach to determine a delegated hostname for a given server. 30x HTTP
-redirection MUST be followed, though loops SHOULD be avoided. Normal X.509 certificate validation is applied
+redirection <span class="bcp14">MUST</span> be followed, though loops <span class="bcp14">SHOULD</span> be avoided. Normal X.509 certificate validation is applied
 to this endpoint (not the specific validation required by the server name resolution steps) <span>[<a href="#RFC5280" class="cite xref">RFC5280</a>]</span>.<a href="#section-8.2.1-1" class="pilcrow">¶</a></p>
 <p id="section-8.2.1-2"><strong>Rate-limited</strong>: No.<a href="#section-8.2.1-2" class="pilcrow">¶</a></p>
 <p id="section-8.2.1-3"><strong>Authentication required</strong>: No.<a href="#section-8.2.1-3" class="pilcrow">¶</a></p>
@@ -2814,14 +2818,14 @@ to this endpoint (not the specific validation required by the server name resolu
 }
 </pre><a href="#section-8.2.1-6" class="pilcrow">¶</a>
 </div>
-<p id="section-8.2.1-7"><code>m.server</code> is a required response field. Responses SHOULD have a <code>Content-Type</code> HTTP header of <code>application/json</code>,
+<p id="section-8.2.1-7"><code>m.server</code> is a required response field. Responses <span class="bcp14">SHOULD</span> have a <code>Content-Type</code> HTTP header of <code>application/json</code>,
 however servers parsing the response should assume that the body is JSON regardless of <code>Content-Type</code> header.
-Failures in parsing the JSON or otherwise invalid data that prevents parsing MUST NOT result in discovery failure.
+Failures in parsing the JSON or otherwise invalid data that prevents parsing <span class="bcp14">MUST NOT</span> result in discovery failure.
 Instead, the caller is expected to move on to the next step of the name resolution approach.<a href="#section-8.2.1-7" class="pilcrow">¶</a></p>
-<p id="section-8.2.1-8">Cache control headers SHOULD be respected on a <code>200 OK</code> response. Callers SHOULD impose a maximum cache time of
-48 hours, regardless of cache control headers. A default of 24 hours SHOULD be used when no cache control headers
+<p id="section-8.2.1-8">Cache control headers <span class="bcp14">SHOULD</span> be respected on a <code>200 OK</code> response. Callers <span class="bcp14">SHOULD</span> impose a maximum cache time of
+48 hours, regardless of cache control headers. A default of 24 hours <span class="bcp14">SHOULD</span> be used when no cache control headers
 are present.<a href="#section-8.2.1-8" class="pilcrow">¶</a></p>
-<p id="section-8.2.1-9">Error responses (non-200) SHOULD be cached for no longer than 1 hour. Callers SHOULD exponentially back off (to a
+<p id="section-8.2.1-9">Error responses (non-200) <span class="bcp14">SHOULD</span> be cached for no longer than 1 hour. Callers <span class="bcp14">SHOULD</span> exponentially back off (to a
 defined limit) upon receiving repeated error responses.<a href="#section-8.2.1-9" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2900,15 +2904,15 @@ authorization scheme of <code>X-Matrix</code>, followed by one or more spaces, f
 list of parameters written as name=value pairs. The names are case insensitive, though the values are. The values
 must be enclosed in quotes if they contain characters which are not allowed in a <code>token</code>, as defined by Section
 5.6.2 of RFC 9110 <span>[<a href="#RFC9110" class="cite xref">RFC9110</a>]</span>. If a value is a valid <code>token</code> it may not be enclosed in quotes. Quoted values
-MAY contain backslash-escaped characters. When parsing the header, the recipient must unescape the characters.<a href="#section-8.3-5.3.4" class="pilcrow">¶</a></p>
+<span class="bcp14">MAY</span> contain backslash-escaped characters. When parsing the header, the recipient must unescape the characters.<a href="#section-8.3-5.3.4" class="pilcrow">¶</a></p>
 <p id="section-8.3-5.3.5">
-The exact parameters are as follows. Unknown parameters are ignored and MUST NOT result in authentication errors.<a href="#section-8.3-5.3.5" class="pilcrow">¶</a></p>
+The exact parameters are as follows. Unknown parameters are ignored and <span class="bcp14">MUST NOT</span> result in authentication errors.<a href="#section-8.3-5.3.5" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-8.3-5.3.6.1">
-                <code>origin</code> - The name of the sending server. MUST match the <code>origin</code> in the signed JSON.<a href="#section-8.3-5.3.6.1" class="pilcrow">¶</a>
+                <code>origin</code> - The name of the sending server. <span class="bcp14">MUST</span> match the <code>origin</code> in the signed JSON.<a href="#section-8.3-5.3.6.1" class="pilcrow">¶</a>
 </li>
               <li class="normal" id="section-8.3-5.3.6.2">
-                <code>destination</code> - The name of the receiving server. MUST match the <code>destination</code> in the signed JSON.<a href="#section-8.3-5.3.6.2" class="pilcrow">¶</a>
+                <code>destination</code> - The name of the receiving server. <span class="bcp14">MUST</span> match the <code>destination</code> in the signed JSON.<a href="#section-8.3-5.3.6.2" class="pilcrow">¶</a>
 </li>
               <li class="normal" id="section-8.3-5.3.6.3">
                 <code>key</code> - The ID, including algorithm name, of the sending server's signing key used to sign the request.<a href="#section-8.3-5.3.6.3" class="pilcrow">¶</a>
@@ -2922,9 +2926,9 @@ The exact parameters are as follows. Unknown parameters are ignored and MUST NOT
 <p id="section-8.3-6">A receiving server validates the Authorization header by composing the JSON object represented in step 2 (all fields
 filled in, sending server's signature added) and validating the signature per elsewhere in this document.<a href="#section-8.3-6" class="pilcrow">¶</a></p>
 <p id="section-8.3-7">Responses from a server are authenticated using TLS and do not have additional signing requirements.<a href="#section-8.3-7" class="pilcrow">¶</a></p>
-<p id="section-8.3-8">A server with multiple signing keys SHOULD include an <code>Authorization</code> header for each signing key. Receiving servers
-MUST validate all <code>Authorization</code> headers. A failure in any of the headers MUST result in an authentication error,
-if the endpoint requires authentication. Failure to provide an <code>Authorization</code> header on an endpoint MUST result in
+<p id="section-8.3-8">A server with multiple signing keys <span class="bcp14">SHOULD</span> include an <code>Authorization</code> header for each signing key. Receiving servers
+<span class="bcp14">MUST</span> validate all <code>Authorization</code> headers. A failure in any of the headers <span class="bcp14">MUST</span> result in an authentication error,
+if the endpoint requires authentication. Failure to provide an <code>Authorization</code> header on an endpoint <span class="bcp14">MUST</span> result in
 an authentication error if the endpoint requires authentication. <code>Authentication</code> headers are ignored on endpoints
 which do not require authentication.<a href="#section-8.3-8" class="pilcrow">¶</a></p>
 <p id="section-8.3-9">An authentication error is a HTTP <code>401 Unauthorized</code> status code and <code>M_FORBIDDEN</code> error code. For example:<a href="#section-8.3-9" class="pilcrow">¶</a></p>
@@ -2951,7 +2955,7 @@ places where a server needs to sign a JSON object.<a href="#section-8.3.1-2" cla
 cover the server's ed25519 keys and to use JSON instead of XML. The advantage of this system is it allows
 each server to pick which notaries it trusts, and can contact multiple notaries to corroborate the keys
 returned by any given notary.<a href="#section-8.3.1-3" class="pilcrow">¶</a></p>
-<p id="section-8.3.1-4">All servers MUST implement the <code>/_matrix/key/v2</code> endpoints. This is to prevent only a few servers
+<p id="section-8.3.1-4">All servers <span class="bcp14">MUST</span> implement the <code>/_matrix/key/v2</code> endpoints. This is to prevent only a few servers
 implementing notary capabilities, which would make the system no better than having a single trusted
 root.<a href="#section-8.3.1-4" class="pilcrow">¶</a></p>
 <p id="section-8.3.1-5">Note that these endpoints operate outside the context of a room: a server does not need to participate
@@ -2962,7 +2966,7 @@ in any shared rooms to be used as a notary by another server.<a href="#section-8
 <a href="#section-8.3.1.1" class="section-number selfRef">8.3.1.1. </a><a href="#name-get-_matrix-key-v2-server" class="section-name selfRef"><code>GET /_matrix/key/v2/server</code></a>
             </h5>
 <p id="section-8.3.1.1-1">Retrieves the server's signing keys. The server can have any number of active or inactive keys at a
-time, but SHOULD have at least 1 active key at all times.<a href="#section-8.3.1.1-1" class="pilcrow">¶</a></p>
+time, but <span class="bcp14">SHOULD</span> have at least 1 active key at all times.<a href="#section-8.3.1.1-1" class="pilcrow">¶</a></p>
 <p id="section-8.3.1.1-2"><strong>Rate-limited</strong>: No.<a href="#section-8.3.1.1-2" class="pilcrow">¶</a></p>
 <p id="section-8.3.1.1-3"><strong>Authentication required</strong>: No.<a href="#section-8.3.1.1-3" class="pilcrow">¶</a></p>
 <p id="section-8.3.1.1-4">This HTTP endpoint does not specify any request parameters or body.<a href="#section-8.3.1.1-4" class="pilcrow">¶</a></p>
@@ -2992,19 +2996,19 @@ time, but SHOULD have at least 1 active key at all times.<a href="#section-8.3.1
 }
 </pre><a href="#section-8.3.1.1-6" class="pilcrow">¶</a>
 </div>
-<p id="section-8.3.1.1-7"><code>server_name</code> MUST be the name of the server (before resolution) which is returning the keys.<a href="#section-8.3.1.1-7" class="pilcrow">¶</a></p>
+<p id="section-8.3.1.1-7"><code>server_name</code> <span class="bcp14">MUST</span> be the name of the server (before resolution) which is returning the keys.<a href="#section-8.3.1.1-7" class="pilcrow">¶</a></p>
 <p id="section-8.3.1.1-8"><code>valid_until_ts</code> is the integer timestamp (milliseconds since Unix epoch) for when the server's keys
-should be  re-fetched. When processing the response, <code>valid_until_ts</code> MUST be treated as the lesser of
+should be  re-fetched. When processing the response, <code>valid_until_ts</code> <span class="bcp14">MUST</span> be treated as the lesser of
 <code>valid_until_ts</code> and 7  days into the future to prevent attackers publishing long-lived keys the server
 is unable to revoke.<a href="#section-8.3.1.1-8" class="pilcrow">¶</a></p>
 <p id="section-8.3.1.1-9"><strong>TODO</strong>: What does it mean to require events have an <code>origin_server_ts</code> which is less than that of
 <code>valid_until_ts</code>? Do we reject the event, soft-fail it, or do something else? Do we only do this on the
 hub?<a href="#section-8.3.1.1-9" class="pilcrow">¶</a></p>
-<p id="section-8.3.1.1-10"><code>m.linearized</code> is an optional boolean, but SHOULD be present and set to <code>true</code>. Semantics for <code>false</code>
+<p id="section-8.3.1.1-10"><code>m.linearized</code> is an optional boolean, but <span class="bcp14">SHOULD</span> be present and set to <code>true</code>. Semantics for <code>false</code>
 and not being present apply to contexts outside of this document.<a href="#section-8.3.1.1-10" class="pilcrow">¶</a></p>
 <p id="section-8.3.1.1-11"><code>verify_keys</code> are the current signing keys for the server, keyed by the combined key algorithm and
 version.  Together, the algorithm and version form a "Key ID", used throughout this document. The
-algorithm MUST be  <code>ed25519</code>. The version MUST ONLY have characters consisting of <code>[a-zA-Z0-9_]</code>.
+algorithm <span class="bcp14">MUST</span> be  <code>ed25519</code>. The version <span class="bcp14">MUST</span> ONLY have characters consisting of <code>[a-zA-Z0-9_]</code>.
 The algorithm and version are joined with a <code>:</code>.<a href="#section-8.3.1.1-11" class="pilcrow">¶</a></p>
 <p id="section-8.3.1.1-12">The object value for each key ID under <code>verify_keys</code> is simply the <code>key</code>, consisting of the unpadded
 base64 encoded public key matching that algorithm and version.<a href="#section-8.3.1.1-12" class="pilcrow">¶</a></p>
@@ -3059,8 +3063,8 @@ current time will be used.<a href="#section-8.3.1.2-7.1" class="pilcrow">¶</a>
 <p id="section-8.3.1.2-11"><code>server_keys</code> is the array of keys (see <code>/_matrix/key/v2/server</code> response format) for the target server. If
 the target server could not be reached and the notary has no cached keys, this array is empty. If the keys
 do not meet <code>minimum_valid_until_ts</code>, they are not included.<a href="#section-8.3.1.2-11" class="pilcrow">¶</a></p>
-<p id="section-8.3.1.2-12">The notary server MUST sign each key returned in <code>server_keys</code> by at least one of its own signing keys. The
-calling server MUST validate all signatures on the objects.<a href="#section-8.3.1.2-12" class="pilcrow">¶</a></p>
+<p id="section-8.3.1.2-12">The notary server <span class="bcp14">MUST</span> sign each key returned in <code>server_keys</code> by at least one of its own signing keys. The
+calling server <span class="bcp14">MUST</span> validate all signatures on the objects.<a href="#section-8.3.1.2-12" class="pilcrow">¶</a></p>
 <p id="section-8.3.1.2-13"><strong>TODO</strong>: We need to specify the caching semantics more clearly. We also should cover why a query can return
 multiple keys, and the situations leading to those cases. In short, it's for validating old events.<a href="#section-8.3.1.2-13" class="pilcrow">¶</a></p>
 </section>
@@ -3092,11 +3096,11 @@ multiple keys, and the situations leading to those cases. In short, it's for val
 <p id="section-8.3.1.3-8"><code>server_keys</code> is required and is the search criteria. The object value is first keyed by server name which
 maps to another object keyed by Key ID, mapping to the specific criteria. If no key IDs are given in the
 request, all of the server's known keys are queried. If no servers are given in the request, the response
-MUST contain an empty <code>server_keys</code> array.<a href="#section-8.3.1.3-8" class="pilcrow">¶</a></p>
+<span class="bcp14">MUST</span> contain an empty <code>server_keys</code> array.<a href="#section-8.3.1.3-8" class="pilcrow">¶</a></p>
 <p id="section-8.3.1.3-9"><code>minimum_valid_until_ts</code> holds the same meaning as in <code>/_matrix/key/v2/query/:serverName</code>.<a href="#section-8.3.1.3-9" class="pilcrow">¶</a></p>
 <p id="section-8.3.1.3-10"><code>200 OK</code> response:<a href="#section-8.3.1.3-10" class="pilcrow">¶</a></p>
 <p id="section-8.3.1.3-11">Same as <code>/_matrix/key/v2/query/:serverName</code> with the following added details.<a href="#section-8.3.1.3-11" class="pilcrow">¶</a></p>
-<p id="section-8.3.1.3-12">Responding servers SHOULD only return signed key objects for the key IDs requested by the caller, however
+<p id="section-8.3.1.3-12">Responding servers <span class="bcp14">SHOULD</span> only return signed key objects for the key IDs requested by the caller, however
 servers CAN respond with more keys than requested. The caller is expected to filter the response if needed.<a href="#section-8.3.1.3-12" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -3186,6 +3190,10 @@ the sending device and the event which gets emitted.<a href="#section-11-4" clas
         <dd>
 <span class="refAuthor">Braden, R., Ed.</span>, <span class="refTitle">"Requirements for Internet Hosts - Application and Support"</span>, <span class="seriesInfo">STD 3</span>, <span class="seriesInfo">RFC 1123</span>, <span class="seriesInfo">DOI 10.17487/RFC1123</span>, <time datetime="1989-10" class="refDate">October 1989</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc1123">https://www.rfc-editor.org/rfc/rfc1123</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC2181">[RFC2181]</dt>
         <dd>
 <span class="refAuthor">Elz, R.</span> and <span class="refAuthor">R. Bush</span>, <span class="refTitle">"Clarifications to the DNS Specification"</span>, <span class="seriesInfo">RFC 2181</span>, <span class="seriesInfo">DOI 10.17487/RFC2181</span>, <time datetime="1997-07" class="refDate">July 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2181">https://www.rfc-editor.org/rfc/rfc2181</a>&gt;</span>. </dd>
@@ -3193,10 +3201,6 @@ the sending device and the event which gets emitted.<a href="#section-11-4" clas
 <dt id="RFC2782">[RFC2782]</dt>
         <dd>
 <span class="refAuthor">Gulbrandsen, A.</span>, <span class="refAuthor">Vixie, P.</span>, and <span class="refAuthor">L. Esibov</span>, <span class="refTitle">"A DNS RR for specifying the location of services (DNS SRV)"</span>, <span class="seriesInfo">RFC 2782</span>, <span class="seriesInfo">DOI 10.17487/RFC2782</span>, <time datetime="2000-02" class="refDate">February 2000</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2782">https://www.rfc-editor.org/rfc/rfc2782</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC2818">[RFC2818]</dt>
-        <dd>
-<span class="refAuthor">Rescorla, E.</span>, <span class="refTitle">"HTTP Over TLS"</span>, <span class="seriesInfo">RFC 2818</span>, <span class="seriesInfo">DOI 10.17487/RFC2818</span>, <time datetime="2000-05" class="refDate">May 2000</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2818">https://www.rfc-editor.org/rfc/rfc2818</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC3596">[RFC3596]</dt>
         <dd>
@@ -3221,6 +3225,10 @@ the sending device and the event which gets emitted.<a href="#section-11-4" clas
 <dt id="RFC8032">[RFC8032]</dt>
         <dd>
 <span class="refAuthor">Josefsson, S.</span> and <span class="refAuthor">I. Liusvaara</span>, <span class="refTitle">"Edwards-Curve Digital Signature Algorithm (EdDSA)"</span>, <span class="seriesInfo">RFC 8032</span>, <span class="seriesInfo">DOI 10.17487/RFC8032</span>, <time datetime="2017-01" class="refDate">January 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8032">https://www.rfc-editor.org/rfc/rfc8032</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8259">[RFC8259]</dt>
         <dd>
