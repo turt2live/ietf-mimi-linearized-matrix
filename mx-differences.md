@@ -242,7 +242,8 @@ Characteristics of the algorithm are:
   "actually, Alice is banned now" events. Note that this will also need considering for state resets.
 
 Identifying events which need linearizing is not yet decided, but it'll likely be some combination/either of the
-`hub_server` and `prev_events` (when >1 value) properties.
+`hub_server` and `prev_events` (when >1 value) properties. For example, when a "fork" happens (event appended to
+somewhere other than the HEAD of the list) via `prev_events`, state res and other algorithms kick in.
 
 Note that the implication here is that *all* DAG-capable servers would be expected to become dual stack servers,
 supporting the semantics/details of LM servers. All DAG-capable servers can become hubs.

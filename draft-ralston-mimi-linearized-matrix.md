@@ -61,6 +61,10 @@ informative:
     author:
        - fullname: Hubert Chathi
          organization: The Matrix.org Foundation C.I.C.
+  PerspectivesProject:
+    target: https://web.archive.org/web/20170702024706/https://perspectives-project.org/
+    title: "Perspectives Project"
+    date: 2017-07-02
 
 --- abstract
 
@@ -394,7 +398,7 @@ The participant server will receive an echo of the fully-formed event from the h
 To ensure authenticity, the participant server signs this "Linearized PDU" or "LPDU" using the
 normal event *signing algorithm*.
 
-### State events
+### State Events
 
 State events track metadata for the room, such as name, topic, and members. State is keyed by a
 tuple of `type` and `state_key`, noting that an empty string is a valid state key. State in the
@@ -424,7 +428,7 @@ Some event types have additional size restrictions which are specified in the de
 event. Additional keys not listed above have no limit other than the implied 65536 byte limit
 for the entire event.
 
-### Event types
+### Event Types
 
 Linearized Matrix defines the following event types:
 
@@ -564,7 +568,7 @@ sent by a hub.
 
 **TODO**: Does the hub's signature actually guard anything?
 
-## Checks performed upon receipt of a PDU/event
+## Receiving Events/PDUs
 
 When a hub receives an LPDU from a participant it adds the missing fields to create a fully
 formed PDU then sends that PDU back out to all participants, including the original sender.
@@ -602,18 +606,18 @@ Events which are rejected are not relayed to any local clients and are not appen
 room in any way. Within Linearized Matrix, events which reference rejected events are
 rejected themselves.
 
-## Soft failure
+## Soft Failure
 
 When an event is "soft-failed" it should not be relayed to any local clients nor be used
 in `auth_events`. The event is otherwise handled as per usual.
 
-## Authorization rules
+## Authorization Rules
 
 These are the rules which govern whether an event is accepted into the room, depending on
 the state events surrounding that event. A given event is checked against multiple different
 sets of state.
 
-### Auth events selection
+### Auth Events Selection
 
 The `auth_events` on an event MUST consist of the following state events, with the exception
 of an `m.room.create` event which has no `auth_events`.
@@ -628,7 +632,7 @@ of an `m.room.create` event which has no `auth_events`.
 
 **TODO**: Talk about restricted room joins here?
 
-### Auth rules algorithm
+### Auth Rules Algorithm
 
 With consideration for default/calculated power levels, the ordered rules which affect
 authorization of a given event are:
@@ -784,7 +788,7 @@ To canonicalize a JSON object, use {{!RFC8785}}.
 
 **TODO**: Matrix currently doesn't use RFC8785, but it should (or similar).
 
-### Signing arbitrary objects
+### Signing Arbitrary Objects
 
 Though events receive a lot of signing, it is often necessary for a server to sign arbitary,
 non-event, payloads as well. For example, in Matrix's existing HTTPS+JSON transport, requests
@@ -794,7 +798,7 @@ To sign an object, the JSON is canonically encoded without the `signatures` or `
 fields. The bytes of the canonically encoded JSON are then signed using the ed25519 signing
 key for the server. The resulting signature is then encoded using unpadded base64.
 
-### Signing events
+### Signing Events
 
 Signing events is very similar to signing an arbitary object, however with a note that an event
 is first redacted before signing. This ensures that later if the event were to be redacted in
@@ -802,7 +806,7 @@ the room that the signature check still passes.
 
 Note that the content hash covers the event's contents in case of redaction.
 
-#### Redacting an event
+#### Event Redactions
 
 All fields at the top level except the following are stripped from the event:
 
@@ -828,7 +832,7 @@ fields are stripped.
   `users`, `users_default`, and `invite`.
 * `m.room.history_visibility` retains `history_visibility`.
 
-### Checking a signature
+### Checking Signatures
 
 If the `signatures` field is missing, doesn't contain the entity that is expected to have done
 the signing (a server name), doesn't have a known key ID, or is otherwise structurally invalid
@@ -850,7 +854,7 @@ An event is covered by two hashes: a content hash and a reference hash. The cont
 unredacted event to ensure it was not modified in transit. The reference hash covers the essential
 fields of the event, including content hashes, and serves as the event's ID.
 
-### Content hash calculation
+### Content Hash Calculation
 
 1. Remove any existing `unsigned` and `signatures` fields.
    1. If calculating an LPDU's content hash, remove any existing `hashes` field as well.
@@ -860,7 +864,7 @@ fields of the event, including content hashes, and serves as the event's ID.
 3. Hash the resulting bytes with SHA-256 {{!RFC6234}}.
 4. Encode the hash using unpadded base64.
 
-### Reference hash
+### Reference Hash Calculation
 
 1. Redact the event.
 2. Remove `signatures` and `unsigned` fields.
@@ -880,7 +884,7 @@ Section 5 of {{!RFC4648}} describes *URL-safe* base64. The same changes are adop
 62nd and 63rd characters are replaced with `-` and `_` respectively. The unpadded behaviour is as
 described above.
 
-# Hub transfers
+# Hub Transfers
 
 **TODO**: This section, if we want a single canonical hub in the room. Some expected problems in this
 area are: who signs the transfer event? who *sends* the transfer event? how does a transfer start?
@@ -1007,6 +1011,14 @@ A "base URL" for a server is, for example, `https://example.org`.
 An endpoint is specified as `/path/to/resource`.
 
 Together, this makes the "request URL" `https://example.org/path/to/resource` with no trailing slash.
+
+### General Standards
+
+Unless otherwise described, all servers are required to implement all endpoints in this document. Similarly,
+all properties in request and response bodies are required unless otherwise noted.
+
+The version number included in an endpoint is strictly in relation to that endpoint. This gives opportunity
+to introduce breaking changes without raising an overall specification version.
 
 ## Resolving Server Names
 
@@ -1376,6 +1388,9 @@ do not meet `minimum_valid_until_ts`, they are not included.
 The notary server MUST sign each key returned in `server_keys` by at least one of its own signing keys. The
 calling server MUST validate all signatures on the objects.
 
+**TODO**: We need to specify the caching semantics more clearly. We also should cover why a query can return
+multiple keys, and the situations leading to those cases. In short, it's for validating old events.
+
 #### `POST /_matrix/key/v2/query`
 
 A bulk version of `/_matrix/key/v2/query/:serverName`. The same behaviour applies to this endpoint.
@@ -1416,7 +1431,7 @@ Same as `/_matrix/key/v2/query/:serverName` with the following added details.
 Responding servers SHOULD only return signed key objects for the key IDs requested by the caller, however
 servers CAN respond with more keys than requested. The caller is expected to filter the response if needed.
 
-# TODO: Remainder of transport
+# TODO: Remainder of Transport
 
 **TODO**: This section.
 
@@ -1427,7 +1442,7 @@ Topics:
 
 # TODOs & Open Questions
 
-Should we include `/_matrix/federation/v1/version` in here? It's used by federation testers, but not
+* Should we include `/_matrix/federation/v1/version` in here? It's used by federation testers, but not
 really anything else.
 
 # Security Considerations
