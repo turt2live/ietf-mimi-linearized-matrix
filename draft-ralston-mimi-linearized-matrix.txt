@@ -5,7 +5,7 @@
 More Instant Messaging Interoperability                       T. Ralston
 Internet-Draft                                                M. Hodgson
 Intended status: Standards Track        The Matrix.org Foundation C.I.C.
-Expires: 16 December 2023                                   14 June 2023
+Expires: 17 December 2023                                   15 June 2023
 
 
                          Linearized Matrix API
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 December 2023.
+   This Internet-Draft will expire on 17 December 2023.
 
 Copyright Notice
 
@@ -84,28 +84,28 @@ Table of Contents
      3.4.  Devices
      3.5.  Events
        3.5.1.  Linearized PDU
-       3.5.2.  State events
+       3.5.2.  State Events
        3.5.3.  Size Limits
-       3.5.4.  Event types
+       3.5.4.  Event Types
    4.  Initial Room Version
    5.  MLS Considerations
    6.  Event Signing & Authorization
-     6.1.  Checks performed upon receipt of a PDU/event
+     6.1.  Receiving Events/PDUs
      6.2.  Rejection
-     6.3.  Soft failure
-     6.4.  Authorization rules
-       6.4.1.  Auth events selection
-       6.4.2.  Auth rules algorithm
+     6.3.  Soft Failure
+     6.4.  Authorization Rules
+       6.4.1.  Auth Events Selection
+       6.4.2.  Auth Rules Algorithm
      6.5.  Signing
        6.5.1.  Canonical JSON
-       6.5.2.  Signing arbitrary objects
-       6.5.3.  Signing events
-       6.5.4.  Checking a signature
+       6.5.2.  Signing Arbitrary Objects
+       6.5.3.  Signing Events
+       6.5.4.  Checking Signatures
      6.6.  Hashes
-       6.6.1.  Content hash calculation
-       6.6.2.  Reference hash
+       6.6.1.  Content Hash Calculation
+       6.6.2.  Reference Hash Calculation
      6.7.  Unpadded Base64
-   7.  Hub transfers
+   7.  Hub Transfers
    8.  Transport
      8.1.  API Standards
        8.1.1.  Errors
@@ -114,15 +114,18 @@ Table of Contents
        8.1.4.  Transaction Identifiers
        8.1.5.  Rate Limiting
        8.1.6.  Trailing Slashes Matter
+       8.1.7.  General Standards
      8.2.  Resolving Server Names
        8.2.1.  GET /.well-known/matrix/server
      8.3.  Request Authentication
-   9.  TODO: Remainder of transport
-   10. Security Considerations
-   11. IANA Considerations
-   12. References
-     12.1.  Normative References
-     12.2.  Informative References
+       8.3.1.  Retrieving Server Keys
+   9.  TODO: Remainder of Transport
+   10. TODOs & Open Questions
+   11. Security Considerations
+   12. IANA Considerations
+   13. References
+     13.1.  Normative References
+     13.2.  Informative References
    Acknowledgments
    Authors' Addresses
 
@@ -505,7 +508,7 @@ Table of Contents
    server signs this "Linearized PDU" or "LPDU" using the normal event
    _signing algorithm_.
 
-3.5.2.  State events
+3.5.2.  State Events
 
    State events track metadata for the room, such as name, topic, and
    members.  State is keyed by a tuple of type and state_key, noting
@@ -542,7 +545,7 @@ Table of Contents
    listed above have no limit other than the implied 65536 byte limit
    for the entire event.
 
-3.5.4.  Event types
+3.5.4.  Event Types
 
    Linearized Matrix defines the following event types:
 
@@ -722,7 +725,7 @@ Table of Contents
 
    *TODO*: Does the hub's signature actually guard anything?
 
-6.1.  Checks performed upon receipt of a PDU/event
+6.1.  Receiving Events/PDUs
 
    When a hub receives an LPDU from a participant it adds the missing
    fields to create a fully formed PDU then sends that PDU back out to
@@ -767,19 +770,19 @@ Table of Contents
    are not appended to the room in any way.  Within Linearized Matrix,
    events which reference rejected events are rejected themselves.
 
-6.3.  Soft failure
+6.3.  Soft Failure
 
    When an event is "soft-failed" it should not be relayed to any local
    clients nor be used in auth_events.  The event is otherwise handled
    as per usual.
 
-6.4.  Authorization rules
+6.4.  Authorization Rules
 
    These are the rules which govern whether an event is accepted into
    the room, depending on the state events surrounding that event.  A
    given event is checked against multiple different sets of state.
 
-6.4.1.  Auth events selection
+6.4.1.  Auth Events Selection
 
    The auth_events on an event MUST consist of the following state
    events, with the exception of an m.room.create event which has no
@@ -801,7 +804,7 @@ Table of Contents
 
    *TODO*: Talk about restricted room joins here?
 
-6.4.2.  Auth rules algorithm
+6.4.2.  Auth Rules Algorithm
 
    With consideration for default/calculated power levels, the ordered
    rules which affect authorization of a given event are:
@@ -1015,7 +1018,7 @@ Table of Contents
    *TODO*: Matrix currently doesn't use RFC8785, but it should (or
    similar).
 
-6.5.2.  Signing arbitrary objects
+6.5.2.  Signing Arbitrary Objects
 
    Though events receive a lot of signing, it is often necessary for a
    server to sign arbitary, non-event, payloads as well.  For example,
@@ -1027,7 +1030,7 @@ Table of Contents
    JSON are then signed using the ed25519 signing key for the server.
    The resulting signature is then encoded using unpadded base64.
 
-6.5.3.  Signing events
+6.5.3.  Signing Events
 
    Signing events is very similar to signing an arbitary object, however
    with a note that an event is first redacted before signing.  This
@@ -1037,7 +1040,7 @@ Table of Contents
    Note that the content hash covers the event's contents in case of
    redaction.
 
-6.5.3.1.  Redacting an event
+6.5.3.1.  Event Redactions
 
    All fields at the top level except the following are stripped from
    the event:
@@ -1078,7 +1081,7 @@ Table of Contents
 
    *  m.room.history_visibility retains history_visibility.
 
-6.5.4.  Checking a signature
+6.5.4.  Checking Signatures
 
    If the signatures field is missing, doesn't contain the entity that
    is expected to have done the signing (a server name), doesn't have a
@@ -1092,6 +1095,10 @@ Table of Contents
 
    Otherwise, the check passes.
 
+   *TODO*: Which specific signatures are required?  If a server has
+   multiple signing keys, possibly a combination of new and old, do we
+   require all or some of them to sign?
+
 6.6.  Hashes
 
    An event is covered by two hashes: a content hash and a reference
@@ -1100,7 +1107,7 @@ Table of Contents
    fields of the event, including content hashes, and serves as the
    event's ID.
 
-6.6.1.  Content hash calculation
+6.6.1.  Content Hash Calculation
 
    1.  Remove any existing unsigned and signatures fields.
 
@@ -1116,7 +1123,7 @@ Table of Contents
 
    4.  Encode the hash using unpadded base64.
 
-6.6.2.  Reference hash
+6.6.2.  Reference Hash Calculation
 
    1.  Redact the event.
 
@@ -1143,7 +1150,7 @@ Table of Contents
    with - and _ respectively.  The unpadded behaviour is as described
    above.
 
-7.  Hub transfers
+7.  Hub Transfers
 
    *TODO*: This section, if we want a single canonical hub in the room.
    Some expected problems in this area are: who signs the transfer
@@ -1297,6 +1304,16 @@ Table of Contents
 
    Together, this makes the "request URL" https://example.org/path/to/
    resource with no trailing slash.
+
+8.1.7.  General Standards
+
+   Unless otherwise described, all servers are required to implement all
+   endpoints in this document.  Similarly, all properties in request and
+   response bodies are required unless otherwise noted.
+
+   The version number included in an endpoint is strictly in relation to
+   that endpoint.  This gives opportunity to introduce breaking changes
+   without raising an overall specification version.
 
 8.2.  Resolving Server Names
 
@@ -1582,16 +1599,220 @@ Table of Contents
       "error": "Signature error on request."
    }
 
-   *TODO*: Describe signing key endpoints.
+8.3.1.  Retrieving Server Keys
 
-9.  TODO: Remainder of transport
+   A server's signing keys are published under /_matrix/key/v2/server
+   and can be queried through notary servers under /_matrix/key/v2/
+   query/:serverName.  Notary servers simply call /_matrix/key/v2/server
+   on the target server, sign the response, and cache it for some time.
+   This allows the target server to go offline for a period of time
+   without affecting their previously sent events.
+
+   The signing keys published by a server are used by request
+   authentication, event/LPDU signing, and other places where a server
+   needs to sign a JSON object.
+
+   The approach used here is borrowed from the Perspectives Project
+   [PerspectivesProject], modified to cover the server's ed25519 keys
+   and to use JSON instead of XML.  The advantage of this system is it
+   allows each server to pick which notaries it trusts, and can contact
+   multiple notaries to corroborate the keys returned by any given
+   notary.
+
+   All servers MUST implement the /_matrix/key/v2 endpoints.  This is to
+   prevent only a few servers implementing notary capabilities, which
+   would make the system no better than having a single trusted root.
+
+   Note that these endpoints operate outside the context of a room: a
+   server does not need to participate in any shared rooms to be used as
+   a notary by another server.
+
+8.3.1.1.  GET /_matrix/key/v2/server
+
+   Retrieves the server's signing keys.  The server can have any number
+   of active or inactive keys at a time, but SHOULD have at least 1
+   active key at all times.
+
+   *Rate-limited*: No.
+
+   *Authentication required*: No.
+
+   This HTTP endpoint does not specify any request parameters or body.
+
+   200 OK response:
+
+   {
+      "server_name": "example.org",
+      "valid_until_ts": 1686776437176,
+      "m.linearized": true,
+      "verify_keys": {
+         "ed25519:0": {
+            "key": "<unpadded base64 encoded public key>"
+         }
+      },
+      "old_verify_keys": {
+         "ed25519:bad": {
+            "expired_ts": 1586776437176,
+            "key": "<unpadded base64 encoded public key>"
+         }
+      },
+      "signatures": {
+         "example.org": {
+            "ed25519:0": "<unpadded base64 encoded signature>"
+         }
+      }
+   }
+
+   server_name MUST be the name of the server (before resolution) which
+   is returning the keys.
+
+   valid_until_ts is the integer timestamp (milliseconds since Unix
+   epoch) for when the server's keys should be re-fetched.  When
+   processing the response, valid_until_ts MUST be treated as the lesser
+   of valid_until_ts and 7 days into the future to prevent attackers
+   publishing long-lived keys the server is unable to revoke.
+
+   *TODO*: What does it mean to require events have an origin_server_ts
+   which is less than that of valid_until_ts?  Do we reject the event,
+   soft-fail it, or do something else?  Do we only do this on the hub?
+
+   m.linearized is an optional boolean, but SHOULD be present and set to
+   true.  Semantics for false and not being present apply to contexts
+   outside of this document.
+
+   verify_keys are the current signing keys for the server, keyed by the
+   combined key algorithm and version.  Together, the algorithm and
+   version form a "Key ID", used throughout this document.  The
+   algorithm MUST be ed25519.  The version MUST ONLY have characters
+   consisting of [a-zA-Z0-9_].  The algorithm and version are joined
+   with a :.
+
+   The object value for each key ID under verify_keys is simply the key,
+   consisting of the unpadded base64 encoded public key matching that
+   algorithm and version.
+
+   old_verify_keys are similar to verify_keys, but have an additional
+   required expired_ts property to denote when the key ceased usage.
+
+   *TODO*: What about events sent with old_verify_keys?
+
+   For request authentication, only keys listed under verify_keys are
+   honoured.  If another key is referenced by the Authorization headers,
+   the request fails authentication.
+
+   Notaries should cache a 200 OK response for half of its lifetime to
+   avoid serving stale values.  Responding servers should avoid
+   returning responses which expire in less than an hour to avoid
+   repeated requests.  Requesting servers should limit how frequently
+   they query for keys to avoid flooding a server with requests.
+
+   If the server fails to respond to this request, notaries should
+   continue to return the last response they received from the server so
+   that the signatures of old events can still be checked.
+
+8.3.1.2.  GET /_matrix/key/v2/query/:serverName
+
+   This is one of two endpoints for querying a server's keys through
+   another server.  The notary (receiving) server will attempt to
+   refresh its cached copy of the target server's keys through
+   /_matrix/key/v2/server, falling back to any cached values if needed.
+
+   *Rate-limited*: No.
+
+   *Authentication required*: No.
+
+   Path parameters:
+
+   *  :serverName - the target server's name to retrieve keys for.
+
+   Query parameters:
+
+   *  minimum_valid_until_ts (integer; optional) - The time in
+      milliseconds since the Unix epoch the target server's keys will
+      need to be valid until to be useful to the caller.  If not
+      specified the notary server's current time will be used.
+
+   Request body: None applicable.
+
+   200 OK response:
+
+   {
+      "server_keys": [
+         {/* server key */}
+      ]
+   }
+
+   server_keys is the array of keys (see /_matrix/key/v2/server response
+   format) for the target server.  If the target server could not be
+   reached and the notary has no cached keys, this array is empty.  If
+   the keys do not meet minimum_valid_until_ts, they are not included.
+
+   The notary server MUST sign each key returned in server_keys by at
+   least one of its own signing keys.  The calling server MUST validate
+   all signatures on the objects.
+
+   *TODO*: We need to specify the caching semantics more clearly.  We
+   also should cover why a query can return multiple keys, and the
+   situations leading to those cases.  In short, it's for validating old
+   events.
+
+8.3.1.3.  POST /_matrix/key/v2/query
+
+   A bulk version of /_matrix/key/v2/query/:serverName.  The same
+   behaviour applies to this endpoint.
+
+   *Rate-limited*: No.
+
+   *Authentication required*: No.
+
+   Path parameters: None applicable.
+
+   Query parameters: None applicable.
+
+   Request body:
+
+   {
+      "server_keys": {
+         "example.org": {
+            "ed25519:0": {
+               "minimum_valid_until_ts": 1686783382189
+            }
+         }
+      }
+   }
+
+   server_keys is required and is the search criteria.  The object value
+   is first keyed by server name which maps to another object keyed by
+   Key ID, mapping to the specific criteria.  If no key IDs are given in
+   the request, all of the server's known keys are queried.  If no
+   servers are given in the request, the response MUST contain an empty
+   server_keys array.
+
+   minimum_valid_until_ts holds the same meaning as in /_matrix/key/v2/
+   query/:serverName.
+
+   200 OK response:
+
+   Same as /_matrix/key/v2/query/:serverName with the following added
+   details.
+
+   Responding servers SHOULD only return signed key objects for the key
+   IDs requested by the caller, however servers CAN respond with more
+   keys than requested.  The caller is expected to filter the response
+   if needed.
+
+9.  TODO: Remainder of Transport
 
    *TODO*: This section.
 
-   Topics: * Publishing of signing keys * Sending events between servers
-   * Media handling * etc
+   Topics: * Sending events between servers * Media handling * etc
 
-10.  Security Considerations
+10.  TODOs & Open Questions
+
+   *  Should we include /_matrix/federation/v1/version in here?  It's
+      used by federation testers, but not really anything else.
+
+11.  Security Considerations
 
    *TODO*: Expand upon this section.
 
@@ -1607,15 +1828,15 @@ Table of Contents
    no strong cryptographic link between the sending device and the event
    which gets emitted.
 
-11.  IANA Considerations
+12.  IANA Considerations
 
    The m.* namespace likely needs formal registration in some capacity.
 
    The I.* namespace likely needs formal registration in some capacity.
 
-12.  References
+13.  References
 
-12.1.  Normative References
+13.1.  Normative References
 
    [I-D.ietf-mls-architecture]
               Beurdouche, B., Rescorla, E., Omara, E., Inguva, S., and
@@ -1710,7 +1931,7 @@ Table of Contents
               DOI 10.17487/RFC9110, June 2022,
               <https://www.rfc-editor.org/rfc/rfc9110>.
 
-12.2.  Informative References
+13.2.  Informative References
 
    [DMLS]     Chathi, H., "Decentralised MLS", 29 May 2023,
               <https://gitlab.matrix.org/matrix-org/mls-ts/-
@@ -1724,6 +1945,11 @@ Table of Contents
    [MSC3995]  Ralston, T., "MSC3995: [WIP] Linearized Matrix", 12 April
               2023, <https://github.com/matrix-org/matrix-spec-
               proposals/pull/3995>.
+
+   [PerspectivesProject]
+              "Perspectives Project", 2 July 2017,
+              <https://web.archive.org/web/20170702024706/
+              https://perspectives-project.org/>.
 
    [RFC5280]  Cooper, D., Santesson, S., Farrell, S., Boeyen, S.,
               Housley, R., and W. Polk, "Internet X.509 Public Key
