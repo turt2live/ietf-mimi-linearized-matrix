@@ -25,7 +25,7 @@ venue:
   github: "turt2live/ietf-mimi-linearized-matrix"
   latest: "https://turt2live.github.io/ietf-mimi-linearized-matrix/draft-ralston-mimi-linearized-matrix.html"
 
-obsoletes: draft-ralston-mimi-matrix-framework,draft-ralston-mimi-matrix-transport
+replaces: draft-ralston-mimi-matrix-framework,draft-ralston-mimi-matrix-transport
 
 author:
  -
