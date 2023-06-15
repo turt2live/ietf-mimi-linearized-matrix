@@ -4,8 +4,12 @@
 
 More Instant Messaging Interoperability                       T. Ralston
 Internet-Draft                                                M. Hodgson
-Intended status: Standards Track        The Matrix.org Foundation C.I.C.
-Expires: 17 December 2023                                   15 June 2023
+Obsoletes: ["I-D.ralston-mimi-          The Matrix.org Foundation C.I.C.
+           matrix-framework",                               15 June 2023
+           "I-D.ralston-mimi-matrix-                                    
+           transport"] (if approved)                                    
+Intended status: Standards Track                                        
+Expires: 17 December 2023
 
 
                          Linearized Matrix API
