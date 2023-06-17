@@ -163,7 +163,7 @@ This leads to two distinct roles:
 participant and hub? (participant can pick the hub it wants to use rather than being
 forced to use a single hub)
 
-## Server Names
+## [Server Names][int-server-names]
 
 Throughout this document servers are referred to as having a "domain name" or "server name".
 A server name MUST be compliant with RFC 1123 (Section 2.1) {{!RFC1123}}.
@@ -198,8 +198,8 @@ Rooms hold the same definition under {{!I-D.ralston-mimi-terminology}}: a concep
 where users send and receive events. All users with sufficient access to the room receive
 events sent to that room.
 
-The different chat types are represented by rooms through [state events](#State+Events), which
-ultimately change how the different algorithms in the [room version](#Room+Versions) behave.
+The different chat types are represented by rooms through [state events](int-state-events), which
+ultimately change how the different algorithms in the [room version](int-room-versions) behave.
 
 Rooms have a single internal "Room ID" to identify them from another room.  The ABNF {{!RFC5234}}
 grammar for a room ID is:
@@ -221,7 +221,7 @@ over a room. The server represented by that domain may no longer be participatin
 The entire room ID after the `!` sigil MUST be treated as opaque. No part of the room ID should
 be parsed, and cannot be assumed to be human-readable.
 
-### Room Versions
+### [Room Versions][int-room-versions]
 
 **TODO**: We should consider naming this something else.
 
@@ -248,7 +248,7 @@ A room version has the following algorithms defined:
 
 A server is capable of supporting multiple room versions at a time. The transport API decouples
 specific details regarding room versions from the wire formats. For example, events are treated
-as JSON blobs in [Linearized Matrix's server-server API](#Transport).
+as JSON blobs in [Linearized Matrix's server-server API](int-transport).
 
 Room versions are normally specified using a dedicated document. An example of this can be found
 in the existing Matrix Spec Change process as MSC3820 {{MSC3820}}.
@@ -303,7 +303,7 @@ Examples:
 
 `user_id_localpart` SHOULD be human-readable and notably MUST NOT contain uppercase letters.
 
-`server_name` denotes the [domain name](#Server+Names) which allocated the ID, or would allocate
+`server_name` denotes the [domain name](int-server-names) which allocated the ID, or would allocate
 the ID if the user doesn't exist yet. A user ID of `@alice:example.org` is read as "alice on
 example.org", similar to an email address.
 
@@ -344,7 +344,7 @@ An event has the following minimum fields:
   being carried by events. Event types are case sensitive. This MUST NOT exceed 255 characters.
 
 * `state_key` (string; optional) - A UTF-8 {{!RFC3629}} string to further distinguish an event
-  type from other related events. Only specified on [State Events](#State+Events). Can be
+  type from other related events. Only specified on [State Events](int-state-events). Can be
   empty. This MUST NOT exceed 255 characters.
 
 * `sender` (string; required) - The user ID which is sending this event. This MUST be a valid
@@ -432,7 +432,7 @@ An example event is:
 }
 ~~~
 
-An event/PDU MUST NOT exceed 65536 bytes when formatted using [Canonical JSON](#Canonical+Json). Note
+An event/PDU MUST NOT exceed 65536 bytes when formatted using [Canonical JSON](int-canonical-json). Note
 that this includes all `signatures` on the event.
 
 Fields have no size limit unless specified above, other than the maximum 65536 bytes for the whole
@@ -459,7 +459,7 @@ signs this partial event before sending it to the hub.
 The participant server will receive an echo of the fully-formed event from the hub once appended
 to the room.
 
-### State Events
+### [State Events][int-state-events]
 
 State events track metadata for the room, such as name, topic, and members. State is keyed by a
 tuple of `type` and `state_key`, noting that an empty string is a valid state key. State in the
@@ -486,7 +486,7 @@ be an empty string.
 The `content` for a create event MUST have at least a `room_version` field to denote what set
 of algorithms the room is using.
 
-These conditions are checked as part of the [event authorization rules](#Authorization+Rules).
+These conditions are checked as part of the [event authorization rules](int-auth-rules).
 
 #### `m.room.join_rules`
 
@@ -523,13 +523,13 @@ membership state for the user. Allowable values are:
 * `ban` - implies kicked/not participating. Cannot be invited or join the room without being
   unbanned first (moderator sends a kick, essentially).
 
-These conditions are checked as part of the [event authorization rules](#Authorization+Rules),
+These conditions are checked as part of the [event authorization rules](int-auth-rules),
 as are the rules for moving between membership states.
 
 #### `m.room.power_levels`
 
 Defines what given users can and can't do, as well as which event types they are able to send.
-The enforcement of these power levels is determined by the [event authorization rules](#Authorization+Rules).
+The enforcement of these power levels is determined by the [event authorization rules](int-auth-rules).
 
 The `state_key` MUST be an empty string.
 
@@ -556,9 +556,9 @@ The `content` for a power levels event SHOULD have at least the following:
 Note that if no power levels event is specified in the room then the room creator (`sender` of
 the `m.room.create` state event) has a default power level of 100.
 
-These conditions are checked as part of the [event authorization rules](#Authorization+Rules).
+These conditions are checked as part of the [event authorization rules](int-auth-rules).
 
-##### Calculating Power Levels
+##### [Calculating Power Levels][int-calc-power-levels]
 
 All power levels are calculated with reference to the `content` of an `m.room.power_levels`
 state event.
@@ -634,12 +634,12 @@ There are a few aspects of an event which verify its authenticity and therefore 
 can be accepted into the room. All of these checks work with the fully-formed PDU for an
 event.
 
-First, the event has one or two [content hashes](#Content+Hash+Calculation), which cover
+First, the event has one or two [content hashes](int-content-hashes), which cover
 the unredacted contents of the event. If the event is modified in any way, the hash check
 will fail on either/both of these hashes. When a check failure occurs, the event is redacted
 before event processing continues.
 
-Second, the event has a [reference hash](#Reference+Hash+Calculation) which covers the
+Second, the event has a [reference hash](int-reference-hashes) which covers the
 redacted event, doubling as the event's ID. Any change to the event which affects this hash
 will result in an entirely different event ID being used, thus being treated as an entirely
 different event.
@@ -710,7 +710,7 @@ are rejected themselves.
 When an event is "soft-failed" it should not be relayed to any local clients nor be used
 in `auth_events`. The event is otherwise handled as per usual.
 
-## Authorization Rules
+## [Authorization Rules][int-auth-rules]
 
 These are the rules which govern whether an event is accepted into the room, depending on
 the state events surrounding that event. A given event is checked against multiple different
@@ -733,7 +733,7 @@ of an `m.room.create` event which has no `auth_events`.
 
 ### Auth Rules Algorithm
 
-With consideration for [default/calculated power levels](#Calculating+Power+Levels), the
+With consideration for [default/calculated power levels](int-calc-power-levels), the
 ordered rules which affect authorization of a given event are:
 
 **TODO**: should we reference `m.federate`?
@@ -886,7 +886,7 @@ API.
 
 To sign an object, the JSON is canonically encoded without the `signatures` or `unsigned`
 fields. The bytes of the canonically encoded JSON are then signed using the ed25519 signing
-key for the server. The resulting signature is then encoded using unpadded base64.
+key for the server. The resulting signature is then encoded using [unpadded base64](int-unpadded-base64).
 
 ## Signing Events
 
@@ -912,7 +912,7 @@ Otherwise, the check passes.
 **TODO**: Which specific signatures are required? If a server has multiple signing keys, possibly
 a combination of new and old, do we require all or some of them to sign?
 
-# Canonical JSON
+# [Canonical JSON][int-canonical-json]
 
 When signing a JSON object, such as an event, it is important that the bytes be ordered in
 the same way for everyone. Otherwise, the signatures will never match.
@@ -921,7 +921,7 @@ To canonicalize a JSON object, use {{!RFC8785}}.
 
 **TODO**: Matrix currently doesn't use RFC8785, but it should (or similar).
 
-# Event Redactions
+# [Event Redactions][int-redactions]
 
 All fields at the top level except the following are stripped from the event:
 
@@ -953,7 +953,7 @@ An event is covered by two hashes: a content hash and a reference hash. The cont
 unredacted event to ensure it was not modified in transit. The reference hash covers the essential
 fields of the event, including content hashes, and serves as the event's ID.
 
-## Content Hash Calculation
+## [Content Hash Calculation][int-content-hashes]
 
 1. Remove any existing `unsigned` and `signatures` fields.
    1. If calculating an LPDU's content hash, remove any existing `hashes` field as well.
@@ -963,7 +963,7 @@ fields of the event, including content hashes, and serves as the event's ID.
 3. Hash the resulting bytes with SHA-256 {{!RFC6234}}.
 4. Encode the hash using unpadded base64.
 
-## Reference Hash Calculation
+## [Reference Hash Calculation][int-reference-hashes]
 
 1. Redact the event.
 2. Remove `signatures` and `unsigned` fields.
@@ -971,7 +971,7 @@ fields of the event, including content hashes, and serves as the event's ID.
 4. Hash the resulting bytes with SHA-256 {{!RFC6234}}.
 5. Encode the hash using URL-safe unpadded base64.
 
-# Unpadded Base64
+# [Unpadded Base64][int-unpadded-base64]
 
 Throughout this document, "unpadded base64" is used to represent binary values as strings. Base64 is
 as specified by {{!RFC4648}}, and *unpadded* base64 simply removes any `=` padding from the resulting
@@ -990,7 +990,7 @@ area are: who signs the transfer event? who *sends* the transfer event? how does
 
 **TODO**: Is this section better placed in the MSC for now?
 
-# Transport
+# [Transport][int-transport]
 
 Servers need to be able to communicate with each other to share events and other information about rooms.
 This document specifies a wire transport which uses JSON {{!RFC8259}} over HTTPS {{!RFC9110}}. Servers
@@ -1102,8 +1102,8 @@ retrying, in milliseconds.
 ### Trailing Slashes Matter
 
 Unless otherwise specified, requests made to endpoints with a trailing slash are to be treated as unknown
-endpoints by servers. Similarly, all endpoints in this document assume the resolved domain (see Resolving
-Server Names) does *not* contain a trailing slash.
+endpoints by servers. Similarly, all endpoints in this document assume the [resolved domain](int-resolve-domain)
+does *not* contain a trailing slash.
 
 A "base URL" for a server is, for example, `https://example.org`.
 
@@ -1119,7 +1119,7 @@ all properties in request and response bodies are required unless otherwise note
 The version number included in an endpoint is strictly in relation to that endpoint. This gives opportunity
 to introduce breaking changes without raising an overall specification version.
 
-## Resolving Server Names
+## [Resolving Server Names][int-resolve-domain]
 
 In order to make a request to another server, the caller needs to know where that server is located.
 
