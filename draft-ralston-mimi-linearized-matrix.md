@@ -163,7 +163,7 @@ This leads to two distinct roles:
 participant and hub? (participant can pick the hub it wants to use rather than being
 forced to use a single hub)
 
-## Server names / domain names
+## Server Names
 
 Throughout this document servers are referred to as having a "domain name" or "server name".
 A server name MUST be compliant with RFC 1123 (Section 2.1) {{!RFC1123}}.
@@ -171,104 +171,151 @@ A server name MUST be compliant with RFC 1123 (Section 2.1) {{!RFC1123}}.
 **TODO**: Should we incorporate Matrix's IPv6 extension, or are we able to assume that
 everyone will be using non-literal hostnames?
 
-**TODO**: Do we really need to make this case sensitive? Matrix does, but is that correct?
+**TODO**: This is the full formal ABNF for a Matrix IPv6-compatible server name.
+
+~~~
+server_name = hostname [ ":" port ]
+
+port        = 1*5DIGIT
+
+hostname    = IPv4address / "[" IPv6address "]" / dns-name
+
+IPv4address = 1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT
+
+IPv6address = 2*45IPv6char
+
+IPv6char    = DIGIT / %x41-46 / %x61-66 / ":" / "."
+                  ; 0-9, A-F, a-f, :, .
+
+dns-name    = 1*255dns-char
+
+dns-char    = DIGIT / ALPHA / "-" / "."
+~~~
 
 ## Rooms
 
-A room is a conceptual place where users send and receive events. Events are sent to a room,
-and all users which have sufficient access will receive that event.
+Rooms hold the same definition under {{!I-D.ralston-mimi-terminology}}: a conceptual place
+where users send and receive events. All users with sufficient access to the room receive
+events sent to that room.
 
-Rooms have a single internal "Room ID" to identify them from another room:
+The different chat types are represented by rooms through [state events](#State+Events), which
+ultimately change how the different algorithms in the [room version](#Room+Versions) behave.
+
+Rooms have a single internal "Room ID" to identify them from another room.  The ABNF {{!RFC5234}}
+grammar for a room ID is:
 
 ~~~
-!<opaque>:<domain>
+room_id = "!" room_id_localpart ":" server_name
+room_id_localpart = 1*opaque
+opaque = DIGIT / ALPHA / "-" / "." / "~" / "_"
 ~~~
 
-For example, `!abc:example.org`.
+`room_id` MUST NOT exceed 255 characters. Room IDs are case sensitive.
 
-The opaque portion of the room ID, called the localpart, must not be empty and must consist
-entirely of the characters `[0-9a-zA-Z._~-]`.
+Example: `!abc:example.org`.
 
-The domain portion of a room ID does *NOT* indicate the room is "hosted" or served by that
+The `server_name` for a room ID does *NOT* indicate the room is "hosted" or served by that
 domain. The domain is used as a namespace to prevent another server from maliciously taking
 over a room. The server represented by that domain may no longer be participating in the room.
 
-The total length (including the sigil and domain) of a room ID MUST NOT exceed 255 characters.
-
-Room IDs are case sensitive.
+The entire room ID after the `!` sigil MUST be treated as opaque. No part of the room ID should
+be parsed, and cannot be assumed to be human-readable.
 
 ### Room Versions
 
 **TODO**: We should consider naming this something else.
 
 A room version is a set of algorithms which define how the room operates, identified by a single
-string. The primary purpose of a room version is to prevent split-brains between servers attempting
-to participate in the room. This makes room versions immutable once specified, preventing rooms
-from suddenly using a new set of rules without all participating servers being aware of the new
-rules.
+string. Room versions are immutable once specified, as otherwise a change in algorithms could
+cause a split-brain between participating servers.
 
-Servers MUST support at least the room version described by this document, but CAN support
-additional room versions as needed. Room versions prefixed with `I.` are reserved for use within
-the IETF specification process. Room versions consisting solely of `0-9` and `.` are reserved for
-use by the Matrix protocol.
+Room versions prefixed with `I.` are reserved for use within the IETF specification process.
+Room versions consisting solely of `0-9` and `.` are reserved for use by the Matrix protocol.
 
 There is no implicit ordering or hierarchy to room versions. Although there is a recommended
 default room version, some rooms might benefit from features of a different room version.
 
-Typically, a room version has the following algorithms defined:
+A room version has the following algorithms defined:
 
-* Event authorization - The rules which govern when events are accepted or rejected by a server.
-* Redaction - The specific rules to decide which fields are kept on events when redacted. This
-  is used by the signing and hash calculations and therefore must be consistent across implementations.
-* Event format - Which fields are expected to be present on an event (or PDU), and the schema
-  for each.
-* Canonical JSON - How exactly to encode events using Canonical JSON. This is used by the signing
-  algorithm and therefore must be consistent across implementations.
-* Hub selection - The rules which identify the current hub server in a room, and transfering that
-  responsibility to another server if needed.
+* Event authorization - Rules which govern when events are accepted, rejected, or soft-failed
+  by a server.
+* Redaction - Description of which fields to keep on an event during redaction. Redaction is
+  used by the signing and hash algorithms, meaning they need to be consistent across implementations.
+* Event format - Which fields are expected to be present on an event, and the schema for each.
+* Canonical JSON - Specific details about how to canonicalize an event as JSON. This is used
+  by the signing algorithm and must be consistent between implementations.
+* Hub selection - Rules around picking the hub server and transferring to a new hub.
 
-Room versions are intentionally decoupled from the transport API, meaning a server is capable
-of supporting multiple room versions at a time. For specification purposes, it'd be expected
-that a dedicated document be used to specify a new room version. An example of this can be found
+A server is capable of supporting multiple room versions at a time. The transport API decouples
+specific details regarding room versions from the wire formats. For example, events are treated
+as JSON blobs in [Linearized Matrix's server-server API](#Transport).
+
+Room versions are normally specified using a dedicated document. An example of this can be found
 in the existing Matrix Spec Change process as MSC3820 {{MSC3820}}.
 
-Each room version has a "stable" or "unstable" designation. Stable room versions can safely be
-used by rooms while unstable room versions might contain bugs or are not yet adopted by a
-specification process.
+Each room version has a "stable" or "unstable" designation. Stable room versions SHOULD be used
+in production by messaging providers. Unstable room versions might contain bugs or are not yet
+fully specified. Messaging providers SHOULD NOT use unstable room versions in production.
 
 **TODO**: Matrix considers a version as stable once accepted through FCP. When would be the
 process equivalent for the IETF?
 
-A room version string MUST NOT exceed 128 characters, MUST NOT be empty, and MUST consist solely
-of `[a-z0-9.-]` characters. Custom/unspecified room versions should be prefixed using reverse
-domain name notation to form a namespace (`org.example.my_room_version`).
+The ABNF {{!RFC5234}} grammar for a room version is:
+
+~~~
+room_version = 1*128room_version_char
+room_version_char = DIGIT
+                  / %x61-7A         ; a-z
+                  / "-" / "."
+~~~
+
+Examples:
+
+* `1`
+* `I.1`
+* `org.example.my-room-version`
+
+Room versions not formally specified SHOULD be prefixed using reverse domain name notation,
+creating a sort of namespace. `org.example.my-room-version` is an example of this.
 
 ## Users
 
 As described by {{!I-D.ralston-mimi-terminology}}, a user is typically a human which operates
-a client. In Linearized Matrix, all users have a User ID to distinguish them:
+a client. Each user has a distinct user ID.
+
+The ABNF {{!RFC5234}} grammar for a user ID is:
 
 ~~~
-@<localpart>:<domain>
+user_id = "@" user_id_localpart ":" server_name
+user_id_localpart = 1*user_id_char
+user_id_char = DIGIT
+             / %x61-7A                   ; a-z
+             / "-" / "." / "="
+             / "_" / "/" / "+"
 ~~~
 
-The localpart portion of the user ID is expected to be human-readable, MUST NOT be empty,
-and MUST consist solely of `[0-9a-z._=-/]` characters. Note that user IDs *cannot* contain
-uppercase letters in the localpart.
+`user_id` MUST NOT exceed 255 characters. User IDs are case sensitive.
 
-The domain portion indicates which server allocated the ID, or would allocate the resource
-if the user doesn't exist yet. `@alice:first.example.org` is a different user on a different
-server from `@alice:second.example.org`, for example.
+Examples:
 
-The total length (including the sigil and domain) of a user ID MUST NOT exceed 255 characters.
+* `@alice:example.org`
+* `@watch/for/slashes:example.org`
 
-User IDs are case sensitive.
+`user_id_localpart` SHOULD be human-readable and notably MUST NOT contain uppercase letters.
 
-**Note**: User IDs are sometimes informally referenced as "MXIDs", short for "Matrix User IDs".
+`server_name` denotes the [domain name](#Server+Names) which allocated the ID, or would allocate
+the ID if the user doesn't exist yet. A user ID of `@alice:example.org` is read as "alice on
+example.org", similar to an email address.
 
-**Author's note**: This draft assumes that an external system will resolve phone number to
-user ID, somehow. Or that `@18005552222:example.org` will resolve to `+1 800 555 2222` on
-a given server, or similar.
+Identity systems and messaging providers SHOULD NOT use a phone number in a localpart, as the
+localpart for a user ID is unchangeable. In these cases, a GUID (scoped to the allocating server)
+is recommended so the associated human can change their phone number without losing chats.
+
+This document does not define how a user ID is acquired. It is expected that an identity specification
+under MIMI will handle resolving email addresses, phone numbers, names, and other common queries
+to user IDs.
+
+User IDs are sometimes informally referenced as "MXIDs", short for "Matrix User IDs".
 
 ## Devices
 
@@ -285,39 +332,43 @@ to distinguish them, and use reverse domain name notation to namespace custom ev
 (for example, `org.example.appname.eventname`). Event types specified by Linearized Matrix
 itself use `m.` as their namespace.
 
-When events are traversing a transport to another server they are often referred to as a
+When events are traversing a transport to another server they are referred to as a
 **Persistent Data Unit** or **PDU**.
 
-An event has many other fields:
+An event has the following minimum fields:
 
-* `room_id` (string; required) - The room ID for where the event is being sent.
+* `room_id` (string; required) - The room ID for where the event is being sent. This MUST be
+  a valid room ID.
 
 * `type` (string; required) - A UTF-8 {{!RFC3629}} string to distinguish different data types
-  being carried by events. All event types use a reverse domain name notation to namespace
-  themselves (for example, `org.example.appname.eventname`). Event types specified by
-  Linearized Matrix itself use `m` as their namespace (for example, `m.room.member`).
+  being carried by events. Event types are case sensitive. This MUST NOT exceed 255 characters.
 
 * `state_key` (string; optional) - A UTF-8 {{!RFC3629}} string to further distinguish an event
-  type from other related events. Only specified on State Events (discussed later). Can be
-  empty.
+  type from other related events. Only specified on [State Events](#State+Events). Can be
+  empty. This MUST NOT exceed 255 characters.
 
-* `sender` (string; required) - The user ID which is sending this event.
+* `sender` (string; required) - The user ID which is sending this event. This MUST be a valid
+  user ID.
 
 * `origin_server_ts` (integer; required) - The milliseconds since the unix epoch for when this
   event was created.
 
 * `hub_server` (string; technically optional) - The domain name of the hub server which is
-  sending this event to the remainder of the room. Note that all events created within Linearized
-  Matrix will have this field set.
+  sending this event to the remainder of the room. All events created within Linearized Matrix
+  MUST have this field set, however events created externally MUST NOT set this field. This
+  MUST be a valid server name.
 
-* `content` (object; required) - The event content. The schema of this is specific to the event
-  type, and should be considered untrusted data until verified otherwise. Malicious servers and
-  clients can, for example, exclude important fields, use invalid value types, or otherwise
-  attempt to disrupt a client - receivers should treat the event with care while processing.
+* `content` (object; required) - The event content. The specific schema depends on the event
+  type. Clients and servers processing an event MUST NOT assume the `content` is safe or
+  accurately represented. Malicious clients and servers are able to send payloads which don't
+  comply with a given schema, which may cause unexpected behaviour on the receiving side.
+  For example, a field marked as "required" might be missing.
 
-* `hashes` (object; required) - Keyed by hash algorithm, the *content hash* for the event. A special
-  `lpdu` key is used to cover the Linearized PDU hashes. `lpdu` is structured the same way as `hashes`,
-  though without the `lpdu` key being an option.
+* `hashes` (object; required) - The *content hashes* for the event. The `lpdu` key within this
+  object is an object itself, keyed by hash algorithm with value being the encoded hash. Similarly,
+  outside of `lpdu`, `hashes` is keyed by hash algorithm with value being the encoded hash.
+  Events created within Linearized Matrix MUST specify an LPDU hash, however events created
+  externally MUST NOT set such a hash.
 
 * `signatures` (object; required) - Keyed first by domain name then by key ID, the signatures for
   the event.
@@ -326,10 +377,12 @@ An event has many other fields:
   send this event in the room. Which specific events are put here are defined by the *auth events
   selection* algorithm.
 
-* `prev_events` (array of strings; required) - The event IDs which precede the event. Note that all
-  events generated within Linearized Matrix will only ever have a single event ID here.
+* `prev_events` (array of strings; required) - The event IDs which precede the event. Events
+  created within Linearized Matrix MUST only ever have a single event ID here, however events
+  created externally MAY have one or more referenced event IDs.
 
-* `unsigned` (object; optional) - Additional metadata not covered by the signing algorithm.
+* `unsigned` (object; optional) - Additional metadata not covered by the signing algorithm. Like
+  `content`, a receiver MUST NOT trust the values to match any particular schema.
 
 Note that an event ID is not specified on the schema. Event IDs are calculated to ensure accuracy
 and consistency between servers. To calculate an event ID, calculate the *reference hash* of the
@@ -337,14 +390,14 @@ event, encode it using *URL-safe Unpadded Base64*, and prefix it with the event 
 
 If both the sender and receiver are implementing the algorithms correctly, the event ID will be
 the same. When different, the receiver will have issues accepting the event (none of the `auth_events`
-will make sense, for example). Both sender and receiver should review their algorithm implementation
-to verify everything is according to the specification in this case.
+will make sense, for example). The sender and receiver will need to review that their implementation
+matches the specification in this case.
 
 Events are treated as JSON {{!RFC8259}} within the protocol, but can be encoded and represented by
 any binary-compatible format. Additional overhead may be introduced when converting between formats,
 however.
 
-An example may be:
+An example event is:
 
 ~~~ json
 {
@@ -379,6 +432,12 @@ An example may be:
 }
 ~~~
 
+An event/PDU MUST NOT exceed 65536 bytes when formatted using [Canonical JSON](#Canonical+Json). Note
+that this includes all `signatures` on the event.
+
+Fields have no size limit unless specified above, other than the maximum 65536 bytes for the whole
+event.
+
 ### Linearized PDU
 
 The hub server is responsible for ensuring events are linearly added to the room from all participants,
@@ -391,20 +450,20 @@ they are sending to the hub:
 
 * `auth_events` - the participant cannot reliably determine what allows it to send the event.
 * `prev_events` - the participant cannot reliably know what event precedes theirs.
-* `hashes` (except `hashes.lpdu`) - top-level hashes normally cover the above two fields.
+* `hashes` (except `hashes.lpdu`) - top-level hashes cover the above two fields.
 
-The participant server *does* populate the `hashes.lpdu` object, covering a *content hash* to give
-authenticity to the sender's contents.
+The participant server *does* populate the `hashes.lpdu` object, covering a *content hash* of the
+partial event, giving authenticity to the sender's contents. The participant server additionally
+signs this partial event before sending it to the hub.
 
-The participant server will receive an echo of the fully-formed event from the hub once appended.
-To ensure authenticity, the participant server signs this "Linearized PDU" or "LPDU" using the
-normal event *signing algorithm*.
+The participant server will receive an echo of the fully-formed event from the hub once appended
+to the room.
 
 ### State Events
 
 State events track metadata for the room, such as name, topic, and members. State is keyed by a
 tuple of `type` and `state_key`, noting that an empty string is a valid state key. State in the
-room with the same key-tuple will be overwritten.
+room with the same key-tuple will be overwritten as "current state".
 
 State events are otherwise processed like regular events in the room: they're appended to the
 room history and can be referenced by that room history.
@@ -414,25 +473,9 @@ the room). In Linearized Matrix, a simple approach to calculating current state 
 over all events in order, overwriting the key-tuple for state events in an adjacent map. That
 map becomes "current state" when the loop is finished.
 
-### Size Limits
-
-A complete event (PDU) MUST NOT exceed 65536 bytes, including any signatures, and encoded as
-Canonical JSON.
-
-There are additional restrictions on the value of the following keys:
-
-* `sender` MUST NOT exceed 255 bytes (including domain).
-* `room_id` MUST NOT exceed 255 bytes.
-* `state_key` MUST NOT exceed 255 bytes.
-* `type` MUST NOT exceed 255 bytes.
-
-Some event types have additional size restrictions which are specified in the description of the
-event. Additional keys not listed above have no limit other than the implied 65536 byte limit
-for the entire event.
-
 ### Event Types
 
-Linearized Matrix defines the following event types:
+Linearized Matrix defines the following event types. The section headers are the event `type`.
 
 #### `m.room.create`
 
@@ -443,10 +486,13 @@ be an empty string.
 The `content` for a create event MUST have at least a `room_version` field to denote what set
 of algorithms the room is using.
 
+These conditions are checked as part of the [event authorization rules](#Authorization+Rules).
+
 #### `m.room.join_rules`
 
 Defines whether users can join without an invite and other similar conditions. The `state_key`
-MUST be an empty string.
+MUST be an empty string. Any other state key, including lack thereof, serve no meaning and
+are treated as though they were a custom event.
 
 The `content` for a join rules event MUST have at least a `join_rule` field to denote the
 join policy for the room. Allowable values are:
@@ -456,6 +502,8 @@ join policy for the room. Allowable values are:
 * `invite` - users must receive an invite to join.
 
 **TODO**: Describe `restricted` (and `knock_restricted`) rooms?
+
+**TODO**: What's the default?
 
 #### `m.room.member`
 
@@ -475,13 +523,13 @@ membership state for the user. Allowable values are:
 * `ban` - implies kicked/not participating. Cannot be invited or join the room without being
   unbanned first (moderator sends a kick, essentially).
 
-The *auth rules* define how these membership states interact and what legal transitions are possible.
-For example, preventing users from unbanning themselves falls under the auth rules.
+These conditions are checked as part of the [event authorization rules](#Authorization+Rules),
+as are the rules for moving between membership states.
 
 #### `m.room.power_levels`
 
 Defines what given users can and can't do, as well as which event types they are able to send.
-The enforcement of these power levels is determined by the *auth rules*.
+The enforcement of these power levels is determined by the [event authorization rules](#Authorization+Rules).
 
 The `state_key` MUST be an empty string.
 
@@ -508,6 +556,38 @@ The `content` for a power levels event SHOULD have at least the following:
 Note that if no power levels event is specified in the room then the room creator (`sender` of
 the `m.room.create` state event) has a default power level of 100.
 
+These conditions are checked as part of the [event authorization rules](#Authorization+Rules).
+
+##### Calculating Power Levels
+
+All power levels are calculated with reference to the `content` of an `m.room.power_levels`
+state event.
+
+To calculate a user's current power level:
+
+1. If `users` is present, use the power level for the user ID, if present.
+2. If `users` is not present, or the user ID is not present in `users`, use `users_default`.
+3. If `users_default` is not present, use `0`.
+
+To calculate the required power level to do an action:
+
+1. If the action (`kick`, `ban`, `invite`, or `redact`) is present, use that power level.
+2. If not present, use the default for the action (`50` for `kick`, `ban`, and `redact`, `0`
+   for `invite`).
+
+To calculate the required power level to send an event:
+
+1. If `events` is present, use the power level for the event `type`, if present.
+2. If `events` is not present, or the event `type` is not present in `events`:
+
+   1. If `state_key` is present (including empty), use `state_default`.
+
+      1. If `state_default` is not specified, use `50`.
+
+   2. If `state_key` is not present, use `events_default`.
+
+      1. If `events_default` is not specified, use `0`.
+
 #### TODO: Other events
 
 **TODO**: `m.room.name`, `m.room.topic`, `m.room.avatar`, `m.room.encryption`, `m.room.history_visibility`
@@ -517,13 +597,19 @@ the `m.room.create` state event) has a default power level of 100.
 # Initial Room Version
 
 As a whole, this document describes the `I.1` room version. Future room versions can build
-upon this version's principles (or entirely replace them) through dedicated drafts.
+upon this version's principles (or entirely replace them) through dedicated documents.
+
+Servers MUST implement support for `I.1`, and SHOULD implement other specified room versions
+as needed. Servers SHOULD use `I.1` when creating new rooms. `I.1` shall be considered "stable".
 
 **Implementation note**: Currently `I.1` is not a real thing. Use
-`org.matrix.i-d.ralston-mimi-linearized-matrix.00` when testing against other Linearized Matrix
+`org.matrix.i-d.ralston-mimi-linearized-matrix.02` when testing against other Linearized Matrix
 implementations. This string may be updated later to account for breaking changes.
 
-`I.1` shall be considered "stable", and SHOULD be used by servers when creating new rooms.
+**Implementation note**: `org.matrix.i-d.ralston-mimi-linearized-matrix.00` also exists in the
+wild, defining a set of algorithms which exist in a prior version of this document (00 and 01).
+
+**TODO**: Remove implementation notes.
 
 The hub server MUST enforce the room version's algorithms upon the room. Participant servers
 SHOULD enforce the room version's algorithm, but can opt to believe the hub server if they
@@ -548,21 +634,19 @@ There are a few aspects of an event which verify its authenticity and therefore 
 can be accepted into the room. All of these checks work with the fully-formed PDU for an
 event.
 
-First, the event has a *content hash* which covers the unredacted content of the event. The
-purpose of this hash is to ensure that the original contents are not modified, therefore if
-the hash check fails then the event is redacted before continuing processing. This removes
-any potentially malicious or malformed details from the event.
+First, the event has one or two [content hashes](#Content+Hash+Calculation), which cover
+the unredacted contents of the event. If the event is modified in any way, the hash check
+will fail on either/both of these hashes. When a check failure occurs, the event is redacted
+before event processing continues.
 
-Second, the event has a *reference hash* which covers the redacted event. This hash serves
-as the event's ID and thus any difference in calculation will result in an entirely different
-event ID.
+Second, the event has a [reference hash](#Reference+Hash+Calculation) which covers the
+redacted event, doubling as the event's ID. Any change to the event which affects this hash
+will result in an entirely different event ID being used, thus being treated as an entirely
+different event.
 
-Third, the event must be signed by the domain implied by the `sender`. In Linearized Matrix,
-this will usually be the LPDU signature discussed earlier in this document. This signature
-covers the content hash of the event.
-
-**TODO**: Except the LPDU signature doesn't cover the participant's content hash, because
-the participant doesn't have a content hash at the moment.
+Third, the event must be signed by the domain implied by the `sender`. This will either be
+a LPDU signature or full event signature depending on the presence of `hub_server`. This
+is to ensure that the event was legitimately generated by the claimed server.
 
 Finally, the event must be signed by the `hub_server` domain if present. This is to ensure
 that the event has actually been processed by the hub and isn't falsely being advertised as
@@ -570,27 +654,40 @@ sent by a hub.
 
 **TODO**: Does the hub's signature actually guard anything?
 
+These conditions are validated throughout the algorithms defined in this document, such as
+when a new event is received over a transport API and during event authorization.
+
 ## Receiving Events/PDUs
 
 When a hub receives an LPDU from a participant it adds the missing fields to create a fully
 formed PDU then sends that PDU back out to all participants, including the original sender.
 
-When a server (hub or participant) receives a PDU, it:
+A server is considered to have "received" an event when it sees it for the first time. This
+might be because the server specifically reached out to fetch that specific event, or the
+server was pushed that event through normal operation.
 
-1. Verifies the event is in a valid shape. This will mean ensuring the required schema is
-   met and of the correct type (there is a string `type`, etc) and that the size limits are
-   honoured. Note that the event may have additional fields in various places, such as at
-   the top level or within `content`: the receiver should ensure these additional fields
-   do not cause the event to be invalid. If the event fails this validation, it is dropped.
+When a server (hub or participant) receives an event, it MUST:
 
-2. Ensures the required signatures are present and valid. If the event fails this, it is
-   dropped.
+1. Verify the event is in a valid shape. In practice, this means ensuring the overall schema
+   for an event is applied, without considering specific schemas for `content`. For example,
+   ensuring a `type` is present, a string, and less than 255 characters. If an event fails
+   to meet this requirement, it is dropped/ignored.
 
-3. Ensures the event has a valid content hash. If the event's hash doesn't match, it is
-   redacted before processing further. The server will ultimately persist the redacted
-   copy.
+2. Ensure the required signatures are present and that all signatures are valid. If the event
+   has a `hub_server` field, the event MUST be signed by that server. The event MUST also be
+   signed by the server implied by the `sender`, noting that this will be an LPDU if `hub_server`
+   is present. All other signatures on the event MUST be valid for the fully-formed event.
+   If the event fails to meet this requirement, it is dropped/ignored.
 
-4. Ensures the event passes the authorization rules for the state identified by the event's
+3. Ensure the event has a valid content hashes. If the event has a `hub_server` field, it
+   MUST have a content hash which covers the LPDU. If either the LPDU or PDU content hash
+   doesn't match what the receiving server calculations, the event is redacted before further
+   processing. The server will ultimately persist the redacted copy.
+
+Additionally, a hub server MUST complete the following checks. Participant servers SHOULD
+also complete the checks, but are not required to.
+
+4. Ensure the event passes the authorization rules for the state identified by the event's
    `auth_events`. If it fails, it is rejected.
 
 5. Ensures the event passes the authorization rules for the state of the room immediately
@@ -605,8 +702,8 @@ When a server (hub or participant) receives a PDU, it:
 ## Rejection
 
 Events which are rejected are not relayed to any local clients and are not appended to the
-room in any way. Within Linearized Matrix, events which reference rejected events are
-rejected themselves.
+room in any way. Events which reference rejected events through `prev_events` or `auth_events`
+are rejected themselves.
 
 ## Soft Failure
 
@@ -636,8 +733,8 @@ of an `m.room.create` event which has no `auth_events`.
 
 ### Auth Rules Algorithm
 
-With consideration for default/calculated power levels, the ordered rules which affect
-authorization of a given event are:
+With consideration for [default/calculated power levels](#Calculating+Power+Levels), the
+ordered rules which affect authorization of a given event are:
 
 **TODO**: should we reference `m.federate`?
 
@@ -773,7 +870,7 @@ There are some consequences to these rules:
 
 **TODO**: If we want to enforce a single hub in a room, we'd do so here with auth rules.
 
-## Signing
+# Signing
 
 All servers, including hubs and participants, publish an ed25519 {{!RFC8032}} signing key
 to be used by other servers when verifying signatures.
@@ -781,7 +878,41 @@ to be used by other servers when verifying signatures.
 **TODO**: Verify RFC reference. We might be using a slightly different ed25519 key today?
 See https://hdevalence.ca/blog/2020-10-04-its-25519am
 
-### Canonical JSON
+## Signing Arbitrary Objects
+
+Though events receive a lot of signing, it is often necessary for a server to sign arbitary,
+non-event, payloads as well. For example, when authenticating a request in the server-server
+API.
+
+To sign an object, the JSON is canonically encoded without the `signatures` or `unsigned`
+fields. The bytes of the canonically encoded JSON are then signed using the ed25519 signing
+key for the server. The resulting signature is then encoded using unpadded base64.
+
+## Signing Events
+
+Signing events is very similar to signing an arbitary object, however with a note that an event
+is first redacted before signing. This ensures that later if the event were to be redacted in
+the room that the signature check still passes.
+
+Note that the content hash covers the event's contents in case of redaction.
+
+## Checking Signatures
+
+If the `signatures` field is missing, doesn't contain the entity that is expected to have done
+the signing (a server name), doesn't have a known key ID, or is otherwise structurally invalid
+then the signature check fails.
+
+If decoding the base64 fails, the check fails.
+
+If removing the `signatures` and `unsigned` properties, canonicalizing the JSON, and verifying
+the signature fails, the check fails.
+
+Otherwise, the check passes.
+
+**TODO**: Which specific signatures are required? If a server has multiple signing keys, possibly
+a combination of new and old, do we require all or some of them to sign?
+
+# Canonical JSON
 
 When signing a JSON object, such as an event, it is important that the bytes be ordered in
 the same way for everyone. Otherwise, the signatures will never match.
@@ -790,25 +921,7 @@ To canonicalize a JSON object, use {{!RFC8785}}.
 
 **TODO**: Matrix currently doesn't use RFC8785, but it should (or similar).
 
-### Signing Arbitrary Objects
-
-Though events receive a lot of signing, it is often necessary for a server to sign arbitary,
-non-event, payloads as well. For example, in Matrix's existing HTTPS+JSON transport, requests
-are signed to ensure they came from the source they claim to be.
-
-To sign an object, the JSON is canonically encoded without the `signatures` or `unsigned`
-fields. The bytes of the canonically encoded JSON are then signed using the ed25519 signing
-key for the server. The resulting signature is then encoded using unpadded base64.
-
-### Signing Events
-
-Signing events is very similar to signing an arbitary object, however with a note that an event
-is first redacted before signing. This ensures that later if the event were to be redacted in
-the room that the signature check still passes.
-
-Note that the content hash covers the event's contents in case of redaction.
-
-#### Event Redactions
+# Event Redactions
 
 All fields at the top level except the following are stripped from the event:
 
@@ -834,29 +947,13 @@ fields are stripped.
   `users`, `users_default`, and `invite`.
 * `m.room.history_visibility` retains `history_visibility`.
 
-### Checking Signatures
-
-If the `signatures` field is missing, doesn't contain the entity that is expected to have done
-the signing (a server name), doesn't have a known key ID, or is otherwise structurally invalid
-then the signature check fails.
-
-If decoding the base64 fails, the check fails.
-
-If removing the `signatures` and `unsigned` properties, canonicalizing the JSON, and verifying
-the signature fails, the check fails.
-
-Otherwise, the check passes.
-
-**TODO**: Which specific signatures are required? If a server has multiple signing keys, possibly
-a combination of new and old, do we require all or some of them to sign?
-
-## Hashes
+# Hashes
 
 An event is covered by two hashes: a content hash and a reference hash. The content hash covers the
 unredacted event to ensure it was not modified in transit. The reference hash covers the essential
 fields of the event, including content hashes, and serves as the event's ID.
 
-### Content Hash Calculation
+## Content Hash Calculation
 
 1. Remove any existing `unsigned` and `signatures` fields.
    1. If calculating an LPDU's content hash, remove any existing `hashes` field as well.
@@ -866,7 +963,7 @@ fields of the event, including content hashes, and serves as the event's ID.
 3. Hash the resulting bytes with SHA-256 {{!RFC6234}}.
 4. Encode the hash using unpadded base64.
 
-### Reference Hash Calculation
+## Reference Hash Calculation
 
 1. Redact the event.
 2. Remove `signatures` and `unsigned` fields.
@@ -874,7 +971,7 @@ fields of the event, including content hashes, and serves as the event's ID.
 4. Hash the resulting bytes with SHA-256 {{!RFC6234}}.
 5. Encode the hash using URL-safe unpadded base64.
 
-## Unpadded Base64
+# Unpadded Base64
 
 Throughout this document, "unpadded base64" is used to represent binary values as strings. Base64 is
 as specified by {{!RFC4648}}, and *unpadded* base64 simply removes any `=` padding from the resulting
@@ -1465,6 +1562,12 @@ the sending device and the event which gets emitted.
 The `m.*` namespace likely needs formal registration in some capacity.
 
 The `I.*` namespace likely needs formal registration in some capacity.
+
+Port 8448 may need formal registration.
+
+The SRV service name `matrix` may need re-registering, or a new service name assigned.
+
+The `.well-known/matrix` namespace is already registered for use by The Matrix.org Foundation C.I.C.
 
 --- back
 

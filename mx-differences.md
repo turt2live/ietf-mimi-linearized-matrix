@@ -260,3 +260,12 @@ and participants can choose their favourite, creating small clusters of LM serve
 * `GET /_matrix/key/v2/server` now returns an *optional* top-level boolean `m.linearized` field. If `true`, the
   server *only* supports Linearized Matrix and cannot handle full-mesh/DAG aspects. These servers are participants
   and sometimes hubs. The field is part of the signature.
+
+## Grammar
+
+* Room IDs must comply with [MSC1597's definition](https://github.com/matrix-org/matrix-spec-proposals/blob/rav/proposals/id_grammar/proposals/1597-id-grammar.md#room-ids-and-event-ids),
+  with the following modification:
+  ``` diff
+  - This is only enforced for v2 rooms - servers and clients wishing to support v1 rooms should be more tolerant.
+  + This is only enforced for room versions implied by the I-D - servers and clients wishing to support other room versions should be more tolerant.
+  ```
