@@ -5,7 +5,7 @@
 More Instant Messaging Interoperability                       T. Ralston
 Internet-Draft                                                M. Hodgson
 Intended status: Standards Track        The Matrix.org Foundation C.I.C.
-Expires: 19 December 2023                                   17 June 2023
+Expires: 21 December 2023                                   19 June 2023
 
 
                            Linearized Matrix
@@ -56,7 +56,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 December 2023.
+   This Internet-Draft will expire on 21 December 2023.
 
 Copyright Notice
 
@@ -77,7 +77,7 @@ Table of Contents
    1.  Introduction
    2.  Conventions and Definitions
    3.  Architecture
-     3.1.  [Server Names][int-server-names]
+     3.1.  Server Names
      3.2.  Rooms
        3.2.1.  [Room Versions][int-room-versions]
      3.3.  Users
@@ -227,11 +227,11 @@ Table of Contents
    trust between participant and hub? (participant can pick the hub it
    wants to use rather than being forced to use a single hub)
 
-3.1.  [Server Names][int-server-names]
+3.1.  Server Names
 
    Throughout this document servers are referred to as having a "domain
-   name" or "server name".  A server name MUST be compliant with RFC
-   1123 (Section 2.1) [RFC1123].
+   name" or "server name".  A server name MUST be compliant with
+   Section 2.1 of [RFC1123].
 
    *TODO*: Should we incorporate Matrix's IPv6 extension, or are we able
    to assume that everyone will be using non-literal hostnames?
@@ -385,10 +385,10 @@ Table of Contents
    user_id_localpart SHOULD be human-readable and notably MUST NOT
    contain uppercase letters.
 
-   server_name denotes the domain name (int-server-names) which
-   allocated the ID, or would allocate the ID if the user doesn't exist
-   yet.  A user ID of @alice:example.org is read as "alice on
-   example.org", similar to an email address.
+   server_name denotes the domain name (Section 3.1) which allocated the
+   ID, or would allocate the ID if the user doesn't exist yet.  A user
+   ID of @alice:example.org is read as "alice on example.org", similar
+   to an email address.
 
    Identity systems and messaging providers SHOULD NOT use a phone
    number in a localpart, as the localpart for a user ID is
@@ -1551,9 +1551,9 @@ Table of Contents
        so the target of the SRV record must prove it is a valid
        delegate/target for <[delegated_]hostname> via TLS.
 
-   2.  Section 6.2.1 of RFC 6125 [RFC6125] recommends this approach, and
-       is consistent with other applications which use SRV records (such
-       as Section 13.7.2.1 of RFC 6120/XMPP [RFC6120]).
+   2.  Section 6.2.1 of [RFC6125] recommends this approach, and is
+       consistent with other applications which use SRV records (such as
+       Section 13.7.2.1 of [RFC6120]/XMPP).
 
    Server implementations and owners should additionally note that the
    target of a SRV record MUST NOT be a CNAME, as per RFC 2782
@@ -1666,16 +1666,16 @@ Table of Contents
        normative.
 
        The format of the Authorization header matches Section 11.4 of
-       RFC 9110 [RFC9110].  The header begins with an authorization
-       scheme of X-Matrix, followed by one or more spaces, followed by
-       an (unordered) comma-separated list of parameters written as
+       [RFC9110].  The header begins with an authorization scheme of
+       X-Matrix, followed by one or more spaces, followed by an
+       (unordered) comma-separated list of parameters written as
        name=value pairs.  The names are case insensitive, though the
        values are.  The values must be enclosed in quotes if they
        contain characters which are not allowed in a token, as defined
-       by Section 5.6.2 of RFC 9110 [RFC9110].  If a value is a valid
-       token it may not be enclosed in quotes.  Quoted values MAY
-       contain backslash-escaped characters.  When parsing the header,
-       the recipient must unescape the characters.
+       by Section 5.6.2 of [RFC9110].  If a value is a valid token it
+       may not be enclosed in quotes.  Quoted values MAY contain
+       backslash-escaped characters.  When parsing the header, the
+       recipient must unescape the characters.
 
        The exact parameters are as follows.  Unknown parameters are
        ignored and MUST NOT result in authentication errors.
