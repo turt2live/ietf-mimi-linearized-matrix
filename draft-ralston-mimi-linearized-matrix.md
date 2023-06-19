@@ -163,7 +163,9 @@ This leads to two distinct roles:
 participant and hub? (participant can pick the hub it wants to use rather than being
 forced to use a single hub)
 
-## [Server Names][int-server-names]
+## Server Names
+
+[][int-server-names]
 
 Throughout this document servers are referred to as having a "domain name" or "server name".
 A server name MUST be compliant with {{!Section 2.1 of RFC1123}}.
