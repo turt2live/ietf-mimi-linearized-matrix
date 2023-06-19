@@ -79,12 +79,12 @@ Table of Contents
    3.  Architecture
      3.1.  Server Names
      3.2.  Rooms
-       3.2.1.  [Room Versions][int-room-versions]
+       3.2.1.  Room Versions
      3.3.  Users
      3.4.  Devices
      3.5.  Events
        3.5.1.  Linearized PDU
-       3.5.2.  [State Events][int-state-events]
+       3.5.2.  State Events
        3.5.3.  Event Types
    4.  Initial Room Version
    5.  MLS Considerations
@@ -92,21 +92,21 @@ Table of Contents
      6.1.  Receiving Events/PDUs
      6.2.  Rejection
      6.3.  Soft Failure
-     6.4.  [Authorization Rules][int-auth-rules]
+     6.4.  Authorization Rules
        6.4.1.  Auth Events Selection
        6.4.2.  Auth Rules Algorithm
    7.  Signing
      7.1.  Signing Arbitrary Objects
      7.2.  Signing Events
      7.3.  Checking Signatures
-   8.  [Canonical JSON][int-canonical-json]
-   9.  [Event Redactions][int-redactions]
+   8.  Canonical JSON
+   9.  Event Redactions
    10. Hashes
-     10.1.  [Content Hash Calculation][int-content-hashes]
-     10.2.  [Reference Hash Calculation][int-reference-hashes]
-   11. [Unpadded Base64][int-unpadded-base64]
+     10.1.  Content Hash Calculation
+     10.2.  Reference Hash Calculation
+   11. Unpadded Base64
    12. Hub Transfers
-   13. [Transport][int-transport]
+   13. Transport
      13.1.  API Standards
        13.1.1.  Errors
        13.1.2.  Unsupported Endpoints
@@ -115,7 +115,7 @@ Table of Contents
        13.1.5.  Rate Limiting
        13.1.6.  Trailing Slashes Matter
        13.1.7.  General Standards
-     13.2.  [Resolving Server Names][int-resolve-domain]
+     13.2.  Resolving Server Names
        13.2.1.  GET /.well-known/matrix/server
      13.3.  Request Authentication
        13.3.1.  Retrieving Server Keys
@@ -263,8 +263,8 @@ Table of Contents
    with sufficient access to the room receive events sent to that room.
 
    The different chat types are represented by rooms through state
-   events (int-state-events), which ultimately change how the different
-   algorithms in the room version (int-room-versions) behave.
+   events (Section 3.5.2), which ultimately change how the different
+   algorithms in the room version (Section 3.2.1) behave.
 
    Rooms have a single internal "Room ID" to identify them from another
    room.  The ABNF [RFC5234] grammar for a room ID is:
@@ -287,7 +287,7 @@ Table of Contents
    part of the room ID should be parsed, and cannot be assumed to be
    human-readable.
 
-3.2.1.  [Room Versions][int-room-versions]
+3.2.1.  Room Versions
 
    *TODO*: We should consider naming this something else.
 
@@ -326,7 +326,7 @@ Table of Contents
    A server is capable of supporting multiple room versions at a time.
    The transport API decouples specific details regarding room versions
    from the wire formats.  For example, events are treated as JSON blobs
-   in Linearized Matrix's server-server API (int-transport).
+   in Linearized Matrix's server-server API (Section 13).
 
    Room versions are normally specified using a dedicated document.  An
    example of this can be found in the existing Matrix Spec Change
@@ -436,7 +436,7 @@ Table of Contents
 
    *  state_key (string; optional) - A UTF-8 [RFC3629] string to further
       distinguish an event type from other related events.  Only
-      specified on State Events (int-state-events).  Can be empty.  This
+      specified on State Events (Section 3.5.2).  Can be empty.  This
       MUST NOT exceed 255 characters.
 
    *  sender (string; required) - The user ID which is sending this
@@ -535,8 +535,8 @@ Table of Contents
    }
 
    An event/PDU MUST NOT exceed 65536 bytes when formatted using
-   Canonical JSON (int-canonical-json).  Note that this includes all
-   signatures on the event.
+   Canonical JSON (Section 8).  Note that this includes all signatures
+   on the event.
 
    Fields have no size limit unless specified above, other than the
    maximum 65536 bytes for the whole event.
@@ -570,7 +570,7 @@ Table of Contents
    The participant server will receive an echo of the fully-formed event
    from the hub once appended to the room.
 
-3.5.2.  [State Events][int-state-events]
+3.5.2.  State Events
 
    State events track metadata for the room, such as name, topic, and
    members.  State is keyed by a tuple of type and state_key, noting
@@ -602,7 +602,7 @@ Table of Contents
    field to denote what set of algorithms the room is using.
 
    These conditions are checked as part of the event authorization rules
-   (int-auth-rules).
+   (Section 6.4).
 
 3.5.3.2.  m.room.join_rules
 
@@ -652,14 +652,13 @@ Table of Contents
       essentially).
 
    These conditions are checked as part of the event authorization rules
-   (int-auth-rules), as are the rules for moving between membership
-   states.
+   (Section 6.4), as are the rules for moving between membership states.
 
 3.5.3.4.  m.room.power_levels
 
    Defines what given users can and can't do, as well as which event
    types they are able to send.  The enforcement of these power levels
-   is determined by the event authorization rules (int-auth-rules).
+   is determined by the event authorization rules (Section 6.4).
 
    The state_key MUST be an empty string.
 
@@ -703,9 +702,9 @@ Table of Contents
    power level of 100.
 
    These conditions are checked as part of the event authorization rules
-   (int-auth-rules).
+   (Section 6.4).
 
-3.5.3.4.1.  [Calculating Power Levels][int-calc-power-levels]
+3.5.3.4.1.  Calculating Power Levels
 
    All power levels are calculated with reference to the content of an
    m.room.power_levels state event.
@@ -797,17 +796,17 @@ Table of Contents
    therefore whether it can be accepted into the room.  All of these
    checks work with the fully-formed PDU for an event.
 
-   First, the event has one or two content hashes (int-content-hashes),
-   which cover the unredacted contents of the event.  If the event is
-   modified in any way, the hash check will fail on either/both of these
-   hashes.  When a check failure occurs, the event is redacted before
-   event processing continues.
+   First, the event has one or two content hashes (Section 10.1), which
+   cover the unredacted contents of the event.  If the event is modified
+   in any way, the hash check will fail on either/both of these hashes.
+   When a check failure occurs, the event is redacted before event
+   processing continues.
 
-   Second, the event has a reference hash (int-reference-hashes) which
-   covers the redacted event, doubling as the event's ID.  Any change to
-   the event which affects this hash will result in an entirely
-   different event ID being used, thus being treated as an entirely
-   different event.
+   Second, the event has a reference hash (Section 10.2) which covers
+   the redacted event, doubling as the event's ID.  Any change to the
+   event which affects this hash will result in an entirely different
+   event ID being used, thus being treated as an entirely different
+   event.
 
    Third, the event must be signed by the domain implied by the sender.
    This will either be a LPDU signature or full event signature
@@ -892,7 +891,7 @@ Table of Contents
    clients nor be used in auth_events.  The event is otherwise handled
    as per usual.
 
-6.4.  [Authorization Rules][int-auth-rules]
+6.4.  Authorization Rules
 
    These are the rules which govern whether an event is accepted into
    the room, depending on the state events surrounding that event.  A
@@ -922,9 +921,9 @@ Table of Contents
 
 6.4.2.  Auth Rules Algorithm
 
-   With consideration for default/calculated power levels (int-calc-
-   power-levels), the ordered rules which affect authorization of a
-   given event are:
+   With consideration for default/calculated power levels
+   (Section 3.5.3.4.1), the ordered rules which affect authorization of
+   a given event are:
 
    *TODO*: should we reference m.federate?
 
@@ -1133,8 +1132,8 @@ Table of Contents
    To sign an object, the JSON is canonically encoded without the
    signatures or unsigned fields.  The bytes of the canonically encoded
    JSON are then signed using the ed25519 signing key for the server.
-   The resulting signature is then encoded using unpadded base64 (int-
-   unpadded-base64).
+   The resulting signature is then encoded using unpadded base64
+   (Section 11).
 
 7.2.  Signing Events
 
@@ -1164,7 +1163,7 @@ Table of Contents
    multiple signing keys, possibly a combination of new and old, do we
    require all or some of them to sign?
 
-8.  [Canonical JSON][int-canonical-json]
+8.  Canonical JSON
 
    When signing a JSON object, such as an event, it is important that
    the bytes be ordered in the same way for everyone.  Otherwise, the
@@ -1175,7 +1174,7 @@ Table of Contents
    *TODO*: Matrix currently doesn't use RFC8785, but it should (or
    similar).
 
-9.  [Event Redactions][int-redactions]
+9.  Event Redactions
 
    All fields at the top level except the following are stripped from
    the event:
@@ -1224,7 +1223,7 @@ Table of Contents
    fields of the event, including content hashes, and serves as the
    event's ID.
 
-10.1.  [Content Hash Calculation][int-content-hashes]
+10.1.  Content Hash Calculation
 
    1.  Remove any existing unsigned and signatures fields.
 
@@ -1240,7 +1239,7 @@ Table of Contents
 
    4.  Encode the hash using unpadded base64.
 
-10.2.  [Reference Hash Calculation][int-reference-hashes]
+10.2.  Reference Hash Calculation
 
    1.  Redact the event.
 
@@ -1252,7 +1251,7 @@ Table of Contents
 
    5.  Encode the hash using URL-safe unpadded base64.
 
-11.  [Unpadded Base64][int-unpadded-base64]
+11.  Unpadded Base64
 
    Throughout this document, "unpadded base64" is used to represent
    binary values as strings.  Base64 is as specified by [RFC4648], and
@@ -1275,7 +1274,7 @@ Table of Contents
 
    *TODO*: Is this section better placed in the MSC for now?
 
-13.  [Transport][int-transport]
+13.  Transport
 
    Servers need to be able to communicate with each other to share
    events and other information about rooms.  This document specifies a
@@ -1413,7 +1412,7 @@ Table of Contents
    Unless otherwise specified, requests made to endpoints with a
    trailing slash are to be treated as unknown endpoints by servers.
    Similarly, all endpoints in this document assume the resolved domain
-   (int-resolve-domain) does _not_ contain a trailing slash.
+   (Section 13.2) does _not_ contain a trailing slash.
 
    A "base URL" for a server is, for example, https://example.org.
 
@@ -1432,7 +1431,7 @@ Table of Contents
    that endpoint.  This gives opportunity to introduce breaking changes
    without raising an overall specification version.
 
-13.2.  [Resolving Server Names][int-resolve-domain]
+13.2.  Resolving Server Names
 
    In order to make a request to another server, the caller needs to
    know where that server is located.
