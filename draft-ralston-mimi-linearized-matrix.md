@@ -36,8 +36,11 @@ author:
     email: matthew@matrix.org
 
 normative:
+  RFC1123:
+  RFC6125:
 
 informative:
+  RFC6120:
   MSC3995:
     target: https://github.com/matrix-org/matrix-spec-proposals/pull/3995
     title: "MSC3995: [WIP] Linearized Matrix"
@@ -166,7 +169,7 @@ forced to use a single hub)
 ## Server Names {#int-server-names}
 
 Throughout this document servers are referred to as having a "domain name" or "server name".
-A server name MUST be compliant with {{!Section 2.1 of RFC1123}}.
+A server name MUST be compliant with {{Section 2.1 of RFC1123}}.
 
 **TODO**: Should we incorporate Matrix's IPv6 extension, or are we able to assume that
 everyone will be using non-literal hostnames?
@@ -979,7 +982,7 @@ string.
 
 Implementations SHOULD accept input with or without padding on base64 values.
 
-{{!Section 5 of RFC4648}} describes *URL-safe* base64. The same changes are adopted here. Namely, the
+{{Section 5 of RFC4648}} describes *URL-safe* base64. The same changes are adopted here. Namely, the
 62nd and 63rd characters are replaced with `-` and `_` respectively. The unpadded behaviour is as
 described above.
 
@@ -1212,8 +1215,8 @@ We require `<[delegated_]hostname>` rather than `<srv_hostname>` in Steps 3.3 an
 
 1. DNS is largely insecure (not all domains use DNSSEC {{?RFC9364}}), so the target of the SRV record must
    prove it is a valid delegate/target for `<[delegated_]hostname>` via TLS.
-2. {{!Section 6.2.1 of RFC6125}} recommends this approach, and is consistent with other applications
-   which use SRV records (such as {{?Section 13.7.2.1 of RFC6120}}/XMPP).
+2. {{Section 6.2.1 of RFC6125}} recommends this approach, and is consistent with other applications
+   which use SRV records (such as {{Section 13.7.2.1 of RFC6120}}/XMPP).
 
 Server implementations and owners should additionally note that the target of a SRV record MUST NOT be a CNAME,
 as per RFC 2782 {{!RFC2782}}:
