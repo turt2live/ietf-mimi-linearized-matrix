@@ -163,9 +163,7 @@ This leads to two distinct roles:
 participant and hub? (participant can pick the hub it wants to use rather than being
 forced to use a single hub)
 
-## Server Names
-
-[][int-server-names]
+## Server Names {#int-server-names}
 
 Throughout this document servers are referred to as having a "domain name" or "server name".
 A server name MUST be compliant with {{!Section 2.1 of RFC1123}}.
@@ -305,7 +303,7 @@ Examples:
 
 `user_id_localpart` SHOULD be human-readable and notably MUST NOT contain uppercase letters.
 
-`server_name` denotes the [domain name](int-server-names) which allocated the ID, or would allocate
+`server_name` denotes the domain name ({{int-server-names}}) which allocated the ID, or would allocate
 the ID if the user doesn't exist yet. A user ID of `@alice:example.org` is read as "alice on
 example.org", similar to an email address.
 
@@ -1319,11 +1317,11 @@ present, but should not include the hostname or `https:` scheme.
 
    Linebreaks within `Authorization` are for clarity and are non-normative.
 
-   The format of the Authorization header matches {{!Section 11.4 of RFC9110}}. The header begins with an
+   The format of the Authorization header matches {{Section 11.4 of RFC9110}}. The header begins with an
    authorization scheme of `X-Matrix`, followed by one or more spaces, followed by an (unordered) comma-separated
    list of parameters written as name=value pairs. The names are case insensitive, though the values are. The values
    must be enclosed in quotes if they contain characters which are not allowed in a `token`, as defined by
-   {{!Section 5.6.2 of RFC9110}}. If a value is a valid `token` it may not be enclosed in quotes. Quoted values
+   {{Section 5.6.2 of RFC9110}}. If a value is a valid `token` it may not be enclosed in quotes. Quoted values
    MAY contain backslash-escaped characters. When parsing the header, the recipient must unescape the characters.
 
    The exact parameters are as follows. Unknown parameters are ignored and MUST NOT result in authentication errors.
