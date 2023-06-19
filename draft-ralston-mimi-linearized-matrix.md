@@ -39,6 +39,7 @@ normative:
   RFC6125:
   RFC4291:
   RFC4648:
+  RFC1123:
 
 informative:
   RFC6120:
