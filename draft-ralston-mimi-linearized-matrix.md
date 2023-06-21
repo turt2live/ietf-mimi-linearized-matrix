@@ -891,13 +891,32 @@ There are some consequences to these rules:
 
 **TODO**: If we want to enforce a single hub in a room, we'd do so here with auth rules.
 
-# Signing
+# Signing {#int-signing}
 
 All servers, including hubs and participants, publish an ed25519 {{!RFC8032}} signing key
 to be used by other servers when verifying signatures.
 
 **TODO**: Verify RFC reference. We might be using a slightly different ed25519 key today?
 See https://hdevalence.ca/blog/2020-10-04-its-25519am
+
+Each key ID consists of an algorithm name and version. Signing keys MUST use an algorithm
+of `ed25519` (and therefore MUST be an ed25519 key). The key version MUST be valid under
+the following ABNF {{!RFC5234}}:
+
+~~~
+key_version = 1*key_version_char
+key_version_char = ALPHA / DIGIT / "_"
+~~~
+
+An algorithm and version combined is a "key ID", deliminated by `:` as per the following
+ABNF {{!RFC5234}}:
+
+~~~
+key_id = key_algorithm ":" key_version
+key_algorithm = "ed25519"
+~~~
+
+Additional key algorithms may be supported by future documents.
 
 ## Signing Events {#int-signing-events}
 
@@ -1018,19 +1037,18 @@ area are: who signs the transfer event? who *sends* the transfer event? how does
 
 # Transport {#int-transport}
 
-Servers need to be able to communicate with each other to share events and other information about rooms.
 This document specifies a wire transport which uses JSON {{!RFC8259}} over HTTPS {{!RFC9110}}. Servers
-MUST provide a TLS certificate signed by a known Certificate Authority.
+MUST support a minimum of HTTP/2 {{!RFC9113}} and TLS 1.3 {{!RFC8446}}.
 
-Requesting servers are ultimately responsible for the Certificate Authorities they place trust in, however
-servers SHOULD trust authorities which would commonly be trusted by an operating system or web browser.
+## TLS Certificates {#int-tls}
 
-Servers SHOULD respect SNI when making requests where possible: a SNI should be sent for the certificate
-which is expected.
-
-**TODO**: This is where we'd mention IPs again, if we choose to accept those as identifiers.
+Servers MUST provide a TLS certificate signed by a known Certificate Authority. Requesting servers
+are ultimately responsible for the Certificate Authorities they place trust in, however servers
+SHOULD trust authorities which would commonly be trusted by an operating system or web browser.
 
 ## API Standards
+
+### Requests and Responses
 
 All HTTP `POST` and `PUT` endpoints require the sending server to supply a (potentially empty) JSON
 object as the request body. Requesting servers SHOULD supply a `Content-Type` header of `application/json`
@@ -1041,9 +1059,19 @@ of `application/json`.
 
 All JSON data, in requests or responses, MUST be encoded using UTF-8 {{!RFC3629}}.
 
-API endpoints should be roughly RESTful in nature.
+All endpoints in this document do *not* support trailing slashes on them. When such a request is
+encountered, it MUST be handled as an unknown endpoint ({{int-unknown-endpoints}}). Examples include:
 
-**TODO**: Specify HTTP and TLS version. Probably http/2 and tls 1.3?
+* `https://example.org/_matrix/path` - valid.
+* `https://example.org/_matrix/path/` - unknown/invalid.
+* `https://example.org//_matrix/path` - unknown/invalid (domain also can't have a trailing slash).
+* `https://example.org//_matrix/path/` - doubly unknown/invalid.
+
+Servers (both hub and participants) MUST implement all endpoints unless otherwise specified.
+
+Most endpoints have a version number as part of the path. This version number is that endpoint's version,
+allowing for breaking changes to be made to the schema of that endpoint. For clarity, the version number
+is *not* representative of an API version.
 
 ### Errors
 
@@ -1081,7 +1109,7 @@ Some common error codes are:
   again.
 * `M_TOO_LARGE` - The request was too large for the receiver to handle.
 
-### Unsupported Endpoints
+### Unsupported Endpoints {#int-unknown-endpoints}
 
 If a server receives a request for an unsupported or otherwise unknown endpoint, the server MUST respond
 with an HTTP `404 Not Found` status code and `M_UNRECOGNIZED` error code. If the request was for a known
@@ -1125,47 +1153,26 @@ retrying, in milliseconds.
 }
 ~~~
 
-### Trailing Slashes Matter
-
-Unless otherwise specified, requests made to endpoints with a trailing slash are to be treated as unknown
-endpoints by servers. Similarly, all endpoints in this document assume the resolved domain ({{int-resolve-domain}})
-does *not* contain a trailing slash.
-
-A "base URL" for a server is, for example, `https://example.org`.
-
-An endpoint is specified as `/path/to/resource`.
-
-Together, this makes the "request URL" `https://example.org/path/to/resource` with no trailing slash.
-
-### General Standards
-
-Unless otherwise described, all servers are required to implement all endpoints in this document. Similarly,
-all properties in request and response bodies are required unless otherwise noted.
-
-The version number included in an endpoint is strictly in relation to that endpoint. This gives opportunity
-to introduce breaking changes without raising an overall specification version.
-
 ## Resolving Server Names {#int-resolve-domain}
 
-In order to make a request to another server, the caller needs to know where that server is located.
+Before making an API request, the caller MUST resolve a server name ({{int-server-names}}) to an IP
+address and port, suitable for HTTPS {{!RFC9110}} traffic.
 
-Similar to email, it is strongly recommended that a server uses their public-facing domain name as their
-server name. This will cause identifiers like user IDs to have the shape `@alice:example.org`. Servers
-SHOULD NOT use `matrix.example.org`, `linearized-matrix.example.org`, etc as their server name.
+A server MAY change the IP/port combination used for API endpoints using SRV DNS records {{!RFC2782}}.
+Servers MAY additionally change which TLS certificate is presented by using `.well-known` delegation.
 
-A server owner might not wish to serve its Linearized Matrix traffic off of the domain implied by its
-users' IDs. A server can change the IP/port for traffic using SRV DNS records {{!RFC2782}}, or can change
-the entire domain name using `.well-known` delegation described below.
+`.well-known` delegation (step 3 below) is recommended for its ease of configuration over SRV DNS records.
 
-Server operators should note that `.well-known` delegation is generally recommended as it is both easier
-to set up and gives better control over where traffic is sent. It also changes which TLS certificate must
-be presented for HTTP communications.
+The target server MUST present a valid TLS certificate ({{int-tls}}) for the name described in each
+step. Similarly, the requesting server MUST use an HTTP `Host` header matching the description in each
+step.
 
-The following steps are used to resolve a server name to an IP address and port. The target server MUST
-present a valid TLS certificate for the name described in each step. The requesting server MUST use a
-HTTP `Host` header with the value described in each step.
+Server developers should note that many of the DNS requirements for the steps below are typically handled
+by the software language or library implicitly. It is rare that a DNS A record needs to be resolved manually,
+for example.
 
-As a reminder, a server name consists of `<hostname>[:<port>]`.
+Per {{int-server-names}}, a server name consists of `<hostname>[:<port>]`. The steps to convert that
+server name to an IP address and port are:
 
 1. If `<hostname>` is an IP literal, then that IP address is to be used together with the given port
    number, or 8448 if no port is given.
@@ -1183,7 +1190,7 @@ As a reminder, a server name consists of `<hostname>[:<port>]`.
    Host header: `<hostname>:<port>`
 
 3. If `<hostname>` is not an IP literal, a regular (non-Matrix) HTTPS request is made to
-   `https://<hostname>/.well-known/matrix/server`, expecting the schema defined by the implied endpoint.
+   `https://<hostname>/.well-known/matrix/server`, expecting the schema defined by {{int-wellknown}}.
    If the response is invalid (bad/not JSON, missing properties, non-200 response, etc), skip to Step 4.
    If the response is valid, the `m.server` property is parsed as `<delegated_hostname>[:<delegated_port>]`.
 
@@ -1248,11 +1255,13 @@ as per RFC 2782 {{!RFC2782}}:
 
 {{!RFC1034}} {{!RFC2181}}
 
-### `GET /.well-known/matrix/server`
+### `GET /.well-known/matrix/server` {#int-wellknown}
 
 Used by the server name resolution approach to determine a delegated hostname for a given server. 30x HTTP
 redirection MUST be followed, though loops SHOULD be avoided. Normal X.509 certificate validation is applied
 to this endpoint (not the specific validation required by the server name resolution steps) {{?RFC5280}}.
+
+This endpoint MAY be implemented by servers (it is optional).
 
 **Rate-limited**: No.
 
@@ -1280,95 +1289,81 @@ are present.
 Error responses (non-200) SHOULD be cached for no longer than 1 hour. Callers SHOULD exponentially back off (to a
 defined limit) upon receiving repeated error responses.
 
-## Request Authentication
+## Request Authentication {#int-transport-auth}
 
 Most endpoints in this document require authentication to prove which server is making the request. This is done
 using public key digital signatures.
 
-The request method, target, and body are signed by wrapping them in a JSON object then using the "Signing Arbitrary
-Objects" algorithm. The resulting signatures are added as an `Authorization` header with an auth scheme of `X-Matrix`.
+The request method, target, and body are represented as a JSON object, signed, and appended as an HTTP
+`Authorization` header with an auth scheme of `X-Matrix`.
 
-Note that the target (`uri`) field should include the full path, including the `?` and any query parameters if
-present, but should not include the hostname or `https:` scheme.
+The object to be signed is:
 
-**TODO**: Define an ordering algorithm for the query string.
+~~~ json
+{
+   "method": "GET",
+   "uri": "/path/to/endpoint?with_qs=true",
+   "origin": "requesting.server.name.example.org",
+   "destination": "target.server.name.example.org",
+   "content": {"json_request_body": true}
+}
+~~~
 
-1. Sign the following JSON template:
+`method` is the HTTP request method, capitalized. `uri` is the full request path, beginning with the leading slash
+and containing the query string (if present). `uri` does not contain the `https:` scheme or hostname.
 
-   ~~~ json
-   {
-      "method": "GET",
-      "uri": "/path/to/endpoint?with_qs=true",
-      "origin": "requesting.server.name.example.org",
-      "destination": "target.server.name.example.org",
-      "content": {"json_request_body": true}
-   }
-   ~~~
+**TODO**: Define an ordering algorithm for the query string (if we need to?).
 
-   `content` is simply the JSON-encoded request body. For `GET` requests or ones without a request body, use an empty
-   JSON object instead.
+`origin` and `destination` are the sender and receiver server names ({{int-server-names}}), respectively.
 
-   In both `origin` and `destination`, the server name is the one *before* resolution/delegation. The same applies to
-   the remainder of the authorization process.
+`content` is the JSON-encoded request body. When a request doesn't contain a body, such as in `GET` requests, use
+an empty JSON object.
 
-2. Append the signatures to the object:
+That object is then signed ({{int-signing-objects}}) by the requesting server. The resulting signature is appended
+as an `Authentication` HTTP header on the request:
 
-   ~~~ json
-   {
-      "method": "GET",
-      "uri": "/path/to/endpoint?with_qs=true",
-      "origin": "requesting.server.name.example.org",
-      "destination": "target.server.name.example.org",
-      "content": {"json_request_body": true},
-      "signatures": {
-         "requesting.server.name.example.org": {
-            "ed25519:0": "<unpadded base64 encoded signature>"
-         }
-      }
-   }
-   ~~~
+~~~
+GET /path/to/endpoint?with_qs=true
+Authorization: X-Matrix origin="requesting.server.name.example.org",
+   destination="target.server.name.example.org",
+   key="ed25519:0",
+   sig="<unpadded base64 encoded signature>"
+Content-Type: application/json
 
-3. Add the signature header, copying the implied field values:
+{"json_request_body": true}
+~~~
 
-   ~~~
-   GET /path/to/endpoint?with_qs=true
-   Authorization: X-Matrix origin="requesting.server.name.example.org",
-      destination="target.server.name.example.org",
-      key="ed25519:0",
-      sig="<unpadded base64 encoded signature>"
-   Content-Type: application/json
+Linebreaks within `Authorization` are for clarity and are non-normative.
 
-   {"json_request_body": true}
-   ~~~
+The format of the Authorization header matches {{Section 11.4 of RFC9110}}. The header begins with an
+authorization scheme of `X-Matrix`, followed by one or more spaces, followed by an (unordered) comma-separated
+list of parameters written as name=value pairs. The names are case insensitive, though the values are. The values
+must be enclosed in quotes if they contain characters which are not allowed in a `token`, as defined by
+{{Section 5.6.2 of RFC9110}}. If a value is a valid `token` it may not be enclosed in quotes. Quoted values
+MAY contain backslash-escaped characters. When parsing the header, the recipient must unescape the characters.
 
-   Linebreaks within `Authorization` are for clarity and are non-normative.
+The exact parameters are:
 
-   The format of the Authorization header matches {{Section 11.4 of RFC9110}}. The header begins with an
-   authorization scheme of `X-Matrix`, followed by one or more spaces, followed by an (unordered) comma-separated
-   list of parameters written as name=value pairs. The names are case insensitive, though the values are. The values
-   must be enclosed in quotes if they contain characters which are not allowed in a `token`, as defined by
-   {{Section 5.6.2 of RFC9110}}. If a value is a valid `token` it may not be enclosed in quotes. Quoted values
-   MAY contain backslash-escaped characters. When parsing the header, the recipient must unescape the characters.
+* `origin` - The name of the sending server. MUST match the `origin` in the signed JSON.
+* `destination` - The name of the receiving server. MUST match the `destination` in the signed JSON.
+* `key` - The ID, including algorithm name, of the sending server's signing key used to sign the request.
+* `signature` - The unpadded base64 ({{int-unpadded-base64}}) encoded signature from step 2.
 
-   The exact parameters are as follows. Unknown parameters are ignored and MUST NOT result in authentication errors.
+Unknown parameters are ignored and MUST NOT result in authentication errors.
 
-   * `origin` - The name of the sending server. MUST match the `origin` in the signed JSON.
-   * `destination` - The name of the receiving server. MUST match the `destination` in the signed JSON.
-   * `key` - The ID, including algorithm name, of the sending server's signing key used to sign the request.
-   * `signature` - The unpadded base64 ({{int-unpadded-base64}}) encoded signature from step 2.
+A receiving server validates the Authorization header by composing the JSON object represented above and checking
+the sender's signature ({{int-checking-signatures}}). Note that to comply with {{int-checking-signatures}} the
+receiver may need to append a `signatures` field to the JSON object manually. All signatures MUST use an unexpired
+key at the time of the request ({{int-transport-keys-validity}}).
 
-A receiving server validates the Authorization header by composing the JSON object represented in step 2 (all fields
-filled in, sending server's signature added) and validating the signature per elsewhere in this document.
+A server with multiple signing keys SHOULD include an `Authorization` header for each signing key.
 
-Responses from a server are authenticated using TLS and do not have additional signing requirements.
+If an endpoint requires authentication, servers MUST:
+* Validate all presented `Authorization` headers.
+* Ensure at least one `Authorization` header is present.
 
-A server with multiple signing keys SHOULD include an `Authorization` header for each signing key. Receiving servers
-MUST validate all `Authorization` headers. A failure in any of the headers MUST result in an authentication error,
-if the endpoint requires authentication. Failure to provide an `Authorization` header on an endpoint MUST result in
-an authentication error if the endpoint requires authentication. `Authentication` headers are ignored on endpoints
-which do not require authentication.
-
-An authentication error is a HTTP `401 Unauthorized` status code and `M_FORBIDDEN` error code. For example:
+If either fails (lack of headers, or any of the headers fail validation), the request MUST be rejected with an
+HTTP `401 Unauthorized` status code and `M_FORBIDDEN` error code:
 
 ~~~ json
 {
@@ -1377,29 +1372,42 @@ An authentication error is a HTTP `401 Unauthorized` status code and `M_FORBIDDE
 }
 ~~~
 
+If an endpoint does *not* require authentication, `Authorization` headers are ignored entirely.
+
+Responses from a server are authenticated using TLS and do not have additional signing requirements.
+
 ### Retrieving Server Keys {#int-transport-get-server-keys}
 
-A server's signing keys are published under `/_matrix/key/v2/server` and can be queried through notary
-servers under `/_matrix/key/v2/query/:serverName`. Notary servers simply call `/_matrix/key/v2/server`
-on the target server, sign the response, and cache it for some time. This allows the target server to
-go offline for a period of time without affecting their previously sent events.
-
-The signing keys published by a server are used by request authentication, event/LPDU signing, and other
-places where a server needs to sign a JSON object.
+A server's signing keys are published under `/_matrix/key/v2/server` ({{int-api-self-key}}) and can be queried
+through notary servers in two ways: {{int-api-notary-query}} and {{int-api-notary-query-bulk}}. Notary servers
+implicitly call `/_matrix/key/v2/server` when queried, signing and caching the response for some time. This
+allows the target server to offline without affecting their previously sent events.
 
 The approach used here is borrowed from the Perspectives Project {{PerspectivesProject}}, modified to
 cover the server's ed25519 keys and to use JSON instead of XML. The advantage of this system is it allows
 each server to pick which notaries it trusts, and can contact multiple notaries to corroborate the keys
 returned by any given notary.
 
-All servers MUST implement the `/_matrix/key/v2` endpoints. This is to prevent only a few servers
-implementing notary capabilities, which would make the system no better than having a single trusted
-root.
+Servers SHOULD attempt to contact the target server directly before using a notary server.
 
 Note that these endpoints operate outside the context of a room: a server does not need to participate
-in any shared rooms to be used as a notary by another server.
+in any shared rooms to be used as a notary by another server, and does not need to use the hub as a notary.
 
-#### `GET /_matrix/key/v2/server`
+#### Validity {#int-transport-keys-validity}
+
+A server's keys are only valid for a short time, denoted by `valid_until_ts`. Around the `valid_until_ts`
+timestamp, a server would re-fetch the server's keys to discover any changes. In the vast majority of cases,
+only `valid_until_ts` changes between requests (keys are long-lived, but validated frequently).
+
+`valid_until_ts` MUST be handled as the lesser of `valid_until_ts` and 7 days into the future, preventing
+attackers from publishing long-lived keys that are unable to be revoked. Servers SHOULD use a timestamp
+approximately 12 hours into the future when responding with their keys.
+
+**TODO**: What does it mean to require events have an `origin_server_ts` which is less than that of
+`valid_until_ts`? Do we reject the event, soft-fail it, or do something else? Do we only do this on the
+hub?
+
+#### `GET /_matrix/key/v2/server` {#int-api-self-key}
 
 Retrieves the server's signing keys. The server can have any number of active or inactive keys at a
 time, but SHOULD have at least 1 active key at all times.
@@ -1436,45 +1444,43 @@ This HTTP endpoint does not specify any request parameters or body.
 }
 ~~~
 
-`server_name` MUST be the name of the server (before resolution) which is returning the keys.
+`server_name` MUST be the name of the server ({{int-server-names}}) which is returning the keys.
 
 `valid_until_ts` is the integer timestamp (milliseconds since Unix epoch) for when the server's keys
-should be  re-fetched. When processing the response, `valid_until_ts` MUST be treated as the lesser of
-`valid_until_ts` and 7  days into the future to prevent attackers publishing long-lived keys the server
-is unable to revoke.
+should be re-fetched. See {{int-transport-keys-validity}}.
 
-**TODO**: What does it mean to require events have an `origin_server_ts` which is less than that of
-`valid_until_ts`? Do we reject the event, soft-fail it, or do something else? Do we only do this on the
-hub?
+`m.linearized` is an optional boolean, but SHOULD be set to `true`. Semantics for `false` and not
+being present apply to contexts outside of this document.
 
-`m.linearized` is an optional boolean, but SHOULD be present and set to `true`. Semantics for `false`
-and not being present apply to contexts outside of this document.
-
-`verify_keys` are the current signing keys for the server, keyed by the combined key algorithm and
-version.  Together, the algorithm and version form a "Key ID", used throughout this document. The
-algorithm MUST be  `ed25519`. The version MUST ONLY have characters consisting of `[a-zA-Z0-9_]`.
-The algorithm and version are joined with a `:`.
-
-The object value for each key ID under `verify_keys` is simply the `key`, consisting of the unpadded
+`verify_keys` are the current signing keys for the server, keyed by key ID ({{int-signing}}). The
+object value for each key ID under `verify_keys` is simply the `key`, consisting of the unpadded
 base64 encoded public key matching that algorithm and version.
 
 `old_verify_keys` are similar to `verify_keys`, but have an additional required `expired_ts` property
-to denote when the key ceased usage.
+to denote when the key ceased usage. This overrides `valid_until_ts` for the purposes of
+{{int-transport-keys-validity}} at an individual key level.
 
 **TODO**: What about events sent with `old_verify_keys`?
 
-For request authentication, only keys listed under `verify_keys` are honoured. If another key is
-referenced by the `Authorization` headers, the request fails authentication.
+For request authentication ({{int-transport-auth}}), only keys listed under `verify_keys` are honoured.
+If another key is referenced by the `Authorization` headers, the request fails authentication.
 
-Notaries should cache a 200 OK response for half of its lifetime to avoid serving stale values.
-Responding servers should avoid returning responses which expire in less than an hour to avoid
-repeated requests. Requesting servers should limit how frequently they query for keys to avoid
+Notaries SHOULD cache a 200 OK response for half of its lifetime to avoid serving stale values.
+Responding servers SHOULD avoid returning responses which expire in less than an hour to avoid
+repeated requests. Requesting servers SHOULD limit how frequently they query for keys to avoid
 flooding a server with requests.
 
-If the server fails to respond to this request, notaries should continue to return the last response
-they received from the server so that the signatures of old events can still be checked.
+If the server fails to respond to this request, notaries SHOULD continue to return the last response
+they received from the server so that the signatures of old events can still be checked, even if that
+response is no longer considered valid ({{int-transport-keys-validity}}).
 
-#### `GET /_matrix/key/v2/query/:serverName`
+Servers are capable of rotating their keys without populating `old_verify_keys`, though this can cause
+reliability issues if other servers don't see both keys. Notaries SHOULD cache responses with distinct
+key IDs indefinitely. For example, if a server has `ed25519:0` and `ed25519:1` on its first response,
+and a later response returns `ed25519:1` and `ed25519:2`, the notary should cache both responses. This
+gives servers an ability to validate `ed25519:0` for old events in a room.
+
+#### `GET /_matrix/key/v2/query/:serverName` {#int-api-notary-query}
 
 This is one of two endpoints for querying a server's keys through another server. The notary (receiving)
 server will attempt to refresh its cached copy of the target server's keys through `/_matrix/key/v2/server`,
@@ -1506,19 +1512,17 @@ Request body: None applicable.
 }
 ~~~
 
-`server_keys` is the array of keys (see `/_matrix/key/v2/server` response format) for the target server. If
+`server_keys` is the array of keys (see {{int-api-self-key}} response format) for the target server. If
 the target server could not be reached and the notary has no cached keys, this array is empty. If the keys
-do not meet `minimum_valid_until_ts`, they are not included.
+do not meet `minimum_valid_until_ts` per {{int-transport-keys-validity}}, they are not included.
 
 The notary server MUST sign each key returned in `server_keys` by at least one of its own signing keys. The
 calling server MUST validate all signatures on the objects.
 
-**TODO**: We need to specify the caching semantics more clearly. We also should cover why a query can return
-multiple keys, and the situations leading to those cases. In short, it's for validating old events.
+#### `POST /_matrix/key/v2/query` {#int-api-notary-query-bulk}
 
-#### `POST /_matrix/key/v2/query`
-
-A bulk version of `/_matrix/key/v2/query/:serverName`. The same behaviour applies to this endpoint.
+A bulk version of `/_matrix/key/v2/query/:serverName` ({{int-api-notary-query}}). The same behaviour
+applies to this endpoint.
 
 **Rate-limited**: No.
 
@@ -1547,14 +1551,14 @@ maps to another object keyed by Key ID, mapping to the specific criteria. If no 
 request, all of the server's known keys are queried. If no servers are given in the request, the response
 MUST contain an empty `server_keys` array.
 
-`minimum_valid_until_ts` holds the same meaning as in `/_matrix/key/v2/query/:serverName`.
+`minimum_valid_until_ts` holds the same meaning as in {{int-api-notary-query}}.
 
 `200 OK` response:
 
-Same as `/_matrix/key/v2/query/:serverName` with the following added details.
+Same as {{int-api-notary-query}} with the following added detail:
 
 Responding servers SHOULD only return signed key objects for the key IDs requested by the caller, however
-servers CAN respond with more keys than requested. The caller is expected to filter the response if needed.
+servers MAY respond with more keys than requested. The caller is expected to filter the response if needed.
 
 # TODO: Remainder of Transport
 
