@@ -1277,22 +1277,23 @@ This HTTP endpoint does not specify any request parameters or body.
 }
 ~~~
 
-`m.server` is a required response field. Responses SHOULD have a `Content-Type` HTTP header of `application/json`,
-however servers parsing the response should assume that the body is JSON regardless of `Content-Type` header.
-Failures in parsing the JSON or otherwise invalid data that prevents parsing MUST NOT result in discovery failure.
-Instead, the caller is expected to move on to the next step of the name resolution approach.
+`m.server` is a required response field. Responses SHOULD have a `Content-Type` HTTP header of
+`application/json`, however servers parsing the response should assume that the body is JSON regardless
+of `Content-Type` header. Failures in parsing the JSON or otherwise invalid data that prevents parsing
+MUST NOT result in discovery failure. Instead, the caller is expected to move on to the next step of
+the name resolution approach.
 
-Cache control headers SHOULD be respected on a `200 OK` response. Callers SHOULD impose a maximum cache time of
-48 hours, regardless of cache control headers. A default of 24 hours SHOULD be used when no cache control headers
-are present.
+Cache control headers SHOULD be respected on a `200 OK` response. Callers SHOULD impose a maximum
+cache time of 48 hours, regardless of cache control headers. A default of 24 hours SHOULD be used
+when no cache control headers are present.
 
-Error responses (non-200) SHOULD be cached for no longer than 1 hour. Callers SHOULD exponentially back off (to a
-defined limit) upon receiving repeated error responses.
+Error responses (non-200) SHOULD be cached for no longer than 1 hour. Callers SHOULD exponentially
+back off (to a defined limit) upon receiving repeated error responses.
 
 ## Request Authentication {#int-transport-auth}
 
-Most endpoints in this document require authentication to prove which server is making the request. This is done
-using public key digital signatures.
+Most endpoints in this document require authentication to prove which server is making the request.
+This is done using public key digital signatures.
 
 The request method, target, and body are represented as a JSON object, signed, and appended as an HTTP
 `Authorization` header with an auth scheme of `X-Matrix`.
@@ -1309,18 +1310,19 @@ The object to be signed is:
 }
 ~~~
 
-`method` is the HTTP request method, capitalized. `uri` is the full request path, beginning with the leading slash
-and containing the query string (if present). `uri` does not contain the `https:` scheme or hostname.
+`method` is the HTTP request method, capitalized. `uri` is the full request path, beginning with the
+leading slash and containing the query string (if present). `uri` does not contain the `https:` scheme
+or hostname.
 
 **TODO**: Define an ordering algorithm for the query string (if we need to?).
 
 `origin` and `destination` are the sender and receiver server names ({{int-server-names}}), respectively.
 
-`content` is the JSON-encoded request body. When a request doesn't contain a body, such as in `GET` requests, use
-an empty JSON object.
+`content` is the JSON-encoded request body. When a request doesn't contain a body, such as in `GET`
+requests, use an empty JSON object.
 
-That object is then signed ({{int-signing-objects}}) by the requesting server. The resulting signature is appended
-as an `Authentication` HTTP header on the request:
+That object is then signed ({{int-signing-objects}}) by the requesting server. The resulting signature
+is appended as an `Authentication` HTTP header on the request:
 
 ~~~
 GET /path/to/endpoint?with_qs=true
@@ -1336,11 +1338,12 @@ Content-Type: application/json
 Linebreaks within `Authorization` are for clarity and are non-normative.
 
 The format of the Authorization header matches {{Section 11.4 of RFC9110}}. The header begins with an
-authorization scheme of `X-Matrix`, followed by one or more spaces, followed by an (unordered) comma-separated
-list of parameters written as name=value pairs. The names are case insensitive, though the values are. The values
-must be enclosed in quotes if they contain characters which are not allowed in a `token`, as defined by
-{{Section 5.6.2 of RFC9110}}. If a value is a valid `token` it may not be enclosed in quotes. Quoted values
-MAY contain backslash-escaped characters. When parsing the header, the recipient must unescape the characters.
+authorization scheme of `X-Matrix`, followed by one or more spaces, followed by an (unordered)
+comma-separated list of parameters written as name=value pairs. The names are case insensitive, though
+the values are. The values must be enclosed in quotes if they contain characters which are not allowed
+in a `token`, as defined by {{Section 5.6.2 of RFC9110}}. If a value is a valid `token` it may not be
+enclosed in quotes. Quoted values MAY contain backslash-escaped characters. When parsing the header,
+the recipient must unescape the characters.
 
 The exact parameters are:
 
@@ -1351,10 +1354,11 @@ The exact parameters are:
 
 Unknown parameters are ignored and MUST NOT result in authentication errors.
 
-A receiving server validates the Authorization header by composing the JSON object represented above and checking
-the sender's signature ({{int-checking-signatures}}). Note that to comply with {{int-checking-signatures}} the
-receiver may need to append a `signatures` field to the JSON object manually. All signatures MUST use an unexpired
-key at the time of the request ({{int-transport-keys-validity}}).
+A receiving server validates the Authorization header by composing the JSON object represented above
+and checking the sender's signature ({{int-checking-signatures}}). Note that to comply with
+{{int-checking-signatures}} the receiver may need to append a `signatures` field to the JSON object
+manually. All signatures MUST use an unexpired key at the time of the request
+({{int-transport-keys-validity}}).
 
 A server with multiple signing keys SHOULD include an `Authorization` header for each signing key.
 
@@ -1362,8 +1366,8 @@ If an endpoint requires authentication, servers MUST:
 * Validate all presented `Authorization` headers.
 * Ensure at least one `Authorization` header is present.
 
-If either fails (lack of headers, or any of the headers fail validation), the request MUST be rejected with an
-HTTP `401 Unauthorized` status code and `M_FORBIDDEN` error code:
+If either fails (lack of headers, or any of the headers fail validation), the request MUST be rejected
+with an HTTP `401 Unauthorized` status code and `M_FORBIDDEN` error code:
 
 ~~~ json
 {
@@ -1378,10 +1382,10 @@ Responses from a server are authenticated using TLS and do not have additional s
 
 ### Retrieving Server Keys {#int-transport-get-server-keys}
 
-A server's signing keys are published under `/_matrix/key/v2/server` ({{int-api-self-key}}) and can be queried
-through notary servers in two ways: {{int-api-notary-query}} and {{int-api-notary-query-bulk}}. Notary servers
-implicitly call `/_matrix/key/v2/server` when queried, signing and caching the response for some time. This
-allows the target server to offline without affecting their previously sent events.
+A server's signing keys are published under `/_matrix/key/v2/server` ({{int-api-self-key}}) and can
+be queried through notary servers in two ways: {{int-api-notary-query}} and {{int-api-notary-query-bulk}}.
+Notary servers implicitly call `/_matrix/key/v2/server` when queried, signing and caching the response
+for some time. This allows the target server to offline without affecting their previously sent events.
 
 The approach used here is borrowed from the Perspectives Project {{PerspectivesProject}}, modified to
 cover the server's ed25519 keys and to use JSON instead of XML. The advantage of this system is it allows
@@ -1391,13 +1395,14 @@ returned by any given notary.
 Servers SHOULD attempt to contact the target server directly before using a notary server.
 
 Note that these endpoints operate outside the context of a room: a server does not need to participate
-in any shared rooms to be used as a notary by another server, and does not need to use the hub as a notary.
+in any shared rooms to be used as a notary by another server, and does not need to use the hub as a
+notary.
 
 #### Validity {#int-transport-keys-validity}
 
 A server's keys are only valid for a short time, denoted by `valid_until_ts`. Around the `valid_until_ts`
-timestamp, a server would re-fetch the server's keys to discover any changes. In the vast majority of cases,
-only `valid_until_ts` changes between requests (keys are long-lived, but validated frequently).
+timestamp, a server would re-fetch the server's keys to discover any changes. In the vast majority of
+cases, only `valid_until_ts` changes between requests (keys are long-lived, but validated frequently).
 
 `valid_until_ts` MUST be handled as the lesser of `valid_until_ts` and 7 days into the future, preventing
 attackers from publishing long-lived keys that are unable to be revoked. Servers SHOULD use a timestamp
@@ -1496,9 +1501,9 @@ Path parameters:
 
 Query parameters:
 
-* `minimum_valid_until_ts` (integer; optional) - The time in milliseconds since the Unix epoch the target
-  server's keys will need to be valid until to be useful to the caller. If not specified the notary server's
-  current time will be used.
+* `minimum_valid_until_ts` (integer; optional) - The time in milliseconds since the Unix epoch the
+  target server's keys will need to be valid until to be useful to the caller. If not specified the
+  notary server's current time will be used.
 
 Request body: None applicable.
 
@@ -1512,12 +1517,12 @@ Request body: None applicable.
 }
 ~~~
 
-`server_keys` is the array of keys (see {{int-api-self-key}} response format) for the target server. If
-the target server could not be reached and the notary has no cached keys, this array is empty. If the keys
-do not meet `minimum_valid_until_ts` per {{int-transport-keys-validity}}, they are not included.
+`server_keys` is the array of keys (see {{int-api-self-key}} response format) for the target server.
+If the target server could not be reached and the notary has no cached keys, this array is empty. If
+the keys do not meet `minimum_valid_until_ts` per {{int-transport-keys-validity}}, they are not included.
 
-The notary server MUST sign each key returned in `server_keys` by at least one of its own signing keys. The
-calling server MUST validate all signatures on the objects.
+The notary server MUST sign each key returned in `server_keys` by at least one of its own signing keys.
+The calling server MUST validate all signatures on the objects.
 
 #### `POST /_matrix/key/v2/query` {#int-api-notary-query-bulk}
 
@@ -1546,10 +1551,10 @@ Request body:
 }
 ~~~
 
-`server_keys` is required and is the search criteria. The object value is first keyed by server name which
-maps to another object keyed by Key ID, mapping to the specific criteria. If no key IDs are given in the
-request, all of the server's known keys are queried. If no servers are given in the request, the response
-MUST contain an empty `server_keys` array.
+`server_keys` is required and is the search criteria. The object value is first keyed by server name
+which maps to another object keyed by Key ID, mapping to the specific criteria. If no key IDs are
+given in the request, all of the server's known keys are queried. If no servers are given in the
+request, the response MUST contain an empty `server_keys` array.
 
 `minimum_valid_until_ts` holds the same meaning as in {{int-api-notary-query}}.
 
@@ -1558,7 +1563,8 @@ MUST contain an empty `server_keys` array.
 Same as {{int-api-notary-query}} with the following added detail:
 
 Responding servers SHOULD only return signed key objects for the key IDs requested by the caller, however
-servers MAY respond with more keys than requested. The caller is expected to filter the response if needed.
+servers MAY respond with more keys than requested. The caller is expected to filter the response if
+needed.
 
 # TODO: Remainder of Transport
 
