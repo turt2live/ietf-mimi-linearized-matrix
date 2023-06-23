@@ -2180,6 +2180,17 @@ These signatures are to satisfy the auth rules ({{int-auth-rules}}).
 
 **TODO**: Do we ever validate the target server's signature? Do we need to?
 
+#### Rejecting Invites {#int-transport-leaves}
+
+Rejecting an invite is done by making a membership transition of `invite` to `leave` through the user's
+`m.room.member` ({{int-ev-member}}) event. As with invites themselves ({{int-transport-invites}}), if
+a server is already participating in the room then it can send out the membership event directly.
+
+If the server is not a member of the room, but the user wishes to formally reject an invite (instead
+of ignoring it), the server will need to handshake that with the hub server.
+
+**TODO**: Finish this section. It's joins, but using `leave` instead (mostly).
+
 ### Joins {#int-transport-joins}
 
 Like invites ({{int-transport-invites}}), this section can be avoided if the sending server is already
@@ -2337,7 +2348,7 @@ prevents the user from joining the room suddenly.
 
 #### Temp Heading 5 {#int-api-send-leave}
 
-#### Temp Heading 6 {#int-transport-leaves}
+**TODO**: Knocking
 
 <!-- /TODO -->
 
