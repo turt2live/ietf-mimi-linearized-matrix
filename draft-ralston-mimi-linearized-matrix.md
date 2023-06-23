@@ -2101,7 +2101,7 @@ really anything else.
 
 * How to honour user settings (ie: blocks) during invites?
 
-# Anti-abuse {#int-anti-abuse}
+# Spam Prevention {#int-spam}
 
 **TODO**: This section.
 
