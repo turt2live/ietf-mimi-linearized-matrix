@@ -1338,7 +1338,15 @@ svg :is([fill="white"], [fill^="#fff"]) {
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.7">
-                <p id="section-toc.1-1.13.2.7.1"><a href="#section-13.7" class="auto internal xref">13.7</a>.  <a href="#name-todo-remainder-of-transport" class="internal xref">TODO: Remainder of Transport</a></p>
+                <p id="section-toc.1-1.13.2.7.1"><a href="#section-13.7" class="auto internal xref">13.7</a>.  <a href="#name-room-membership" class="internal xref">Room Membership</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.7.2.1">
+                    <p id="section-toc.1-1.13.2.7.2.1.1"><a href="#section-13.7.1" class="auto internal xref">13.7.1</a>.  <a href="#name-invites" class="internal xref">Invites</a></p>
+</li>
+                </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.8">
+                <p id="section-toc.1-1.13.2.8.1"><a href="#section-13.8" class="auto internal xref">13.8</a>.  <a href="#name-todo-remainder-of-transport" class="internal xref">TODO: Remainder of Transport</a></p>
 </li>
             </ul>
 </li>
@@ -1924,7 +1932,7 @@ of algorithms the room is using.<a href="#section-3.5.3.1-2" class="pilcrow">¶<
 <p id="section-3.5.3.1-3">These conditions are checked as part of the event authorization rules (<a href="#int-auth-rules" class="auto internal xref">Section 6.4</a>).<a href="#section-3.5.3.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="mroomjoinrules">
+<div id="int-ev-join-rules">
 <section id="section-3.5.3.2">
             <h5 id="name-mroomjoin_rules">
 <a href="#section-3.5.3.2" class="section-number selfRef">3.5.3.2. </a><a href="#name-mroomjoin_rules" class="section-name selfRef"><code>m.room.join_rules</code></a>
@@ -1949,7 +1957,7 @@ join policy for the room. Allowable values are:<a href="#section-3.5.3.2-2" clas
 <p id="section-3.5.3.2-5"><strong>TODO</strong>: What's the default?<a href="#section-3.5.3.2-5" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="mroommember">
+<div id="int-ev-member">
 <section id="section-3.5.3.3">
             <h5 id="name-mroommember">
 <a href="#section-3.5.3.3" class="section-number selfRef">3.5.3.3. </a><a href="#name-mroommember" class="section-name selfRef"><code>m.room.member</code></a>
@@ -3358,8 +3366,8 @@ applicable room.<a href="#section-13.5-2" class="pilcrow">¶</a></p>
               <path d="M 40,192 L 248,192" fill="none" stroke="black"></path>
               <path d="M 40,240 L 176,240" fill="none" stroke="black"></path>
               <path d="M 40,272 L 176,272" fill="none" stroke="black"></path>
-              <path d="M 8,304 L 160,304" fill="none" stroke="black"></path>
-              <path d="M 336,304 L 496,304" fill="none" stroke="black"></path>
+              <path d="M 8,304 L 136,304" fill="none" stroke="black"></path>
+              <path d="M 368,304 L 496,304" fill="none" stroke="black"></path>
               <path d="M 40,352 L 248,352" fill="none" stroke="black"></path>
               <path d="M 40,400 L 424,400" fill="none" stroke="black"></path>
               <polygon class="arrowhead" points="432,400 420,394.4 420,405.6" fill="black" transform="rotate(0,424,400)"></polygon>
@@ -3378,8 +3386,9 @@ applicable room.<a href="#section-13.5-2" class="pilcrow">¶</a></p>
                 <text x="68" y="228">Append</text>
                 <text x="112" y="228">PDU</text>
                 <text x="156" y="228">fields</text>
-                <text x="212" y="308">CONCURRENT</text>
-                <text x="292" y="308">REQUESTS</text>
+                <text x="188" y="308">Concurrent</text>
+                <text x="268" y="308">requests</text>
+                <text x="332" y="308">follow</text>
                 <text x="56" y="340">PUT</text>
                 <text x="124" y="340">/send/:txnId</text>
                 <text x="56" y="388">PUT</text>
@@ -3692,39 +3701,338 @@ exist.<a href="#section-13.6.4-16" class="pilcrow">¶</a></p>
 </div>
 </section>
 </div>
-<div id="todo-remainder-of-transport">
+<div id="int-transport-room-membership">
 <section id="section-13.7">
-        <h3 id="name-todo-remainder-of-transport">
-<a href="#section-13.7" class="section-number selfRef">13.7. </a><a href="#name-todo-remainder-of-transport" class="section-name selfRef">TODO: Remainder of Transport</a>
+        <h3 id="name-room-membership">
+<a href="#section-13.7" class="section-number selfRef">13.7. </a><a href="#name-room-membership" class="section-name selfRef">Room Membership</a>
         </h3>
-<p id="section-13.7-1"><strong>TODO</strong>: This section.<a href="#section-13.7-1" class="pilcrow">¶</a></p>
-<p id="section-13.7-2">Topics:<a href="#section-13.7-2" class="pilcrow">¶</a></p>
+<p id="section-13.7-1">When a server is already participating in a room, it can simply send <code>m.room.member</code> (<a href="#int-ev-member" class="auto internal xref">Section 3.5.3.3</a>)
+events with the <code>/send</code> API (<a href="#int-api-send-txn" class="auto internal xref">Section 13.5.1</a>) to other servers/the hub directly. When a server is
+not already participating however, it needs to be welcomed in by the hub server.<a href="#section-13.7-1" class="pilcrow">¶</a></p>
+<p id="section-13.7-2">A typical invite flow would be:<a href="#section-13.7-2" class="pilcrow">¶</a></p>
+<div id="section-13.7-3">
+          <div class="alignLeft art-svg artwork" id="section-13.7-3.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="720" width="648" viewBox="0 0 648 720" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px">
+              <path d="M 8,32 L 8,64" fill="none" stroke="black"></path>
+              <path d="M 64,72 L 64,408" fill="none" stroke="black"></path>
+              <path d="M 64,424 L 64,704" fill="none" stroke="black"></path>
+              <path d="M 120,32 L 120,64" fill="none" stroke="black"></path>
+              <path d="M 232,32 L 232,64" fill="none" stroke="black"></path>
+              <path d="M 256,72 L 256,400" fill="none" stroke="black"></path>
+              <path d="M 256,432 L 256,704" fill="none" stroke="black"></path>
+              <path d="M 280,32 L 280,64" fill="none" stroke="black"></path>
+              <path d="M 392,32 L 392,64" fill="none" stroke="black"></path>
+              <path d="M 456,72 L 456,408" fill="none" stroke="black"></path>
+              <path d="M 456,424 L 456,704" fill="none" stroke="black"></path>
+              <path d="M 520,32 L 520,64" fill="none" stroke="black"></path>
+              <path d="M 616,560 L 616,592" fill="none" stroke="black"></path>
+              <path d="M 640,256 L 640,288" fill="none" stroke="black"></path>
+              <path d="M 8,32 L 120,32" fill="none" stroke="black"></path>
+              <path d="M 232,32 L 280,32" fill="none" stroke="black"></path>
+              <path d="M 392,32 L 520,32" fill="none" stroke="black"></path>
+              <path d="M 8,64 L 120,64" fill="none" stroke="black"></path>
+              <path d="M 232,64 L 280,64" fill="none" stroke="black"></path>
+              <path d="M 392,64 L 520,64" fill="none" stroke="black"></path>
+              <path d="M 72,112 L 248,112" fill="none" stroke="black"></path>
+              <path d="M 264,160 L 448,160" fill="none" stroke="black"></path>
+              <path d="M 464,256 L 640,256" fill="none" stroke="black"></path>
+              <path d="M 464,288 L 640,288" fill="none" stroke="black"></path>
+              <path d="M 264,336 L 448,336" fill="none" stroke="black"></path>
+              <path d="M 72,384 L 248,384" fill="none" stroke="black"></path>
+              <path d="M 8,416 L 192,416" fill="none" stroke="black"></path>
+              <path d="M 448,416 L 640,416" fill="none" stroke="black"></path>
+              <path d="M 264,464 L 448,464" fill="none" stroke="black"></path>
+              <path d="M 264,512 L 448,512" fill="none" stroke="black"></path>
+              <path d="M 464,560 L 616,560" fill="none" stroke="black"></path>
+              <path d="M 464,592 L 616,592" fill="none" stroke="black"></path>
+              <path d="M 264,640 L 448,640" fill="none" stroke="black"></path>
+              <path d="M 264,688 L 448,688" fill="none" stroke="black"></path>
+              <polygon class="arrowhead" points="472,592 460,586.4 460,597.6" fill="black" transform="rotate(180,464,592)"></polygon>
+              <polygon class="arrowhead" points="472,288 460,282.4 460,293.6" fill="black" transform="rotate(180,464,288)"></polygon>
+              <polygon class="arrowhead" points="456,688 444,682.4 444,693.6" fill="black" transform="rotate(0,448,688)"></polygon>
+              <polygon class="arrowhead" points="456,512 444,506.4 444,517.6" fill="black" transform="rotate(0,448,512)"></polygon>
+              <polygon class="arrowhead" points="456,160 444,154.4 444,165.6" fill="black" transform="rotate(0,448,160)"></polygon>
+              <polygon class="arrowhead" points="272,640 260,634.4 260,645.6" fill="black" transform="rotate(180,264,640)"></polygon>
+              <polygon class="arrowhead" points="272,464 260,458.4 260,469.6" fill="black" transform="rotate(180,264,464)"></polygon>
+              <polygon class="arrowhead" points="272,336 260,330.4 260,341.6" fill="black" transform="rotate(180,264,336)"></polygon>
+              <polygon class="arrowhead" points="256,112 244,106.4 244,117.6" fill="black" transform="rotate(0,248,112)"></polygon>
+              <polygon class="arrowhead" points="80,384 68,378.4 68,389.6" fill="black" transform="rotate(180,72,384)"></polygon>
+              <g class="text">
+                <text x="64" y="52">Participant</text>
+                <text x="256" y="52">Hub</text>
+                <text x="452" y="52">TargetServer</text>
+                <text x="92" y="100">POST</text>
+                <text x="144" y="100">/invite</text>
+                <text x="204" y="100">(LPDU)</text>
+                <text x="284" y="148">POST</text>
+                <text x="336" y="148">/invite</text>
+                <text x="392" y="148">(PDU)</text>
+                <text x="492" y="196">Decide</text>
+                <text x="532" y="196">to</text>
+                <text x="576" y="196">process</text>
+                <text x="624" y="196">the</text>
+                <text x="496" y="212">invite.</text>
+                <text x="544" y="212">Can</text>
+                <text x="588" y="212">reject</text>
+                <text x="632" y="212">due</text>
+                <text x="476" y="228">to</text>
+                <text x="512" y="228">spam,</text>
+                <text x="548" y="228">or</text>
+                <text x="580" y="228">send</text>
+                <text x="612" y="228">it</text>
+                <text x="636" y="228">to</text>
+                <text x="480" y="244">the</text>
+                <text x="536" y="244">recipient</text>
+                <text x="600" y="244">user.</text>
+                <text x="316" y="324">Finish</text>
+                <text x="364" y="324">POST</text>
+                <text x="416" y="324">/invite</text>
+                <text x="116" y="372">Finish</text>
+                <text x="164" y="372">POST</text>
+                <text x="216" y="372">/invite</text>
+                <text x="220" y="420">User</text>
+                <text x="272" y="420">decides</text>
+                <text x="316" y="420">to</text>
+                <text x="356" y="420">accept</text>
+                <text x="412" y="420">invite</text>
+                <text x="344" y="452">GET</text>
+                <text x="404" y="452">/make_join</text>
+                <text x="292" y="500">Finish</text>
+                <text x="336" y="500">GET</text>
+                <text x="396" y="500">/make_join</text>
+                <text x="484" y="548">Fill</text>
+                <text x="528" y="548">event</text>
+                <text x="588" y="548">template</text>
+                <text x="340" y="628">POST</text>
+                <text x="404" y="628">/send_join</text>
+                <text x="292" y="676">Finish</text>
+                <text x="340" y="676">POST</text>
+                <text x="404" y="676">/send_join</text>
+              </g>
+            </svg><a href="#section-13.7-3.1" class="pilcrow">¶</a>
+</div>
+</div>
+<p id="section-13.7-4"><code>POST /invite</code> is shorthand for <a href="#int-api-invite" class="auto internal xref">Section 13.7.1.1</a>. Similarly, <code>GET /make_join</code> is <a href="#int-api-make-join" class="auto internal xref">Section 13.7.1.2</a>
+and <code>POST /send_join</code> is <a href="#int-api-send-join" class="auto internal xref">Section 13.7.1.3</a>.<a href="#section-13.7-4" class="pilcrow">¶</a></p>
+<p id="section-13.7-5">If the user decided to reject the invite, the TargetServer would use <code>GET /make_leave</code> (<a href="#int-api-make-leave" class="auto internal xref">Section 13.7.1.4</a>)
+and <code>POST /send_leave</code> (<a href="#int-api-send-leave" class="auto internal xref">Section 13.7.1.5</a>) instead of make/send_join.<a href="#section-13.7-5" class="pilcrow">¶</a></p>
+<div id="invites">
+<section id="section-13.7.1">
+          <h4 id="name-invites">
+<a href="#section-13.7.1" class="section-number selfRef">13.7.1. </a><a href="#name-invites" class="section-name selfRef">Invites</a>
+          </h4>
+<p id="section-13.7.1-1">When inviting a user belonging to a server already in the room, senders <span class="bcp14">SHOULD</span> use <code>m.room.member</code>
+(<a href="#int-ev-member" class="auto internal xref">Section 3.5.3.3</a>) events and the <code>/send</code> API (<a href="#int-api-send-txn" class="auto internal xref">Section 13.5.1</a>). This section's endpoints <span class="bcp14">SHOULD</span>
+only be used when the target server is <em>not</em> participating in the room already.<a href="#section-13.7.1-1" class="pilcrow">¶</a></p>
+<p id="section-13.7.1-2">Note that being invited does not count as the server "participating" in the room. This can mean that
+while a server has a user with a pending invite in the room, this section's endpoints are needed to
+send additional invites to other users on the same server.<a href="#section-13.7.1-2" class="pilcrow">¶</a></p>
+<p id="section-13.7.1-3">The full invite sequence is:<a href="#section-13.7.1-3" class="pilcrow">¶</a></p>
+<div id="section-13.7.1-4">
+            <div class="alignLeft art-svg artwork" id="section-13.7.1-4.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="784" width="640" viewBox="0 0 640 784" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px">
+                <path d="M 8,32 L 8,64" fill="none" stroke="black"></path>
+                <path d="M 64,72 L 64,768" fill="none" stroke="black"></path>
+                <path d="M 120,32 L 120,64" fill="none" stroke="black"></path>
+                <path d="M 224,32 L 224,64" fill="none" stroke="black"></path>
+                <path d="M 248,72 L 248,768" fill="none" stroke="black"></path>
+                <path d="M 272,32 L 272,64" fill="none" stroke="black"></path>
+                <path d="M 384,32 L 384,64" fill="none" stroke="black"></path>
+                <path d="M 400,256 L 400,288" fill="none" stroke="black"></path>
+                <path d="M 448,72 L 448,768" fill="none" stroke="black"></path>
+                <path d="M 512,32 L 512,64" fill="none" stroke="black"></path>
+                <path d="M 632,624 L 632,656" fill="none" stroke="black"></path>
+                <path d="M 8,32 L 120,32" fill="none" stroke="black"></path>
+                <path d="M 224,32 L 272,32" fill="none" stroke="black"></path>
+                <path d="M 384,32 L 512,32" fill="none" stroke="black"></path>
+                <path d="M 8,64 L 120,64" fill="none" stroke="black"></path>
+                <path d="M 224,64 L 272,64" fill="none" stroke="black"></path>
+                <path d="M 384,64 L 512,64" fill="none" stroke="black"></path>
+                <path d="M 72,112 L 240,112" fill="none" stroke="black"></path>
+                <path d="M 256,256 L 400,256" fill="none" stroke="black"></path>
+                <path d="M 256,288 L 400,288" fill="none" stroke="black"></path>
+                <path d="M 256,336 L 440,336" fill="none" stroke="black"></path>
+                <path d="M 456,624 L 632,624" fill="none" stroke="black"></path>
+                <path d="M 456,656 L 632,656" fill="none" stroke="black"></path>
+                <path d="M 256,704 L 440,704" fill="none" stroke="black"></path>
+                <path d="M 72,752 L 240,752" fill="none" stroke="black"></path>
+                <polygon class="arrowhead" points="464,656 452,650.4 452,661.6" fill="black" transform="rotate(180,456,656)"></polygon>
+                <polygon class="arrowhead" points="448,336 436,330.4 436,341.6" fill="black" transform="rotate(0,440,336)"></polygon>
+                <polygon class="arrowhead" points="264,704 252,698.4 252,709.6" fill="black" transform="rotate(180,256,704)"></polygon>
+                <polygon class="arrowhead" points="264,288 252,282.4 252,293.6" fill="black" transform="rotate(180,256,288)"></polygon>
+                <polygon class="arrowhead" points="248,112 236,106.4 236,117.6" fill="black" transform="rotate(0,240,112)"></polygon>
+                <polygon class="arrowhead" points="80,752 68,746.4 68,757.6" fill="black" transform="rotate(180,72,752)"></polygon>
+                <g class="text">
+                  <text x="64" y="52">Participant</text>
+                  <text x="248" y="52">Hub</text>
+                  <text x="444" y="52">TargetServer</text>
+                  <text x="92" y="100">POST</text>
+                  <text x="144" y="100">/invite</text>
+                  <text x="132" y="148">Reject</text>
+                  <text x="172" y="148">if</text>
+                  <text x="212" y="148">sender</text>
+                  <text x="108" y="164">cannot</text>
+                  <text x="164" y="164">invite</text>
+                  <text x="216" y="164">other</text>
+                  <text x="216" y="180">users</text>
+                  <text x="76" y="196">&lt;-</text>
+                  <text x="96" y="196">-</text>
+                  <text x="112" y="196">-</text>
+                  <text x="128" y="196">-</text>
+                  <text x="144" y="196">-</text>
+                  <text x="160" y="196">-</text>
+                  <text x="176" y="196">-</text>
+                  <text x="192" y="196">-</text>
+                  <text x="208" y="196">-</text>
+                  <text x="224" y="196">-</text>
+                  <text x="240" y="196">-</text>
+                  <text x="300" y="228">Otherwise,</text>
+                  <text x="372" y="228">append</text>
+                  <text x="272" y="244">PDU</text>
+                  <text x="316" y="244">fields</text>
+                  <text x="276" y="324">POST</text>
+                  <text x="328" y="324">/invite</text>
+                  <text x="348" y="372">Reject</text>
+                  <text x="388" y="372">if</text>
+                  <text x="420" y="372">room</text>
+                  <text x="296" y="388">version</text>
+                  <text x="344" y="388">not</text>
+                  <text x="400" y="388">supported</text>
+                  <text x="260" y="404">&lt;-</text>
+                  <text x="280" y="404">-</text>
+                  <text x="296" y="404">-</text>
+                  <text x="312" y="404">-</text>
+                  <text x="328" y="404">-</text>
+                  <text x="344" y="404">-</text>
+                  <text x="360" y="404">-</text>
+                  <text x="376" y="404">-</text>
+                  <text x="392" y="404">-</text>
+                  <text x="408" y="404">-</text>
+                  <text x="424" y="404">-</text>
+                  <text x="440" y="404">-</text>
+                  <text x="292" y="436">Reject</text>
+                  <text x="332" y="436">if</text>
+                  <text x="372" y="436">target</text>
+                  <text x="420" y="436">user</text>
+                  <text x="308" y="452">is</text>
+                  <text x="364" y="452">ineligible</text>
+                  <text x="424" y="452">for</text>
+                  <text x="408" y="468">invites</text>
+                  <text x="260" y="484">&lt;-</text>
+                  <text x="280" y="484">-</text>
+                  <text x="296" y="484">-</text>
+                  <text x="312" y="484">-</text>
+                  <text x="328" y="484">-</text>
+                  <text x="344" y="484">-</text>
+                  <text x="360" y="484">-</text>
+                  <text x="376" y="484">-</text>
+                  <text x="392" y="484">-</text>
+                  <text x="408" y="484">-</text>
+                  <text x="424" y="484">-</text>
+                  <text x="440" y="484">-</text>
+                  <text x="112" y="516">Proxy</text>
+                  <text x="188" y="516">TargetServer</text>
+                  <text x="200" y="532">rejection</text>
+                  <text x="76" y="548">&lt;-</text>
+                  <text x="96" y="548">-</text>
+                  <text x="112" y="548">-</text>
+                  <text x="128" y="548">-</text>
+                  <text x="144" y="548">-</text>
+                  <text x="160" y="548">-</text>
+                  <text x="176" y="548">-</text>
+                  <text x="192" y="548">-</text>
+                  <text x="208" y="548">-</text>
+                  <text x="224" y="548">-</text>
+                  <text x="240" y="548">-</text>
+                  <text x="500" y="580">Otherwise,</text>
+                  <text x="568" y="580">queue</text>
+                  <text x="488" y="596">sending</text>
+                  <text x="536" y="596">the</text>
+                  <text x="580" y="596">invite</text>
+                  <text x="620" y="596">to</text>
+                  <text x="484" y="612">target</text>
+                  <text x="532" y="612">user</text>
+                  <text x="400" y="692">200</text>
+                  <text x="428" y="692">OK</text>
+                  <text x="200" y="740">200</text>
+                  <text x="228" y="740">OK</text>
+                </g>
+              </svg><a href="#section-13.7.1-4.1" class="pilcrow">¶</a>
+</div>
+</div>
+<p id="section-13.7.1-5"><code>POST /invite</code> is shorthand for <a href="#int-api-invite" class="auto internal xref">Section 13.7.1.1</a>.<a href="#section-13.7.1-5" class="pilcrow">¶</a></p>
+<div id="int-api-invite">
+<section id="section-13.7.1.1">
+            <h5 id="name-temp-heading-1">
+<a href="#section-13.7.1.1" class="section-number selfRef">13.7.1.1. </a><a href="#name-temp-heading-1" class="section-name selfRef">Temp Heading 1</a>
+          </h5>
+</section>
+</div>
+<div id="int-api-make-join">
+<section id="section-13.7.1.2">
+            <h5 id="name-temp-heading-2">
+<a href="#section-13.7.1.2" class="section-number selfRef">13.7.1.2. </a><a href="#name-temp-heading-2" class="section-name selfRef">Temp Heading 2</a>
+          </h5>
+</section>
+</div>
+<div id="int-api-send-join">
+<section id="section-13.7.1.3">
+            <h5 id="name-temp-heading-3">
+<a href="#section-13.7.1.3" class="section-number selfRef">13.7.1.3. </a><a href="#name-temp-heading-3" class="section-name selfRef">Temp Heading 3</a>
+          </h5>
+</section>
+</div>
+<div id="int-api-make-leave">
+<section id="section-13.7.1.4">
+            <h5 id="name-temp-heading-4">
+<a href="#section-13.7.1.4" class="section-number selfRef">13.7.1.4. </a><a href="#name-temp-heading-4" class="section-name selfRef">Temp Heading 4</a>
+          </h5>
+</section>
+</div>
+<div id="int-api-send-leave">
+<section id="section-13.7.1.5">
+            <h5 id="name-temp-heading-5">
+<a href="#section-13.7.1.5" class="section-number selfRef">13.7.1.5. </a><a href="#name-temp-heading-5" class="section-name selfRef">Temp Heading 5</a>
+            </h5>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="todo-remainder-of-transport">
+<section id="section-13.8">
+        <h3 id="name-todo-remainder-of-transport">
+<a href="#section-13.8" class="section-number selfRef">13.8. </a><a href="#name-todo-remainder-of-transport" class="section-name selfRef">TODO: Remainder of Transport</a>
+        </h3>
+<p id="section-13.8-1"><strong>TODO</strong>: This section.<a href="#section-13.8-1" class="pilcrow">¶</a></p>
+<p id="section-13.8-2">Topics:<a href="#section-13.8-2" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.7-3.1">Media/content repo (images, videos, attachments, etc)<a href="#section-13.7-3.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.8-3.1">Media/content repo (images, videos, attachments, etc)<a href="#section-13.8-3.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-13.7-3.2">EDUs (typing notifications, receipts, presence)<a href="#section-13.7-3.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.8-3.2">EDUs (typing notifications, receipts, presence)<a href="#section-13.8-3.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-13.7-3.3">Device management &amp; to-device messaging<a href="#section-13.7-3.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.8-3.3">Device management &amp; to-device messaging<a href="#section-13.8-3.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-13.7-3.4">Query APIs (alias resolution, profiles)<a href="#section-13.7-3.4" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.8-3.4">Query APIs (alias resolution, profiles)<a href="#section-13.8-3.4" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-13.7-3.5">Encryption APIs<a href="#section-13.7-3.5" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.8-3.5">Encryption APIs<a href="#section-13.8-3.5" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-13.7-4">Notably/deliberately missing APIs are:<a href="#section-13.7-4" class="pilcrow">¶</a></p>
+<p id="section-13.8-4">Notably/deliberately missing APIs are:<a href="#section-13.8-4" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.7-5.1">
-            <code>get_missing_events</code> - this is used by DAG servers only<a href="#section-13.7-5.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.8-5.1">
+            <code>get_missing_events</code> - this is used by DAG servers only<a href="#section-13.8-5.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-13.7-5.2">Public room directory<a href="#section-13.7-5.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.8-5.2">Public room directory<a href="#section-13.8-5.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-13.7-5.3">Timestamp-to-event API<a href="#section-13.7-5.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.8-5.3">Timestamp-to-event API<a href="#section-13.8-5.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-13.7-5.4">All of 3rd party invites<a href="#section-13.7-5.4" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.8-5.4">All of 3rd party invites<a href="#section-13.8-5.4" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-13.7-5.5">All of Spaces<a href="#section-13.7-5.5" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.8-5.5">All of Spaces<a href="#section-13.8-5.5" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-13.7-5.6">OpenID API<a href="#section-13.7-5.6" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.8-5.6">OpenID API<a href="#section-13.8-5.6" class="pilcrow">¶</a>
 </li>
         </ul>
 </section>
