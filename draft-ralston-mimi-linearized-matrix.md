@@ -2007,7 +2007,7 @@ The full invite sequence is:
        |     Reject if sender |                        |
        |  cannot invite other |                        |
        |                users |                        |
-       |<- - - - - - - - - - -|                        |
+       |<┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄|                        |
        |                      |                        |
        |                      | Otherwise, append      |
        |                      | PDU fields             |
@@ -2020,16 +2020,16 @@ The full invite sequence is:
        |                      |                        |
        |                      |         Reject if room |
        |                      |  version not supported |
-       |                      |<- - - - - - - - - - - -|
+       |                      |<┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄|
        |                      |                        |
        |                      |  Reject if target user |
        |                      |      is ineligible for |
        |                      |                invites |
-       |                      |<- - - - - - - - - - - -|
+       |                      |<┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄|
        |                      |                        |
        |   Proxy TargetServer |                        |
        |            rejection |                        |
-       |<- - - - - - - - - - -|                        |
+       |<┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄|                        |
        |                      |                        |
        |                      |                        | Otherwise, queue
        |                      |                        | sending the invite to
@@ -2047,6 +2047,13 @@ The full invite sequence is:
 ~~~
 
 `POST /invite` is shorthand for {{int-api-invite}}.
+
+What causes a user to be considered "ineligible" for an invite is left as an implementation detail.
+See {{int-user-privacy}} and {{int-spam}} for suggestions on handling user-level privacy controls and
+spam invites.
+
+
+
 
 <!-- TODO -->
 
@@ -2087,6 +2094,19 @@ Notably/deliberately missing APIs are:
 
 * Should we include `/_matrix/federation/v1/version` in here? It's used by federation testers, but not
 really anything else.
+
+# User Privacy {#int-user-privacy}
+
+**TODO**: This section.
+
+* How to honour user settings (ie: blocks) during invites?
+
+# Anti-abuse {#int-anti-abuse}
+
+**TODO**: This section.
+
+* How to counteract invite spam?
+* Say it's okay to reject invites because the server blocked the room.
 
 # Security Considerations
 
