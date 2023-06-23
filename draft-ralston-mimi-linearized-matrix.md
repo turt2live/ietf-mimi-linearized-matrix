@@ -1073,7 +1073,7 @@ Most endpoints have a version number as part of the path. This version number is
 allowing for breaking changes to be made to the schema of that endpoint. For clarity, the version number
 is *not* representative of an API version.
 
-### Errors
+### Errors {#int-transport-errors}
 
 All errors are represented by an error code defined by this document and an accompanied HTTP status code.
 It is possible for a HTTP status code to map to multiple error codes, and it's possible for an error
@@ -1114,17 +1114,18 @@ Some common error codes are:
 If a server receives a request for an unsupported or otherwise unknown endpoint, the server MUST respond
 with an HTTP `404 Not Found` status code and `M_UNRECOGNIZED` error code. If the request was for a known
 endpoint, but wrong HTTP method, a `405 Method Not Allowed` HTTP status code and `M_UNRECOGNIZED` error
-code.
+code ({{int-transport-errors}}).
 
 ### Malformed Requests
 
 If a server is expecting JSON in the request body but receives something else, it MUST respond with an
-HTTP status code of `400 Bad Request` and error code `M_NOT_JSON`. If the request contains JSON, and is
-for a known endpoint, but otherwise missing required keys or is malformed, the server MUST respond with
-an HTTP status code of `400 Bad Request` and error code `M_BAD_JSON`. Where possible, `error` for
-`M_BAD_JSON` should describe the missing keys or other parsing error.
+HTTP status code of `400 Bad Request` and error code `M_NOT_JSON` ({{int-transport-errors}}). If the
+request contains JSON, and is for a known endpoint, but otherwise missing required keys or is malformed,
+the server MUST respond with an HTTP status code of `400 Bad Request` and error code `M_BAD_JSON`
+({{int-transport-errors}}). Where possible, `error` for `M_BAD_JSON` should describe the missing keys
+or other parsing error.
 
-### Transaction Identifiers
+### Transaction Identifiers {#int-txn-ids}
 
 Where endpoints use HTTP `PUT`, it is typical for a "transaction ID" to be specified in the path
 parameters. This transaction ID MUST ONLY be used for making requests idempotent - if a server receives
@@ -1141,9 +1142,9 @@ Servers SHOULD implement rate limiting semantics to reduce the risk of being ove
 support being rate limited are annotated in this document.
 
 If a rate limit is encountered, the server MUST respond with an HTTP `429 Too Many Requests` status code
-and `M_LIMIT_EXCEEDED` error code. If applicable, the server should additionally include a
-`retry_after_ms` integer field on the error response to denote how long the caller should wait before
-retrying, in milliseconds.
+and `M_LIMIT_EXCEEDED` error code ({{int-transport-errors}}). If applicable, the server should additionally
+include a `retry_after_ms` integer field on the error response to denote how long the caller should
+wait before retrying, in milliseconds.
 
 ~~~ json
 {
@@ -1367,7 +1368,7 @@ If an endpoint requires authentication, servers MUST:
 * Ensure at least one `Authorization` header is present.
 
 If either fails (lack of headers, or any of the headers fail validation), the request MUST be rejected
-with an HTTP `401 Unauthorized` status code and `M_FORBIDDEN` error code:
+with an HTTP `401 Unauthorized` status code and `M_FORBIDDEN` error code ({{int-transport-errors}}):
 
 ~~~ json
 {
@@ -1566,14 +1567,175 @@ Responding servers SHOULD only return signed key objects for the key IDs request
 servers MAY respond with more keys than requested. The caller is expected to filter the response if
 needed.
 
-# TODO: Remainder of Transport
+### Sending Events {#int-transport-send-events}
+
+Events accepted into the room by a hub server must be sent to all other servers in that room. Similarly,
+participant servers need a way to send partial events through the hub server, as mentioned by {{int-lpdu}}.
+
+A single endpoint is used for all rooms on either server, and can contain both fully-formed PDUs
+({{int-pdu}}) or Linearized PDUs (partial events; {{int-lpdu}}) depending on the server's role in the
+applicable room.
+
+A typical event send path will be:
+
+~~~ aasvg
++-----+                +---------------+     +---------------+
+| Hub |                | Participant1  |     | Participant2  |
++-----+                +---------------+     +---------------+
+   |                           |                     |
+   |                           | Create LPDU         |
+   |                           |------------         |
+   |                           |           |         |
+   |                           |<-----------         |
+   |                           |                     |
+   |          PUT /send/:txnId |                     |
+   |<--------------------------|                     |
+   |                           |                     |
+   | Append PDU fields         |                     |
+   |------------------         |                     |
+   |                 |         |                     |
+   |<-----------------         |                     |
+   |                           |                     |
+-------------------- CONCURRENT REQUESTS ---------------------
+   |                           |                     |
+   | PUT /send/:txnId          |                     |
+   |-------------------------->|                     |
+   |                           |                     |
+   | PUT /send/:txnId          |                     |
+   |------------------------------------------------>|
+   |                           |                     |
+~~~
+
+`PUT /send/:txnId` is shorthand for {{int-api-send-txn}}.
+
+Hubs which generate events would skip to the point where they create a fully-formed PDU and send it
+out to all other participants.
+
+#### `PUT /_matrix/federation/v2/send/:txnId` {#int-api-send-txn}
+
+Sends (L)PDUs ({{int-pdu}}, {{int-lpdu}}) to another server. The sending server MUST wait for a
+`200 OK` response from the receiver before sending another request with a different `:txnId`.
+
+**Implementation note**: Currently this endpoint doesn't actually exist. Use
+`PUT /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send/:txnId`
+when testing against other Linearized Matrix implementations. This string may be updated later to
+account for breaking changes.
+
+**TODO**: Remove implementation notes.
+
+**Rate-limited**: No.
+
+**Authentication required**: Yes.
+
+Path parameters:
+
+* `:txnId` - the transaction ID ({{int-txn-ids}}) for the request.
+
+Query parameters: None applicable.
+
+Request body:
+
+~~~ json
+{
+   "edus": [{/* TODO: Define EDUs */}],
+   "pdus": [
+      {/* Either an LPDU or PDU */}
+   ]
+}
+~~~
+
+**TODO**: Describe EDUs.
+
+`edus` are the Ephemeral Data Units to send. If no EDUs are being sent, this field MAY be excluded
+from the request body.
+
+`pdus` are the events/PDUs ({{int-pdus}}) and LPDUs ({{int-lpdus}}) to send to the server. Whether
+it's an LPDU or PDU depends on the sending server's role in that room: if they are a non-hub server,
+it will be an LPDU.
+
+Each event in the `pdus` array gets processed as such:
+
+1. Identify the room ID for the event. The exact format of the event can differ between room versions,
+   however currently this would be done by extracting the `room_id` property.
+
+   1. If that room ID is invalid/not found, the event is rejected.
+   2. If the server is not participating in the room, the event is dropped/skipped.
+
+2. If the event is an LPDU and the receiving server is the hub, the additional PDU fields are appended
+   before continuing.
+
+3. If the event is an LPDU and the receiving server is not the hub, the event is dropped/skipped.
+
+4. The checks defined by {{int-receiving-events}} are performed.
+
+5. If the event still hasn't been dropped/rejected, it is appended to the room. For participant servers,
+   this may mean it's queued for sending to local clients.
+
+Server implementation authors should note that these steps can be condensed, but are expanded here
+for specification purposes. For example, an LPDU's signature can/will fail without ever needing to
+append the PDU fields first - the server can skip some extra work this way.
+
+`200 OK` response:
+
+~~~ json
+{
+   "failed_pdus": {
+      "$eventid": {
+         "error": "Invalid event format"
+      },
+      "$eventid": {
+         "error": "@alice:example.org cannot send m.room.power_levels"
+      }
+   }
+}
+~~~
+
+The receiving server MUST NOT send a `200 OK` response until all events have been processed. Servers
+SHOULD NOT block responding to this endpoint on sending accepted events to local clients or other
+participant servers, as doing so could lead to a lengthy backlog of events waiting to be sent.
+
+Sending servers SHOULD apply/expect a timeout and retry the exact same request with the same transaction
+ID until they see a `200 OK` response. If the sending server attempts to send a different transaction
+ID from the one already in flight, the receiving server MUST respond with a `400 Bad Request` HTTP
+status code and `M_BAD_STATE` error code ({{int-transport-errors}}). Receiving servers SHOULD continue
+processing requests to this endpoint event after the sender has disconnected/timed out, but SHOULD NOT
+process the request multiple times due to the transaction ID ({{int-txn-ids}}).
+
+`failed_pdus` is an object mapping event ID ({{int-pdu}}) to error string. Event IDs are based upon
+the received object, not the final/complete object. For example, if an LPDU is sent, gets its PDU
+fields appended, and fails event authorization, then the error would be for the event ID of the LPDU,
+not the fully-formed PDU. This is to allow the sender to correlate what they sent with errors.
+
+The object for each event ID MUST contain an `error` string field, representing the human-readable
+reason for an event being rejected.
+
+Events which are dropped/ignored or accepted do *not* appear in `failed_pdus`.
+
+**TODO**: Should we also return fully-formed PDUs for the LPDUs we received?
+
+### Event and State APIs
+
+**TODO**: this section.
+
+### TODO: Remainder of Transport
 
 **TODO**: This section.
 
 Topics:
-* Sending events between servers
-* Media handling
-* etc
+* Media/content repo (images, videos, attachments, etc)
+* EDUs (typing notifications, receipts, presence)
+* Device management & to-device messaging
+* Query APIs (alias resolution, profiles)
+* Encryption APIs
+
+Notably/deliberately missing APIs are:
+
+* `get_missing_events` - this is used by DAG servers only
+* Public room directory
+* Timestamp-to-event API
+* All of 3rd party invites
+* All of Spaces
+* OpenID API
 
 # TODOs & Open Questions
 

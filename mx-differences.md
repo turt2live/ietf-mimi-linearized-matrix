@@ -260,6 +260,26 @@ and participants can choose their favourite, creating small clusters of LM serve
 * `GET /_matrix/key/v2/server` now returns an *optional* top-level boolean `m.linearized` field. If `true`, the
   server *only* supports Linearized Matrix and cannot handle full-mesh/DAG aspects. These servers are participants
   and sometimes hubs. The field is part of the signature.
+* `PUT /_matrix/federation/v2/send/:txnId` is a new endpoint, modeled off of
+  `PUT /_matrix/federation/v1/send/:txnId`. In short, the request body has the following changes:
+
+  * `pdus` now accepts PDUs (events) and LPDUs (partial events).
+  * `edus` remains optional (no changes).
+  * `origin` doesn't exist/is removed.
+  * `origin_server_ts` doesn't exist/is removed.
+
+  Additionally, the response changes accordingly:
+
+  * `pdus` is replaced by `failed_pdus`, retaining a similar structure. The `failed_pdus` object is keyed by
+    failed event ID (LPDU event ID if it's not yet a PDU) with a an object value. The object value has the
+    same schema as the `v1` endpoint: `error` as a human-readable string to denote the rejection reason.
+
+    Note that events which are dropped or accepted do not appear in `failed_pdus`.
+
+  All other behaviour is as detailed by the existing `PUT /_matrix/federation/v1/send/:txnId` endpoint.
+
+  **Note**: This is implemented as `PUT /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send/:txnId`
+  as an unstable prefix.
 
 ## Grammar
 
