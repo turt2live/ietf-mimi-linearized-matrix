@@ -2049,15 +2049,17 @@ The full invite sequence is:
 `POST /invite` is shorthand for {{int-api-invite}}.
 
 <!-- TODO -->
-#### Temp Heading {#int-api-invite}
 
-#### Temp Heading {#int-api-make-join}
+#### Temp Heading 1 {#int-api-invite}
 
-#### Temp Heading {#int-api-send-join}
+#### Temp Heading 2 {#int-api-make-join}
 
-#### Temp Heading {#int-api-make-leave}
+#### Temp Heading 3 {#int-api-send-join}
 
-#### Temp Heading {#int-api-send-leave}
+#### Temp Heading 4 {#int-api-make-leave}
+
+#### Temp Heading 5 {#int-api-send-leave}
+
 <!-- /TODO -->
 
 ## TODO: Remainder of Transport
