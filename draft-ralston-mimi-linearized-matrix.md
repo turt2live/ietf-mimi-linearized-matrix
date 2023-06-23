@@ -1649,7 +1649,7 @@ Request body:
 `edus` are the Ephemeral Data Units to send. If no EDUs are being sent, this field MAY be excluded
 from the request body.
 
-`pdus` are the events/PDUs ({{int-pdus}}) and LPDUs ({{int-lpdus}}) to send to the server. Whether
+`pdus` are the events/PDUs ({{int-pdu}}) and LPDUs ({{int-lpdu}}) to send to the server. Whether
 it's an LPDU or PDU depends on the sending server's role in that room: if they are a non-hub server,
 it will be an LPDU.
 
