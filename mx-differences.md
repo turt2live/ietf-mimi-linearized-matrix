@@ -314,10 +314,30 @@ and participants can choose their favourite, creating small clusters of LM serve
 
   Further, `pdus` is ordered oldest to newest, and still includes `v`. In other words, `v` should be last.
 
+  **Note**: This is implemented as `GET /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/backfill/:roomId`
+  as an unstable prefix.
+
 * `POST /_matrix/federation/v3/invite/:txnId` is a new endpoint, copying its request and response structures
   from `PUT /_matrix/federation/v2/invite/:roomId/:eventId`. Note the HTTP method change.
 
   `:txnId` can easily be an event ID.
+
+  **Note**: This is implemented as `POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/invite/:txnId`
+  as an unstable prefix.
+
+* `POST /_matrix/federation/v3/send_join/:txnId` is a new endpoint, copying much of the behaviour from
+  `PUT /_matrix/federation/v2/make_join/:roomId/:eventId`. Note the HTTP method change.
+
+  `:txnId` can easily be an event ID.
+
+  The request body will contain an LPDU instead of a PDU when coming from LM. The response body only consists
+  of `state`, `auth_chain`, and `event`, though including other fields is okay too.
+
+  Faster joins is not currently possible in LM, but will be in future. `omit_members` continues to default
+  to false.
+
+  **Note**: This is implemented as `POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send_join/:txnId`
+  as an unstable prefix.
 
 Some APIs are not implemented at all in LM:
 
