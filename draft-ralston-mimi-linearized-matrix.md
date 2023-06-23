@@ -192,6 +192,7 @@ are 3 different servers). Server names SHOULD be lower case (`example.org`) and 
 230 characters for ease of use.
 
 Examples:
+
 * `example.org` (DNS host name)
 * `example.org:5678` (DNS host name with explicit port)
 * `127.0.0.1` (literal IPv4 address)
@@ -1376,6 +1377,7 @@ manually. All signatures MUST use an unexpired key at the time of the request
 A server with multiple signing keys SHOULD include an `Authorization` header for each signing key.
 
 If an endpoint requires authentication, servers MUST:
+
 * Validate all presented `Authorization` headers.
 * Ensure at least one `Authorization` header is present.
 
@@ -1927,6 +1929,7 @@ exist.
 **TODO**: This section.
 
 Topics:
+
 * Media/content repo (images, videos, attachments, etc)
 * EDUs (typing notifications, receipts, presence)
 * Device management & to-device messaging
