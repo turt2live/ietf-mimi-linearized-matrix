@@ -1322,6 +1322,20 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.6">
                 <p id="section-toc.1-1.13.2.6.1"><a href="#section-13.6" class="auto internal xref">13.6</a>.  <a href="#name-event-and-state-apis" class="internal xref">Event and State APIs</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.6.2.1">
+                    <p id="section-toc.1-1.13.2.6.2.1.1"><a href="#section-13.6.1" class="auto internal xref">13.6.1</a>.  <a href="#name-get-_matrix-federation-v2-e" class="internal xref"><code>GET /_matrix/federation/v2/event/:eventId</code></a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.6.2.2">
+                    <p id="section-toc.1-1.13.2.6.2.2.1"><a href="#section-13.6.2" class="auto internal xref">13.6.2</a>.  <a href="#name-get-_matrix-federation-v1-s" class="internal xref"><code>GET /_matrix/federation/v1/state/:roomId</code></a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.6.2.3">
+                    <p id="section-toc.1-1.13.2.6.2.3.1"><a href="#section-13.6.3" class="auto internal xref">13.6.3</a>.  <a href="#name-get-_matrix-federation-v1-st" class="internal xref"><code>GET /_matrix/federation/v1/state_ids/:roomId</code></a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.6.2.4">
+                    <p id="section-toc.1-1.13.2.6.2.4.1"><a href="#section-13.6.4" class="auto internal xref">13.6.4</a>.  <a href="#name-get-_matrix-federation-v2-b" class="internal xref"><code>GET /_matrix/federation/v2/backfill/:roomId</code></a></p>
+</li>
+                </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.7">
                 <p id="section-toc.1-1.13.2.7.1"><a href="#section-13.7" class="auto internal xref">13.7</a>.  <a href="#name-todo-remainder-of-transport" class="internal xref">TODO: Remainder of Transport</a></p>
@@ -2054,13 +2068,29 @@ for <code>invite</code>).<a href="#section-3.5.3.4.1-5.2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
-<div id="todo-other-events">
+<div id="mroomhistoryvisibility">
 <section id="section-3.5.3.5">
-            <h5 id="name-todo-other-events">
-<a href="#section-3.5.3.5" class="section-number selfRef">3.5.3.5. </a><a href="#name-todo-other-events" class="section-name selfRef">TODO: Other events</a>
+            <h5 id="name-mroomhistory_visibility">
+<a href="#section-3.5.3.5" class="section-number selfRef">3.5.3.5. </a><a href="#name-mroomhistory_visibility" class="section-name selfRef"><code>m.room.history_visibility</code></a>
             </h5>
-<p id="section-3.5.3.5-1"><strong>TODO</strong>: <code>m.room.name</code>, <code>m.room.topic</code>, <code>m.room.avatar</code>, <code>m.room.encryption</code>, <code>m.room.history_visibility</code><a href="#section-3.5.3.5-1" class="pilcrow">¶</a></p>
-<p id="section-3.5.3.5-2"><strong>TODO</strong>: Drop <code>m.room.encryption</code> and pack it into the create event instead?<a href="#section-3.5.3.5-2" class="pilcrow">¶</a></p>
+<p id="section-3.5.3.5-1"><strong>TODO</strong>: Describe.<a href="#section-3.5.3.5-1" class="pilcrow">¶</a></p>
+<div id="int-calc-event-visibility">
+<section id="section-3.5.3.5.1">
+              <h6 id="name-calculating-event-visibilit">
+<a href="#section-3.5.3.5.1" class="section-number selfRef">3.5.3.5.1. </a><a href="#name-calculating-event-visibilit" class="section-name selfRef">Calculating Event Visibility</a>
+              </h6>
+<p id="section-3.5.3.5.1-1"><strong>TODO</strong>: Describe. (when can a server see an event?)<a href="#section-3.5.3.5.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="todo-other-events">
+<section id="section-3.5.3.6">
+            <h5 id="name-todo-other-events">
+<a href="#section-3.5.3.6" class="section-number selfRef">3.5.3.6. </a><a href="#name-todo-other-events" class="section-name selfRef">TODO: Other events</a>
+            </h5>
+<p id="section-3.5.3.6-1"><strong>TODO</strong>: <code>m.room.name</code>, <code>m.room.topic</code>, <code>m.room.avatar</code>, <code>m.room.encryption</code><a href="#section-3.5.3.6-1" class="pilcrow">¶</a></p>
+<p id="section-3.5.3.6-2"><strong>TODO</strong>: Drop <code>m.room.encryption</code> and pack it into the create event instead?<a href="#section-3.5.3.6-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2706,7 +2736,7 @@ are ultimately responsible for the Certificate Authorities they place trust in, 
         <h3 id="name-api-standards">
 <a href="#section-13.2" class="section-number selfRef">13.2. </a><a href="#name-api-standards" class="section-name selfRef">API Standards</a>
         </h3>
-<div id="requests-and-responses">
+<div id="int-transport-requests-responses">
 <section id="section-13.2.1">
           <h4 id="name-requests-and-responses">
 <a href="#section-13.2.1" class="section-number selfRef">13.2.1. </a><a href="#name-requests-and-responses" class="section-name selfRef">Requests and Responses</a>
@@ -2847,6 +2877,9 @@ wait before retrying, in milliseconds.<a href="#section-13.2.6-2" class="pilcrow
 }
 </pre><a href="#section-13.2.6-3" class="pilcrow">¶</a>
 </div>
+<p id="section-13.2.6-4">The exact rate limit mechanics are left as an implementation detail. A potential approach may be to
+prevent repeated requests for the same resource at a high rate and ensuring a remote server does not
+request more than a defined number of resources at a time.<a href="#section-13.2.6-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -3198,7 +3231,7 @@ falling back to any cached values if needed.<a href="#section-13.4.1.3-1" class=
 <p id="section-13.4.1.3-4">Path parameters:<a href="#section-13.4.1.3-4" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-13.4.1.3-5.1">
-                <code>:serverName</code> - the target server's name to retrieve keys for.<a href="#section-13.4.1.3-5.1" class="pilcrow">¶</a>
+                <code>:serverName</code> - the target server's name (<a href="#int-server-names" class="auto internal xref">Section 3.1</a>) to retrieve keys for.<a href="#section-13.4.1.3-5.1" class="pilcrow">¶</a>
 </li>
             </ul>
 <p id="section-13.4.1.3-6">Query parameters:<a href="#section-13.4.1.3-6" class="pilcrow">¶</a></p>
@@ -3446,7 +3479,199 @@ reason for an event being rejected.<a href="#section-13.5.1-22" class="pilcrow">
         <h3 id="name-event-and-state-apis">
 <a href="#section-13.6" class="section-number selfRef">13.6. </a><a href="#name-event-and-state-apis" class="section-name selfRef">Event and State APIs</a>
         </h3>
-<p id="section-13.6-1"><strong>TODO</strong>: this section.<a href="#section-13.6-1" class="pilcrow">¶</a></p>
+<p id="section-13.6-1">When a participant in the room is missing an event, or otherwise needs a new copy of it, it can retrieve
+that event from the hub server. Similar mechanics apply for getting state events, current state of a room,
+and backfilling scrollback in a room.<a href="#section-13.6-1" class="pilcrow">¶</a></p>
+<p id="section-13.6-2">All servers are required to implement all endpoints (<a href="#int-transport-requests-responses" class="auto internal xref">Section 13.2.1</a>), however
+only hub servers are guaranteed to have the full history/state for a room. While other participant
+servers might have history, they <span class="bcp14">SHOULD NOT</span> be contacted due to the high likelihood of a Not Found-style
+error.<a href="#section-13.6-2" class="pilcrow">¶</a></p>
+<div id="get-matrixfederationv2eventeventid">
+<section id="section-13.6.1">
+          <h4 id="name-get-_matrix-federation-v2-e">
+<a href="#section-13.6.1" class="section-number selfRef">13.6.1. </a><a href="#name-get-_matrix-federation-v2-e" class="section-name selfRef"><code>GET /_matrix/federation/v2/event/:eventId</code></a>
+          </h4>
+<p id="section-13.6.1-1">Retrieves a single event.<a href="#section-13.6.1-1" class="pilcrow">¶</a></p>
+<p id="section-13.6.1-2"><strong>Implementation note</strong>: Currently this endpoint doesn't actually exist. Use
+<code>GET /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/event/:eventId</code>
+when testing against other Linearized Matrix implementations. This string may be updated later to
+account for breaking changes.<a href="#section-13.6.1-2" class="pilcrow">¶</a></p>
+<p id="section-13.6.1-3"><strong>TODO</strong>: Remove implementation notes.<a href="#section-13.6.1-3" class="pilcrow">¶</a></p>
+<p id="section-13.6.1-4"><strong>Rate-limited</strong>: Yes.<a href="#section-13.6.1-4" class="pilcrow">¶</a></p>
+<p id="section-13.6.1-5"><strong>Authentication required</strong>: Yes.<a href="#section-13.6.1-5" class="pilcrow">¶</a></p>
+<p id="section-13.6.1-6">Path parameters:<a href="#section-13.6.1-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.6.1-7.1">
+              <code>:eventId</code> - the event ID (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) to retrieve. Note that event IDs are typically reference
+hashes (<a href="#int-reference-hashes" class="auto internal xref">Section 10.2</a>) of the event itself, which includes the room ID. This makes
+event IDs globally unique.<a href="#section-13.6.1-7.1" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-13.6.1-8">Query parameters: None applicable.<a href="#section-13.6.1-8" class="pilcrow">¶</a></p>
+<p id="section-13.6.1-9">Request body: None applicable.<a href="#section-13.6.1-9" class="pilcrow">¶</a></p>
+<p id="section-13.6.1-10"><code>200 OK</code> response:<a href="#section-13.6.1-10" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.6.1-11">
+<pre>
+{
+   /* the event */
+}
+</pre><a href="#section-13.6.1-11" class="pilcrow">¶</a>
+</div>
+<p id="section-13.6.1-12">The response body is simply the event (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) itself, if the requesting server has reasonable
+visibility of the event (<a href="#int-calc-event-visibility" class="auto internal xref">Section 3.5.3.5.1</a>). When the server can see an event but not the
+contents, the event is served redacted (<a href="#int-redactions" class="auto internal xref">Section 9</a>) instead.<a href="#section-13.6.1-12" class="pilcrow">¶</a></p>
+<p id="section-13.6.1-13">If the event isn't known to the server, or the requesting server has no reason to know that the event
+even exists, a <code>404 Not Found</code> HTTP status code and <code>M_NOT_FOUND</code> error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>)
+is returned.<a href="#section-13.6.1-13" class="pilcrow">¶</a></p>
+<p id="section-13.6.1-14">The returned event <span class="bcp14">MUST</span> be checked before being used by the requesting server (<a href="#int-receiving-events" class="auto internal xref">Section 6.1</a>).
+This endpoint <span class="bcp14">MUST NOT</span> return LPDUs (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>), instead treating such events as though they didn't
+exist.<a href="#section-13.6.1-14" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="int-api-get-state">
+<section id="section-13.6.2">
+          <h4 id="name-get-_matrix-federation-v1-s">
+<a href="#section-13.6.2" class="section-number selfRef">13.6.2. </a><a href="#name-get-_matrix-federation-v1-s" class="section-name selfRef"><code>GET /_matrix/federation/v1/state/:roomId</code></a>
+          </h4>
+<p id="section-13.6.2-1">Retrieves a snapshot of the room state (<a href="#int-state-events" class="auto internal xref">Section 3.5.2</a>) at the given event. This is typically
+most useful when a participant server prefers to store minimal information about the room, but still
+needs to offer context to its clients.<a href="#section-13.6.2-1" class="pilcrow">¶</a></p>
+<p id="section-13.6.2-2"><strong>Rate-limited</strong>: Yes.<a href="#section-13.6.2-2" class="pilcrow">¶</a></p>
+<p id="section-13.6.2-3"><strong>Authentication required</strong>: Yes.<a href="#section-13.6.2-3" class="pilcrow">¶</a></p>
+<p id="section-13.6.2-4">Path parameters:<a href="#section-13.6.2-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.6.2-5.1">
+              <code>:roomId</code> - the room ID (<a href="#int-room-id" class="auto internal xref">Section 3.2</a>) to retrieve state in.<a href="#section-13.6.2-5.1" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-13.6.2-6">Query parameters:<a href="#section-13.6.2-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.6.2-7.1">
+              <code>event_id</code> (string; required) - The event ID (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) to retrieve state at.<a href="#section-13.6.2-7.1" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-13.6.2-8">Request body: None applicable.<a href="#section-13.6.2-8" class="pilcrow">¶</a></p>
+<p id="section-13.6.2-9"><code>200 OK</code> response:<a href="#section-13.6.2-9" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.6.2-10">
+<pre>
+{
+   "auth_chain": [
+      {/* event */}
+   ],
+   "pdus": [
+      {/* event */}
+   ]
+}
+</pre><a href="#section-13.6.2-10" class="pilcrow">¶</a>
+</div>
+<p id="section-13.6.2-11">The returned room state is in two parts: the <code>pdus</code>, consisting of the events which represent "current
+state" (<a href="#int-state-events" class="auto internal xref">Section 3.5.2</a>) prior to considering state changes induced by the event in the original
+request, and <code>auth_chain</code>, consisting of the events which make up the <code>auth_events</code> (<a href="#int-auth-selection" class="auto internal xref">Section 6.4.1</a>)
+for the <code>pdus</code> and the <code>auth_events</code> of those events, recursively.<a href="#section-13.6.2-11" class="pilcrow">¶</a></p>
+<p id="section-13.6.2-12">The <code>auth_chain</code> will eventually stop recursing when it reaches the <code>m.room.create</code> event, as it cannot
+have any <code>auth_events</code>.<a href="#section-13.6.2-12" class="pilcrow">¶</a></p>
+<p id="section-13.6.2-13">For example, if the requested event ID was an <code>m.room.power_levels</code> event, the returned state would be
+as if the new power levels were not applied.<a href="#section-13.6.2-13" class="pilcrow">¶</a></p>
+<p id="section-13.6.2-14">Both <code>auth_chain</code> and <code>pdus</code> contain event objects (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>).<a href="#section-13.6.2-14" class="pilcrow">¶</a></p>
+<p id="section-13.6.2-15">If the requesting server does not have reasonable visibility on the room (<a href="#int-calc-event-visibility" class="auto internal xref">Section 3.5.3.5.1</a>),
+or either the room ID or event ID don't exist, a <code>404 Not Found</code> HTTP status code and <code>M_NOT_FOUND</code>
+error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>) is returned. The same error is returned if the event ID doesn't
+exist in the requested room ID.<a href="#section-13.6.2-15" class="pilcrow">¶</a></p>
+<p id="section-13.6.2-16">Note that the requesting server will generally always have visibility of the <code>auth_chain</code> and <code>pdu</code>
+events, but may not be able to see their contents. In this case, they are redacted (<a href="#int-redactions" class="auto internal xref">Section 9</a>)
+before being served.<a href="#section-13.6.2-16" class="pilcrow">¶</a></p>
+<p id="section-13.6.2-17">The returned events <span class="bcp14">MUST</span> be checked before being used by the requesting server (<a href="#int-receiving-events" class="auto internal xref">Section 6.1</a>).
+This endpoint <span class="bcp14">MUST NOT</span> return LPDUs (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>), instead treating such events as though they didn't
+exist.<a href="#section-13.6.2-17" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="get-matrixfederationv1stateidsroomid">
+<section id="section-13.6.3">
+          <h4 id="name-get-_matrix-federation-v1-st">
+<a href="#section-13.6.3" class="section-number selfRef">13.6.3. </a><a href="#name-get-_matrix-federation-v1-st" class="section-name selfRef"><code>GET /_matrix/federation/v1/state_ids/:roomId</code></a>
+          </h4>
+<p id="section-13.6.3-1">This performs the same function as <a href="#int-api-get-state" class="auto internal xref">Section 13.6.2</a> but returns just the event IDs instead.<a href="#section-13.6.3-1" class="pilcrow">¶</a></p>
+<p id="section-13.6.3-2"><strong>Rate-limited</strong>: Yes.<a href="#section-13.6.3-2" class="pilcrow">¶</a></p>
+<p id="section-13.6.3-3"><strong>Authentication required</strong>: Yes.<a href="#section-13.6.3-3" class="pilcrow">¶</a></p>
+<p id="section-13.6.3-4">Path parameters:<a href="#section-13.6.3-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.6.3-5.1">
+              <code>:roomId</code> - the room ID (<a href="#int-room-id" class="auto internal xref">Section 3.2</a>) to retrieve state in.<a href="#section-13.6.3-5.1" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-13.6.3-6">Query parameters:<a href="#section-13.6.3-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.6.3-7.1">
+              <code>event_id</code> (string; required) - The event ID (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) to retrieve state at.<a href="#section-13.6.3-7.1" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-13.6.3-8">Request body: None applicable.<a href="#section-13.6.3-8" class="pilcrow">¶</a></p>
+<p id="section-13.6.3-9"><code>200 OK</code> response:<a href="#section-13.6.3-9" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.6.3-10">
+<pre>
+{
+   "auth_chain_ids": ["$event1", "$event2"],
+   "pdu_ids": ["$event3", "$event4"]
+}
+</pre><a href="#section-13.6.3-10" class="pilcrow">¶</a>
+</div>
+<p id="section-13.6.3-11">See <a href="#int-api-get-state" class="auto internal xref">Section 13.6.2</a> for behaviour. Note that <code>auth_chain</code> becomes <code>auth_chain_ids</code> when using
+this endpoint, and <code>pdus</code> becomes <code>pdu_ids</code>.<a href="#section-13.6.3-11" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="get-matrixfederationv2backfillroomid">
+<section id="section-13.6.4">
+          <h4 id="name-get-_matrix-federation-v2-b">
+<a href="#section-13.6.4" class="section-number selfRef">13.6.4. </a><a href="#name-get-_matrix-federation-v2-b" class="section-name selfRef"><code>GET /_matrix/federation/v2/backfill/:roomId</code></a>
+          </h4>
+<p id="section-13.6.4-1">Retrieves a sliding window history of previous events in a given room.<a href="#section-13.6.4-1" class="pilcrow">¶</a></p>
+<p id="section-13.6.4-2"><strong>Implementation note</strong>: Currently this endpoint doesn't actually exist. Use
+<code>GET /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/backfill/:roomId</code>
+when testing against other Linearized Matrix implementations. This string may be updated later to
+account for breaking changes.<a href="#section-13.6.4-2" class="pilcrow">¶</a></p>
+<p id="section-13.6.4-3"><strong>TODO</strong>: Remove implementation notes.<a href="#section-13.6.4-3" class="pilcrow">¶</a></p>
+<p id="section-13.6.4-4"><strong>Rate-limited</strong>: Yes.<a href="#section-13.6.4-4" class="pilcrow">¶</a></p>
+<p id="section-13.6.4-5"><strong>Authentication required</strong>: Yes.<a href="#section-13.6.4-5" class="pilcrow">¶</a></p>
+<p id="section-13.6.4-6">Path parameters:<a href="#section-13.6.4-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.6.4-7.1">
+              <code>:roomId</code> - the room ID (<a href="#int-room-id" class="auto internal xref">Section 3.2</a>) to retrieve events from.<a href="#section-13.6.4-7.1" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-13.6.4-8">Query parameters:<a href="#section-13.6.4-8" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.6.4-9.1">
+              <code>v</code> (string; required) - The event ID (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) to start backfilling from.<a href="#section-13.6.4-9.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-13.6.4-9.2">
+              <code>limit</code> (integer; required) - The maximum number of events to return, including <code>v</code>.<a href="#section-13.6.4-9.2" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-13.6.4-10">Request body: None applicable.<a href="#section-13.6.4-10" class="pilcrow">¶</a></p>
+<p id="section-13.6.4-11"><code>200 OK</code> response:<a href="#section-13.6.4-11" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.6.4-12">
+<pre>
+{
+   "pdus": [
+      {/* event */}
+   ]
+}
+</pre><a href="#section-13.6.4-12" class="pilcrow">¶</a>
+</div>
+<p id="section-13.6.4-13">The number of returned <code>pdus</code> <span class="bcp14">MUST NOT</span> exceed the <code>limit</code> provided by the caller. <code>limit</code> <span class="bcp14">SHOULD</span> have
+a maximum value imposed by the receiving server. <code>pdus</code> contains the events (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) preceeding
+the requested event ID (<code>v</code>), including <code>v</code>. <code>pdus</code> is ordered from oldest to newest.<a href="#section-13.6.4-13" class="pilcrow">¶</a></p>
+<p id="section-13.6.4-14">If the requesting server does not have reasonable visibility on the room (<a href="#int-calc-event-visibility" class="auto internal xref">Section 3.5.3.5.1</a>),
+or either the room ID or event ID don't exist, a <code>404 Not Found</code> HTTP status code and <code>M_NOT_FOUND</code>
+error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>) is returned. The same error is returned if the event ID doesn't
+exist in the requested room ID.<a href="#section-13.6.4-14" class="pilcrow">¶</a></p>
+<p id="section-13.6.4-15">If the requesting server does have visibility on the returned events, but not their contents, they
+are redacted (<a href="#int-redactions" class="auto internal xref">Section 9</a>) before being served.<a href="#section-13.6.4-15" class="pilcrow">¶</a></p>
+<p id="section-13.6.4-16">The returned events <span class="bcp14">MUST</span> be checked before being used by the requesting server (<a href="#int-receiving-events" class="auto internal xref">Section 6.1</a>).
+This endpoint <span class="bcp14">MUST NOT</span> return LPDUs (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>), instead treating such events as though they didn't
+exist.<a href="#section-13.6.4-16" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="todo-remainder-of-transport">
