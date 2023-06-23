@@ -1557,13 +1557,27 @@ dns-char    = DIGIT / ALPHA / "-" / "."
 <p id="section-3.1-6">Server names <span class="bcp14">MUST</span> be treated as case sensitive (<code>eXaMpLe.OrG</code>, <code>example.org</code>, and <code>EXAMPLE.ORG</code>
 are 3 different servers). Server names <span class="bcp14">SHOULD</span> be lower case (<code>example.org</code>) and <span class="bcp14">SHOULD NOT</span> exceed
 230 characters for ease of use.<a href="#section-3.1-6" class="pilcrow">¶</a></p>
-<p id="section-3.1-7">Examples:
-* <code>example.org</code> (DNS host name)
-* <code>example.org:5678</code> (DNS host name with explicit port)
-* <code>127.0.0.1</code> (literal IPv4 address)
-* <code>127.0.0.1:5678</code> (literal IPv4 address with explicit port)
-* <code>[2001:DB8:0:0:8:800:200C:417A]</code> (literal IPv6 address)
-* <code>[2001:DB8:0:0:8:800:200C:417A]:5678</code> (literal IPv6 address with explicit port)<a href="#section-3.1-7" class="pilcrow">¶</a></p>
+<p id="section-3.1-7">Examples:<a href="#section-3.1-7" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-3.1-8.1">
+            <code>example.org</code> (DNS host name)<a href="#section-3.1-8.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.1-8.2">
+            <code>example.org:5678</code> (DNS host name with explicit port)<a href="#section-3.1-8.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.1-8.3">
+            <code>127.0.0.1</code> (literal IPv4 address)<a href="#section-3.1-8.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.1-8.4">
+            <code>127.0.0.1:5678</code> (literal IPv4 address with explicit port)<a href="#section-3.1-8.4" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.1-8.5">
+            <code>[2001:DB8:0:0:8:800:200C:417A]</code> (literal IPv6 address)<a href="#section-3.1-8.5" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-3.1-8.6">
+            <code>[2001:DB8:0:0:8:800:200C:417A]:5678</code> (literal IPv6 address with explicit port)<a href="#section-3.1-8.6" class="pilcrow">¶</a>
+</li>
+        </ul>
 </section>
 </div>
 <div id="int-room-id">
@@ -3106,21 +3120,25 @@ and checking the sender's signature (<a href="#int-checking-signatures" class="a
 manually. All signatures <span class="bcp14">MUST</span> use an unexpired key at the time of the request
 (<a href="#int-transport-keys-validity" class="auto internal xref">Section 13.4.1.1</a>).<a href="#section-13.4-16" class="pilcrow">¶</a></p>
 <p id="section-13.4-17">A server with multiple signing keys <span class="bcp14">SHOULD</span> include an <code>Authorization</code> header for each signing key.<a href="#section-13.4-17" class="pilcrow">¶</a></p>
-<p id="section-13.4-18">If an endpoint requires authentication, servers <span class="bcp14">MUST</span>:
-* Validate all presented <code>Authorization</code> headers.
-* Ensure at least one <code>Authorization</code> header is present.<a href="#section-13.4-18" class="pilcrow">¶</a></p>
-<p id="section-13.4-19">If either fails (lack of headers, or any of the headers fail validation), the request <span class="bcp14">MUST</span> be rejected
-with an HTTP <code>401 Unauthorized</code> status code and <code>M_FORBIDDEN</code> error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>):<a href="#section-13.4-19" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-13.4-20">
+<p id="section-13.4-18">If an endpoint requires authentication, servers <span class="bcp14">MUST</span>:<a href="#section-13.4-18" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.4-19.1">Validate all presented <code>Authorization</code> headers.<a href="#section-13.4-19.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-13.4-19.2">Ensure at least one <code>Authorization</code> header is present.<a href="#section-13.4-19.2" class="pilcrow">¶</a>
+</li>
+        </ul>
+<p id="section-13.4-20">If either fails (lack of headers, or any of the headers fail validation), the request <span class="bcp14">MUST</span> be rejected
+with an HTTP <code>401 Unauthorized</code> status code and <code>M_FORBIDDEN</code> error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>):<a href="#section-13.4-20" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.4-21">
 <pre>
 {
    "errcode": "M_FORBIDDEN",
    "error": "Signature error on request."
 }
-</pre><a href="#section-13.4-20" class="pilcrow">¶</a>
+</pre><a href="#section-13.4-21" class="pilcrow">¶</a>
 </div>
-<p id="section-13.4-21">If an endpoint does <em>not</em> require authentication, <code>Authorization</code> headers are ignored entirely.<a href="#section-13.4-21" class="pilcrow">¶</a></p>
-<p id="section-13.4-22">Responses from a server are authenticated using TLS and do not have additional signing requirements.<a href="#section-13.4-22" class="pilcrow">¶</a></p>
+<p id="section-13.4-22">If an endpoint does <em>not</em> require authentication, <code>Authorization</code> headers are ignored entirely.<a href="#section-13.4-22" class="pilcrow">¶</a></p>
+<p id="section-13.4-23">Responses from a server are authenticated using TLS and do not have additional signing requirements.<a href="#section-13.4-23" class="pilcrow">¶</a></p>
 <div id="int-transport-get-server-keys">
 <section id="section-13.4.1">
           <h4 id="name-retrieving-server-keys">
@@ -3680,26 +3698,33 @@ exist.<a href="#section-13.6.4-16" class="pilcrow">¶</a></p>
 <a href="#section-13.7" class="section-number selfRef">13.7. </a><a href="#name-todo-remainder-of-transport" class="section-name selfRef">TODO: Remainder of Transport</a>
         </h3>
 <p id="section-13.7-1"><strong>TODO</strong>: This section.<a href="#section-13.7-1" class="pilcrow">¶</a></p>
-<p id="section-13.7-2">Topics:
-* Media/content repo (images, videos, attachments, etc)
-* EDUs (typing notifications, receipts, presence)
-* Device management &amp; to-device messaging
-* Query APIs (alias resolution, profiles)
-* Encryption APIs<a href="#section-13.7-2" class="pilcrow">¶</a></p>
-<p id="section-13.7-3">Notably/deliberately missing APIs are:<a href="#section-13.7-3" class="pilcrow">¶</a></p>
+<p id="section-13.7-2">Topics:<a href="#section-13.7-2" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.7-4.1">
-            <code>get_missing_events</code> - this is used by DAG servers only<a href="#section-13.7-4.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.7-3.1">Media/content repo (images, videos, attachments, etc)<a href="#section-13.7-3.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-13.7-4.2">Public room directory<a href="#section-13.7-4.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.7-3.2">EDUs (typing notifications, receipts, presence)<a href="#section-13.7-3.2" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-13.7-4.3">Timestamp-to-event API<a href="#section-13.7-4.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.7-3.3">Device management &amp; to-device messaging<a href="#section-13.7-3.3" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-13.7-4.4">All of 3rd party invites<a href="#section-13.7-4.4" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.7-3.4">Query APIs (alias resolution, profiles)<a href="#section-13.7-3.4" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-13.7-4.5">All of Spaces<a href="#section-13.7-4.5" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.7-3.5">Encryption APIs<a href="#section-13.7-3.5" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-13.7-4.6">OpenID API<a href="#section-13.7-4.6" class="pilcrow">¶</a>
+        </ul>
+<p id="section-13.7-4">Notably/deliberately missing APIs are:<a href="#section-13.7-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.7-5.1">
+            <code>get_missing_events</code> - this is used by DAG servers only<a href="#section-13.7-5.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-13.7-5.2">Public room directory<a href="#section-13.7-5.2" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-13.7-5.3">Timestamp-to-event API<a href="#section-13.7-5.3" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-13.7-5.4">All of 3rd party invites<a href="#section-13.7-5.4" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-13.7-5.5">All of Spaces<a href="#section-13.7-5.5" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-13.7-5.6">OpenID API<a href="#section-13.7-5.6" class="pilcrow">¶</a>
 </li>
         </ul>
 </section>
