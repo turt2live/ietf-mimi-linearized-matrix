@@ -512,7 +512,7 @@ of algorithms the room is using.
 
 These conditions are checked as part of the event authorization rules ({{int-auth-rules}}).
 
-#### `m.room.join_rules`
+#### `m.room.join_rules` {#int-ev-join-rules}
 
 Defines whether users can join without an invite and other similar conditions. The `state_key`
 MUST be an empty string. Any other state key, including lack thereof, serve no meaning and
@@ -529,7 +529,7 @@ join policy for the room. Allowable values are:
 
 **TODO**: What's the default?
 
-#### `m.room.member`
+#### `m.room.member` {#int-ev-member}
 
 Defines the membership for a user in the room. If the user does not have a membership event then
 they are presumed to be in the `leave` state.
@@ -1610,7 +1610,7 @@ A typical event send path will be:
    |                 |         |                     |
    |<----------------+         |                     |
    |                           |                     |
--------------------- CONCURRENT REQUESTS ---------------------
+----------------- Concurrent requests follow -----------------
    |                           |                     |
    | PUT /send/:txnId          |                     |
    |-------------------------->|                     |
@@ -1923,6 +1923,142 @@ are redacted ({{int-redactions}}) before being served.
 The returned events MUST be checked before being used by the requesting server ({{int-receiving-events}}).
 This endpoint MUST NOT return LPDUs ({{int-lpdu}}), instead treating such events as though they didn't
 exist.
+
+## Room Membership {#int-transport-room-membership}
+
+When a server is already participating in a room, it can simply send `m.room.member` ({{int-ev-member}})
+events with the `/send` API ({{int-api-send-txn}}) to other servers/the hub directly. When a server is
+not already participating however, it needs to be welcomed in by the hub server.
+
+A typical invite flow would be:
+
+~~~ aasvg
++-------------+             +-----+             +---------------+
+| Participant |             | Hub |             | TargetServer  |
++-------------+             +-----+             +---------------+
+       |                       |                        |
+       | POST /invite (LPDU)   |                        |
+       |---------------------->|                        |
+       |                       |                        |
+       |                       | POST /invite (PDU)     |
+       |                       |----------------------->|
+       |                       |                        |
+       |                       |                        | Decide to process the
+       |                       |                        | invite. Can reject due
+       |                       |                        | to spam, or send it to
+       |                       |                        | the recipient user.
+       |                       |                        |----------------------+
+       |                       |                        |                      |
+       |                       |                        |<---------------------+
+       |                       |                        |
+       |                       |    Finish POST /invite |
+       |                       |<-----------------------|
+       |                       |                        |
+       |   Finish POST /invite |                        |
+       |<----------------------|                        |
+       |                       |                        |
+------------------------ User decides to accept invite -------------------------
+       |                       |                        |
+       |                       |         GET /make_join |
+       |                       |<-----------------------|
+       |                       |                        |
+       |                       | Finish GET /make_join  |
+       |                       |----------------------->|
+       |                       |                        |
+       |                       |                        | Fill event template
+       |                       |                        |-------------------+
+       |                       |                        |                   |
+       |                       |                        |<------------------+
+       |                       |                        |
+       |                       |        POST /send_join |
+       |                       |<-----------------------|
+       |                       |                        |
+       |                       | Finish POST /send_join |
+       |                       |----------------------->|
+       |                       |                        |
+~~~
+
+`POST /invite` is shorthand for {{int-api-invite}}. Similarly, `GET /make_join` is {{int-api-make-join}}
+and `POST /send_join` is {{int-api-send-join}}.
+
+If the user decided to reject the invite, the TargetServer would use `GET /make_leave` ({{int-api-make-leave}})
+and `POST /send_leave` ({{int-api-send-leave}}) instead of make/send_join.
+
+### Invites
+
+When inviting a user belonging to a server already in the room, senders SHOULD use `m.room.member`
+({{int-ev-member}}) events and the `/send` API ({{int-api-send-txn}}). This section's endpoints SHOULD
+only be used when the target server is *not* participating in the room already.
+
+Note that being invited does not count as the server "participating" in the room. This can mean that
+while a server has a user with a pending invite in the room, this section's endpoints are needed to
+send additional invites to other users on the same server.
+
+The full invite sequence is:
+
+~~~ aasvg
++-------------+            +-----+             +---------------+
+| Participant |            | Hub |             | TargetServer  |
++-------------+            +-----+             +---------------+
+       |                      |                        |
+       | POST /invite         |                        |
+       |--------------------->|                        |
+       |                      |                        |
+       |     Reject if sender |                        |
+       |  cannot invite other |                        |
+       |                users |                        |
+       |<- - - - - - - - - - -|                        |
+       |                      |                        |
+       |                      | Otherwise, append      |
+       |                      | PDU fields             |
+       |                      |------------------+     |
+       |                      |                  |     |
+       |                      |<-----------------+     |
+       |                      |                        |
+       |                      | POST /invite           |
+       |                      |----------------------->|
+       |                      |                        |
+       |                      |         Reject if room |
+       |                      |  version not supported |
+       |                      |<- - - - - - - - - - - -|
+       |                      |                        |
+       |                      |  Reject if target user |
+       |                      |      is ineligible for |
+       |                      |                invites |
+       |                      |<- - - - - - - - - - - -|
+       |                      |                        |
+       |   Proxy TargetServer |                        |
+       |            rejection |                        |
+       |<- - - - - - - - - - -|                        |
+       |                      |                        |
+       |                      |                        | Otherwise, queue
+       |                      |                        | sending the invite to
+       |                      |                        | target user
+       |                      |                        |----------------------+
+       |                      |                        |                      |
+       |                      |                        |<---------------------+
+       |                      |                        |
+       |                      |                 200 OK |
+       |                      |<-----------------------|
+       |                      |                        |
+       |               200 OK |                        |
+       |<---------------------|                        |
+       |                      |                        |
+~~~
+
+`POST /invite` is shorthand for {{int-api-invite}}.
+
+<!-- TODO -->
+#### Temp Heading {#int-api-invite}
+
+#### Temp Heading {#int-api-make-join}
+
+#### Temp Heading {#int-api-send-join}
+
+#### Temp Heading {#int-api-make-leave}
+
+#### Temp Heading {#int-api-send-leave}
+<!-- /TODO -->
 
 ## TODO: Remainder of Transport
 

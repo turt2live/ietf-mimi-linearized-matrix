@@ -257,6 +257,8 @@ and participants can choose their favourite, creating small clusters of LM serve
 
 ## HTTP API Changes
 
+* http/2 and TLS 1.3 are the minimum baseline for transport.
+
 * `GET /_matrix/key/v2/server` now returns an *optional* top-level boolean `m.linearized` field. If `true`, the
   server *only* supports Linearized Matrix and cannot handle full-mesh/DAG aspects. These servers are participants
   and sometimes hubs. The field is part of the signature.
@@ -301,8 +303,8 @@ and participants can choose their favourite, creating small clusters of LM serve
   above.
 
 * `GET /_matrix/federation/v2/backfill/:roomId` is a new endpoint, modeled off of
-  `GET /_matrix/federation/v1/backfill/:roomId`. Instead of returning a single-PDU transaction, it returns
-  `{"pdus": [...]}`.
+  `GET /_matrix/federation/v1/backfill/:roomId`. Instead of returning a transaction containing PDUs, it returns
+  just `{"pdus": [...]}`.
 
   It's also had its 404 semantics clarified (see `GET /state/:roomId` above), and returns an empty array if
   there are no previous events (ie: when requesting the `m.room.create` event). Additionally, the specification
