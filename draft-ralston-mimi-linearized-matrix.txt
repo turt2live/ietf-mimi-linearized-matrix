@@ -112,9 +112,10 @@ Table of Contents
        13.3.1.  GET /.well-known/matrix/server
      13.4.  Request Authentication
        13.4.1.  Retrieving Server Keys
-       13.4.2.  Sending Events
-       13.4.3.  Event and State APIs
-       13.4.4.  TODO: Remainder of Transport
+     13.5.  Sending Events
+       13.5.1.  PUT /_matrix/federation/v2/send/:txnId
+     13.6.  Event and State APIs
+     13.7.  TODO: Remainder of Transport
    14. TODOs & Open Questions
    15. Security Considerations
    16. IANA Considerations
@@ -1960,7 +1961,7 @@ Table of Contents
    keys than requested.  The caller is expected to filter the response
    if needed.
 
-13.4.2.  Sending Events
+13.5.  Sending Events
 
    Events accepted into the room by a hub server must be sent to all
    other servers in that room.  Similarly, participant servers need a
@@ -2000,12 +2001,12 @@ Table of Contents
       |------------------------------------------------>|
       |                           |                     |
 
-   PUT /send/:txnId is shorthand for Section 13.4.2.1.
+   PUT /send/:txnId is shorthand for Section 13.5.1.
 
    Hubs which generate events would skip to the point where they create
    a fully-formed PDU and send it out to all other participants.
 
-13.4.2.1.  PUT /_matrix/federation/v2/send/:txnId
+13.5.1.  PUT /_matrix/federation/v2/send/:txnId
 
    Sends (L)PDUs (Section 3.5, Section 3.5.1) to another server.  The
    sending server MUST wait for a 200 OK response from the receiver
@@ -2122,11 +2123,11 @@ Table of Contents
    *TODO*: Should we also return fully-formed PDUs for the LPDUs we
    received?
 
-13.4.3.  Event and State APIs
+13.6.  Event and State APIs
 
    *TODO*: this section.
 
-13.4.4.  TODO: Remainder of Transport
+13.7.  TODO: Remainder of Transport
 
    *TODO*: This section.
 

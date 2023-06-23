@@ -1310,16 +1310,21 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.4.2.1">
                     <p id="section-toc.1-1.13.2.4.2.1.1"><a href="#section-13.4.1" class="auto internal xref">13.4.1</a>.  <a href="#name-retrieving-server-keys" class="internal xref">Retrieving Server Keys</a></p>
 </li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.4.2.2">
-                    <p id="section-toc.1-1.13.2.4.2.2.1"><a href="#section-13.4.2" class="auto internal xref">13.4.2</a>.  <a href="#name-sending-events" class="internal xref">Sending Events</a></p>
+                </ul>
 </li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.4.2.3">
-                    <p id="section-toc.1-1.13.2.4.2.3.1"><a href="#section-13.4.3" class="auto internal xref">13.4.3</a>.  <a href="#name-event-and-state-apis" class="internal xref">Event and State APIs</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.4.2.4">
-                    <p id="section-toc.1-1.13.2.4.2.4.1"><a href="#section-13.4.4" class="auto internal xref">13.4.4</a>.  <a href="#name-todo-remainder-of-transport" class="internal xref">TODO: Remainder of Transport</a></p>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.5">
+                <p id="section-toc.1-1.13.2.5.1"><a href="#section-13.5" class="auto internal xref">13.5</a>.  <a href="#name-sending-events" class="internal xref">Sending Events</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.5.2.1">
+                    <p id="section-toc.1-1.13.2.5.2.1.1"><a href="#section-13.5.1" class="auto internal xref">13.5.1</a>.  <a href="#name-put-_matrix-federation-v2-s" class="internal xref"><code>PUT /_matrix/federation/v2/send/:txnId</code></a></p>
 </li>
                 </ul>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.6">
+                <p id="section-toc.1-1.13.2.6.1"><a href="#section-13.6" class="auto internal xref">13.6</a>.  <a href="#name-event-and-state-apis" class="internal xref">Event and State APIs</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.7">
+                <p id="section-toc.1-1.13.2.7.1"><a href="#section-13.7" class="auto internal xref">13.7</a>.  <a href="#name-todo-remainder-of-transport" class="internal xref">TODO: Remainder of Transport</a></p>
 </li>
             </ul>
 </li>
@@ -3261,102 +3266,104 @@ needed.<a href="#section-13.4.1.4-12" class="pilcrow">¶</a></p>
 </div>
 </section>
 </div>
+</section>
+</div>
 <div id="int-transport-send-events">
-<section id="section-13.4.2">
-          <h4 id="name-sending-events">
-<a href="#section-13.4.2" class="section-number selfRef">13.4.2. </a><a href="#name-sending-events" class="section-name selfRef">Sending Events</a>
-          </h4>
-<p id="section-13.4.2-1">Events accepted into the room by a hub server must be sent to all other servers in that room. Similarly,
-participant servers need a way to send partial events through the hub server, as mentioned by <a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>.<a href="#section-13.4.2-1" class="pilcrow">¶</a></p>
-<p id="section-13.4.2-2">A single endpoint is used for all rooms on either server, and can contain both fully-formed PDUs
+<section id="section-13.5">
+        <h3 id="name-sending-events">
+<a href="#section-13.5" class="section-number selfRef">13.5. </a><a href="#name-sending-events" class="section-name selfRef">Sending Events</a>
+        </h3>
+<p id="section-13.5-1">Events accepted into the room by a hub server must be sent to all other servers in that room. Similarly,
+participant servers need a way to send partial events through the hub server, as mentioned by <a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>.<a href="#section-13.5-1" class="pilcrow">¶</a></p>
+<p id="section-13.5-2">A single endpoint is used for all rooms on either server, and can contain both fully-formed PDUs
 (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) or Linearized PDUs (partial events; <a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>) depending on the server's role in the
-applicable room.<a href="#section-13.4.2-2" class="pilcrow">¶</a></p>
-<p id="section-13.4.2-3">A typical event send path will be:<a href="#section-13.4.2-3" class="pilcrow">¶</a></p>
-<div id="section-13.4.2-4">
-            <div class="alignLeft art-svg artwork" id="section-13.4.2-4.1">
+applicable room.<a href="#section-13.5-2" class="pilcrow">¶</a></p>
+<p id="section-13.5-3">A typical event send path will be:<a href="#section-13.5-3" class="pilcrow">¶</a></p>
+<div id="section-13.5-4">
+          <div class="alignLeft art-svg artwork" id="section-13.5-4.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="432" width="504" viewBox="0 0 504 432" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px">
-                <path d="M 8,32 L 8,64" fill="none" stroke="black"></path>
-                <path d="M 32,72 L 32,296" fill="none" stroke="black"></path>
-                <path d="M 32,312 L 32,416" fill="none" stroke="black"></path>
-                <path d="M 56,32 L 56,64" fill="none" stroke="black"></path>
-                <path d="M 192,32 L 192,64" fill="none" stroke="black"></path>
-                <path d="M 256,72 L 256,288" fill="none" stroke="black"></path>
-                <path d="M 256,320 L 256,392" fill="none" stroke="black"></path>
-                <path d="M 320,32 L 320,64" fill="none" stroke="black"></path>
-                <path d="M 368,32 L 368,64" fill="none" stroke="black"></path>
-                <path d="M 432,72 L 432,296" fill="none" stroke="black"></path>
-                <path d="M 432,312 L 432,416" fill="none" stroke="black"></path>
-                <path d="M 496,32 L 496,64" fill="none" stroke="black"></path>
-                <path d="M 8,32 L 56,32" fill="none" stroke="black"></path>
-                <path d="M 192,32 L 320,32" fill="none" stroke="black"></path>
-                <path d="M 368,32 L 496,32" fill="none" stroke="black"></path>
-                <path d="M 8,64 L 56,64" fill="none" stroke="black"></path>
-                <path d="M 192,64 L 320,64" fill="none" stroke="black"></path>
-                <path d="M 368,64 L 496,64" fill="none" stroke="black"></path>
-                <path d="M 264,112 L 352,112" fill="none" stroke="black"></path>
-                <path d="M 264,144 L 352,144" fill="none" stroke="black"></path>
-                <path d="M 40,192 L 248,192" fill="none" stroke="black"></path>
-                <path d="M 40,240 L 176,240" fill="none" stroke="black"></path>
-                <path d="M 40,272 L 176,272" fill="none" stroke="black"></path>
-                <path d="M 8,304 L 160,304" fill="none" stroke="black"></path>
-                <path d="M 336,304 L 496,304" fill="none" stroke="black"></path>
-                <path d="M 40,352 L 248,352" fill="none" stroke="black"></path>
-                <path d="M 40,400 L 424,400" fill="none" stroke="black"></path>
-                <polygon class="arrowhead" points="432,400 420,394.4 420,405.6" fill="black" transform="rotate(0,424,400)"></polygon>
-                <polygon class="arrowhead" points="272,144 260,138.4 260,149.6" fill="black" transform="rotate(180,264,144)"></polygon>
-                <polygon class="arrowhead" points="256,352 244,346.4 244,357.6" fill="black" transform="rotate(0,248,352)"></polygon>
-                <polygon class="arrowhead" points="48,272 36,266.4 36,277.6" fill="black" transform="rotate(180,40,272)"></polygon>
-                <polygon class="arrowhead" points="48,192 36,186.4 36,197.6" fill="black" transform="rotate(180,40,192)"></polygon>
-                <g class="text">
-                  <text x="32" y="52">Hub</text>
-                  <text x="252" y="52">Participant1</text>
-                  <text x="428" y="52">Participant2</text>
-                  <text x="292" y="100">Create</text>
-                  <text x="340" y="100">LPDU</text>
-                  <text x="352" y="132">|</text>
-                  <text x="128" y="180">PUT</text>
-                  <text x="196" y="180">/send/:txnId</text>
-                  <text x="68" y="228">Append</text>
-                  <text x="112" y="228">PDU</text>
-                  <text x="156" y="228">fields</text>
-                  <text x="176" y="260">|</text>
-                  <text x="212" y="308">CONCURRENT</text>
-                  <text x="292" y="308">REQUESTS</text>
-                  <text x="56" y="340">PUT</text>
-                  <text x="124" y="340">/send/:txnId</text>
-                  <text x="56" y="388">PUT</text>
-                  <text x="124" y="388">/send/:txnId</text>
-                  <text x="256" y="420">|</text>
-                </g>
-              </svg><a href="#section-13.4.2-4.1" class="pilcrow">¶</a>
+              <path d="M 8,32 L 8,64" fill="none" stroke="black"></path>
+              <path d="M 32,72 L 32,296" fill="none" stroke="black"></path>
+              <path d="M 32,312 L 32,416" fill="none" stroke="black"></path>
+              <path d="M 56,32 L 56,64" fill="none" stroke="black"></path>
+              <path d="M 192,32 L 192,64" fill="none" stroke="black"></path>
+              <path d="M 256,72 L 256,288" fill="none" stroke="black"></path>
+              <path d="M 256,320 L 256,392" fill="none" stroke="black"></path>
+              <path d="M 320,32 L 320,64" fill="none" stroke="black"></path>
+              <path d="M 368,32 L 368,64" fill="none" stroke="black"></path>
+              <path d="M 432,72 L 432,296" fill="none" stroke="black"></path>
+              <path d="M 432,312 L 432,416" fill="none" stroke="black"></path>
+              <path d="M 496,32 L 496,64" fill="none" stroke="black"></path>
+              <path d="M 8,32 L 56,32" fill="none" stroke="black"></path>
+              <path d="M 192,32 L 320,32" fill="none" stroke="black"></path>
+              <path d="M 368,32 L 496,32" fill="none" stroke="black"></path>
+              <path d="M 8,64 L 56,64" fill="none" stroke="black"></path>
+              <path d="M 192,64 L 320,64" fill="none" stroke="black"></path>
+              <path d="M 368,64 L 496,64" fill="none" stroke="black"></path>
+              <path d="M 264,112 L 352,112" fill="none" stroke="black"></path>
+              <path d="M 264,144 L 352,144" fill="none" stroke="black"></path>
+              <path d="M 40,192 L 248,192" fill="none" stroke="black"></path>
+              <path d="M 40,240 L 176,240" fill="none" stroke="black"></path>
+              <path d="M 40,272 L 176,272" fill="none" stroke="black"></path>
+              <path d="M 8,304 L 160,304" fill="none" stroke="black"></path>
+              <path d="M 336,304 L 496,304" fill="none" stroke="black"></path>
+              <path d="M 40,352 L 248,352" fill="none" stroke="black"></path>
+              <path d="M 40,400 L 424,400" fill="none" stroke="black"></path>
+              <polygon class="arrowhead" points="432,400 420,394.4 420,405.6" fill="black" transform="rotate(0,424,400)"></polygon>
+              <polygon class="arrowhead" points="272,144 260,138.4 260,149.6" fill="black" transform="rotate(180,264,144)"></polygon>
+              <polygon class="arrowhead" points="256,352 244,346.4 244,357.6" fill="black" transform="rotate(0,248,352)"></polygon>
+              <polygon class="arrowhead" points="48,272 36,266.4 36,277.6" fill="black" transform="rotate(180,40,272)"></polygon>
+              <polygon class="arrowhead" points="48,192 36,186.4 36,197.6" fill="black" transform="rotate(180,40,192)"></polygon>
+              <g class="text">
+                <text x="32" y="52">Hub</text>
+                <text x="252" y="52">Participant1</text>
+                <text x="428" y="52">Participant2</text>
+                <text x="292" y="100">Create</text>
+                <text x="340" y="100">LPDU</text>
+                <text x="352" y="132">|</text>
+                <text x="128" y="180">PUT</text>
+                <text x="196" y="180">/send/:txnId</text>
+                <text x="68" y="228">Append</text>
+                <text x="112" y="228">PDU</text>
+                <text x="156" y="228">fields</text>
+                <text x="176" y="260">|</text>
+                <text x="212" y="308">CONCURRENT</text>
+                <text x="292" y="308">REQUESTS</text>
+                <text x="56" y="340">PUT</text>
+                <text x="124" y="340">/send/:txnId</text>
+                <text x="56" y="388">PUT</text>
+                <text x="124" y="388">/send/:txnId</text>
+                <text x="256" y="420">|</text>
+              </g>
+            </svg><a href="#section-13.5-4.1" class="pilcrow">¶</a>
 </div>
 </div>
-<p id="section-13.4.2-5"><code>PUT /send/:txnId</code> is shorthand for <a href="#int-api-send-txn" class="auto internal xref">Section 13.4.2.1</a>.<a href="#section-13.4.2-5" class="pilcrow">¶</a></p>
-<p id="section-13.4.2-6">Hubs which generate events would skip to the point where they create a fully-formed PDU and send it
-out to all other participants.<a href="#section-13.4.2-6" class="pilcrow">¶</a></p>
+<p id="section-13.5-5"><code>PUT /send/:txnId</code> is shorthand for <a href="#int-api-send-txn" class="auto internal xref">Section 13.5.1</a>.<a href="#section-13.5-5" class="pilcrow">¶</a></p>
+<p id="section-13.5-6">Hubs which generate events would skip to the point where they create a fully-formed PDU and send it
+out to all other participants.<a href="#section-13.5-6" class="pilcrow">¶</a></p>
 <div id="int-api-send-txn">
-<section id="section-13.4.2.1">
-            <h5 id="name-put-_matrix-federation-v2-s">
-<a href="#section-13.4.2.1" class="section-number selfRef">13.4.2.1. </a><a href="#name-put-_matrix-federation-v2-s" class="section-name selfRef"><code>PUT /_matrix/federation/v2/send/:txnId</code></a>
-            </h5>
-<p id="section-13.4.2.1-1">Sends (L)PDUs (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>, <a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>) to another server. The sending server <span class="bcp14">MUST</span> wait for a
-<code>200 OK</code> response from the receiver before sending another request with a different <code>:txnId</code>.<a href="#section-13.4.2.1-1" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-2"><strong>Implementation note</strong>: Currently this endpoint doesn't actually exist. Use
+<section id="section-13.5.1">
+          <h4 id="name-put-_matrix-federation-v2-s">
+<a href="#section-13.5.1" class="section-number selfRef">13.5.1. </a><a href="#name-put-_matrix-federation-v2-s" class="section-name selfRef"><code>PUT /_matrix/federation/v2/send/:txnId</code></a>
+          </h4>
+<p id="section-13.5.1-1">Sends (L)PDUs (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>, <a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>) to another server. The sending server <span class="bcp14">MUST</span> wait for a
+<code>200 OK</code> response from the receiver before sending another request with a different <code>:txnId</code>.<a href="#section-13.5.1-1" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-2"><strong>Implementation note</strong>: Currently this endpoint doesn't actually exist. Use
 <code>PUT /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send/:txnId</code>
 when testing against other Linearized Matrix implementations. This string may be updated later to
-account for breaking changes.<a href="#section-13.4.2.1-2" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-3"><strong>TODO</strong>: Remove implementation notes.<a href="#section-13.4.2.1-3" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-4"><strong>Rate-limited</strong>: No.<a href="#section-13.4.2.1-4" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-5"><strong>Authentication required</strong>: Yes.<a href="#section-13.4.2.1-5" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-6">Path parameters:<a href="#section-13.4.2.1-6" class="pilcrow">¶</a></p>
+account for breaking changes.<a href="#section-13.5.1-2" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-3"><strong>TODO</strong>: Remove implementation notes.<a href="#section-13.5.1-3" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-4"><strong>Rate-limited</strong>: No.<a href="#section-13.5.1-4" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-5"><strong>Authentication required</strong>: Yes.<a href="#section-13.5.1-5" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-6">Path parameters:<a href="#section-13.5.1-6" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.4.2.1-7.1">
-                <code>:txnId</code> - the transaction ID (<a href="#int-txn-ids" class="auto internal xref">Section 13.2.5</a>) for the request.<a href="#section-13.4.2.1-7.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.5.1-7.1">
+              <code>:txnId</code> - the transaction ID (<a href="#int-txn-ids" class="auto internal xref">Section 13.2.5</a>) for the request.<a href="#section-13.5.1-7.1" class="pilcrow">¶</a>
 </li>
-            </ul>
-<p id="section-13.4.2.1-8">Query parameters: None applicable.<a href="#section-13.4.2.1-8" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-9">Request body:<a href="#section-13.4.2.1-9" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-13.4.2.1-10">
+          </ul>
+<p id="section-13.5.1-8">Query parameters: None applicable.<a href="#section-13.5.1-8" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-9">Request body:<a href="#section-13.5.1-9" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.5.1-10">
 <pre>
 {
    "edus": [{/* TODO: Define EDUs */}],
@@ -3364,42 +3371,42 @@ account for breaking changes.<a href="#section-13.4.2.1-2" class="pilcrow">¶</a
       {/* Either an LPDU or PDU */}
    ]
 }
-</pre><a href="#section-13.4.2.1-10" class="pilcrow">¶</a>
+</pre><a href="#section-13.5.1-10" class="pilcrow">¶</a>
 </div>
-<p id="section-13.4.2.1-11"><strong>TODO</strong>: Describe EDUs.<a href="#section-13.4.2.1-11" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-12"><code>edus</code> are the Ephemeral Data Units to send. If no EDUs are being sent, this field <span class="bcp14">MAY</span> be excluded
-from the request body.<a href="#section-13.4.2.1-12" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-13"><code>pdus</code> are the events/PDUs (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) and LPDUs (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>) to send to the server. Whether
+<p id="section-13.5.1-11"><strong>TODO</strong>: Describe EDUs.<a href="#section-13.5.1-11" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-12"><code>edus</code> are the Ephemeral Data Units to send. If no EDUs are being sent, this field <span class="bcp14">MAY</span> be excluded
+from the request body.<a href="#section-13.5.1-12" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-13"><code>pdus</code> are the events/PDUs (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) and LPDUs (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>) to send to the server. Whether
 it's an LPDU or PDU depends on the sending server's role in that room: if they are a non-hub server,
-it will be an LPDU.<a href="#section-13.4.2.1-13" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-14">Each event in the <code>pdus</code> array gets processed as such:<a href="#section-13.4.2.1-14" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-13.4.2.1-15">
-<li id="section-13.4.2.1-15.1">
-                <p id="section-13.4.2.1-15.1.1">Identify the room ID for the event. The exact format of the event can differ between room versions,
-however currently this would be done by extracting the <code>room_id</code> property.<a href="#section-13.4.2.1-15.1.1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-13.4.2.1-15.1.2">
-<li id="section-13.4.2.1-15.1.2.1">If that room ID is invalid/not found, the event is rejected.<a href="#section-13.4.2.1-15.1.2.1" class="pilcrow">¶</a>
+it will be an LPDU.<a href="#section-13.5.1-13" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-14">Each event in the <code>pdus</code> array gets processed as such:<a href="#section-13.5.1-14" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-13.5.1-15">
+<li id="section-13.5.1-15.1">
+              <p id="section-13.5.1-15.1.1">Identify the room ID for the event. The exact format of the event can differ between room versions,
+however currently this would be done by extracting the <code>room_id</code> property.<a href="#section-13.5.1-15.1.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-13.5.1-15.1.2">
+<li id="section-13.5.1-15.1.2.1">If that room ID is invalid/not found, the event is rejected.<a href="#section-13.5.1-15.1.2.1" class="pilcrow">¶</a>
 </li>
-                  <li id="section-13.4.2.1-15.1.2.2">If the server is not participating in the room, the event is dropped/skipped.<a href="#section-13.4.2.1-15.1.2.2" class="pilcrow">¶</a>
+                <li id="section-13.5.1-15.1.2.2">If the server is not participating in the room, the event is dropped/skipped.<a href="#section-13.5.1-15.1.2.2" class="pilcrow">¶</a>
 </li>
-                </ol>
+              </ol>
 </li>
-              <li id="section-13.4.2.1-15.2">If the event is an LPDU and the receiving server is the hub, the additional PDU fields are appended
-before continuing.<a href="#section-13.4.2.1-15.2" class="pilcrow">¶</a>
+            <li id="section-13.5.1-15.2">If the event is an LPDU and the receiving server is the hub, the additional PDU fields are appended
+before continuing.<a href="#section-13.5.1-15.2" class="pilcrow">¶</a>
 </li>
-              <li id="section-13.4.2.1-15.3">If the event is an LPDU and the receiving server is not the hub, the event is dropped/skipped.<a href="#section-13.4.2.1-15.3" class="pilcrow">¶</a>
+            <li id="section-13.5.1-15.3">If the event is an LPDU and the receiving server is not the hub, the event is dropped/skipped.<a href="#section-13.5.1-15.3" class="pilcrow">¶</a>
 </li>
-              <li id="section-13.4.2.1-15.4">The checks defined by <a href="#int-receiving-events" class="auto internal xref">Section 6.1</a> are performed.<a href="#section-13.4.2.1-15.4" class="pilcrow">¶</a>
+            <li id="section-13.5.1-15.4">The checks defined by <a href="#int-receiving-events" class="auto internal xref">Section 6.1</a> are performed.<a href="#section-13.5.1-15.4" class="pilcrow">¶</a>
 </li>
-              <li id="section-13.4.2.1-15.5">If the event still hasn't been dropped/rejected, it is appended to the room. For participant servers,
-this may mean it's queued for sending to local clients.<a href="#section-13.4.2.1-15.5" class="pilcrow">¶</a>
+            <li id="section-13.5.1-15.5">If the event still hasn't been dropped/rejected, it is appended to the room. For participant servers,
+this may mean it's queued for sending to local clients.<a href="#section-13.5.1-15.5" class="pilcrow">¶</a>
 </li>
-            </ol>
-<p id="section-13.4.2.1-16">Server implementation authors should note that these steps can be condensed, but are expanded here
+          </ol>
+<p id="section-13.5.1-16">Server implementation authors should note that these steps can be condensed, but are expanded here
 for specification purposes. For example, an LPDU's signature can/will fail without ever needing to
-append the PDU fields first - the server can skip some extra work this way.<a href="#section-13.4.2.1-16" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-17"><code>200 OK</code> response:<a href="#section-13.4.2.1-17" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-13.4.2.1-18">
+append the PDU fields first - the server can skip some extra work this way.<a href="#section-13.5.1-16" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-17"><code>200 OK</code> response:<a href="#section-13.5.1-17" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.5.1-18">
 <pre>
 {
    "failed_pdus": {
@@ -3411,67 +3418,65 @@ append the PDU fields first - the server can skip some extra work this way.<a hr
       }
    }
 }
-</pre><a href="#section-13.4.2.1-18" class="pilcrow">¶</a>
+</pre><a href="#section-13.5.1-18" class="pilcrow">¶</a>
 </div>
-<p id="section-13.4.2.1-19">The receiving server <span class="bcp14">MUST NOT</span> send a <code>200 OK</code> response until all events have been processed. Servers
+<p id="section-13.5.1-19">The receiving server <span class="bcp14">MUST NOT</span> send a <code>200 OK</code> response until all events have been processed. Servers
 <span class="bcp14">SHOULD NOT</span> block responding to this endpoint on sending accepted events to local clients or other
-participant servers, as doing so could lead to a lengthy backlog of events waiting to be sent.<a href="#section-13.4.2.1-19" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-20">Sending servers <span class="bcp14">SHOULD</span> apply/expect a timeout and retry the exact same request with the same transaction
+participant servers, as doing so could lead to a lengthy backlog of events waiting to be sent.<a href="#section-13.5.1-19" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-20">Sending servers <span class="bcp14">SHOULD</span> apply/expect a timeout and retry the exact same request with the same transaction
 ID until they see a <code>200 OK</code> response. If the sending server attempts to send a different transaction
 ID from the one already in flight, the receiving server <span class="bcp14">MUST</span> respond with a <code>400 Bad Request</code> HTTP
 status code and <code>M_BAD_STATE</code> error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>). Receiving servers <span class="bcp14">SHOULD</span> continue
 processing requests to this endpoint event after the sender has disconnected/timed out, but <span class="bcp14">SHOULD NOT</span>
-process the request multiple times due to the transaction ID (<a href="#int-txn-ids" class="auto internal xref">Section 13.2.5</a>).<a href="#section-13.4.2.1-20" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-21"><code>failed_pdus</code> is an object mapping event ID (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) to error string. Event IDs are based upon
+process the request multiple times due to the transaction ID (<a href="#int-txn-ids" class="auto internal xref">Section 13.2.5</a>).<a href="#section-13.5.1-20" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-21"><code>failed_pdus</code> is an object mapping event ID (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) to error string. Event IDs are based upon
 the received object, not the final/complete object. For example, if an LPDU is sent, gets its PDU
 fields appended, and fails event authorization, then the error would be for the event ID of the LPDU,
-not the fully-formed PDU. This is to allow the sender to correlate what they sent with errors.<a href="#section-13.4.2.1-21" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-22">The object for each event ID <span class="bcp14">MUST</span> contain an <code>error</code> string field, representing the human-readable
-reason for an event being rejected.<a href="#section-13.4.2.1-22" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-23">Events which are dropped/ignored or accepted do <em>not</em> appear in <code>failed_pdus</code>.<a href="#section-13.4.2.1-23" class="pilcrow">¶</a></p>
-<p id="section-13.4.2.1-24"><strong>TODO</strong>: Should we also return fully-formed PDUs for the LPDUs we received?<a href="#section-13.4.2.1-24" class="pilcrow">¶</a></p>
+not the fully-formed PDU. This is to allow the sender to correlate what they sent with errors.<a href="#section-13.5.1-21" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-22">The object for each event ID <span class="bcp14">MUST</span> contain an <code>error</code> string field, representing the human-readable
+reason for an event being rejected.<a href="#section-13.5.1-22" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-23">Events which are dropped/ignored or accepted do <em>not</em> appear in <code>failed_pdus</code>.<a href="#section-13.5.1-23" class="pilcrow">¶</a></p>
+<p id="section-13.5.1-24"><strong>TODO</strong>: Should we also return fully-formed PDUs for the LPDUs we received?<a href="#section-13.5.1-24" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
 </div>
 <div id="event-and-state-apis">
-<section id="section-13.4.3">
-          <h4 id="name-event-and-state-apis">
-<a href="#section-13.4.3" class="section-number selfRef">13.4.3. </a><a href="#name-event-and-state-apis" class="section-name selfRef">Event and State APIs</a>
-          </h4>
-<p id="section-13.4.3-1"><strong>TODO</strong>: this section.<a href="#section-13.4.3-1" class="pilcrow">¶</a></p>
+<section id="section-13.6">
+        <h3 id="name-event-and-state-apis">
+<a href="#section-13.6" class="section-number selfRef">13.6. </a><a href="#name-event-and-state-apis" class="section-name selfRef">Event and State APIs</a>
+        </h3>
+<p id="section-13.6-1"><strong>TODO</strong>: this section.<a href="#section-13.6-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="todo-remainder-of-transport">
-<section id="section-13.4.4">
-          <h4 id="name-todo-remainder-of-transport">
-<a href="#section-13.4.4" class="section-number selfRef">13.4.4. </a><a href="#name-todo-remainder-of-transport" class="section-name selfRef">TODO: Remainder of Transport</a>
-          </h4>
-<p id="section-13.4.4-1"><strong>TODO</strong>: This section.<a href="#section-13.4.4-1" class="pilcrow">¶</a></p>
-<p id="section-13.4.4-2">Topics:
+<section id="section-13.7">
+        <h3 id="name-todo-remainder-of-transport">
+<a href="#section-13.7" class="section-number selfRef">13.7. </a><a href="#name-todo-remainder-of-transport" class="section-name selfRef">TODO: Remainder of Transport</a>
+        </h3>
+<p id="section-13.7-1"><strong>TODO</strong>: This section.<a href="#section-13.7-1" class="pilcrow">¶</a></p>
+<p id="section-13.7-2">Topics:
 * Media/content repo (images, videos, attachments, etc)
 * EDUs (typing notifications, receipts, presence)
 * Device management &amp; to-device messaging
 * Query APIs (alias resolution, profiles)
-* Encryption APIs<a href="#section-13.4.4-2" class="pilcrow">¶</a></p>
-<p id="section-13.4.4-3">Notably/deliberately missing APIs are:<a href="#section-13.4.4-3" class="pilcrow">¶</a></p>
+* Encryption APIs<a href="#section-13.7-2" class="pilcrow">¶</a></p>
+<p id="section-13.7-3">Notably/deliberately missing APIs are:<a href="#section-13.7-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.4.4-4.1">
-              <code>get_missing_events</code> - this is used by DAG servers only<a href="#section-13.4.4-4.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.7-4.1">
+            <code>get_missing_events</code> - this is used by DAG servers only<a href="#section-13.7-4.1" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-13.4.4-4.2">Public room directory<a href="#section-13.4.4-4.2" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.7-4.2">Public room directory<a href="#section-13.7-4.2" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-13.4.4-4.3">Timestamp-to-event API<a href="#section-13.4.4-4.3" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.7-4.3">Timestamp-to-event API<a href="#section-13.7-4.3" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-13.4.4-4.4">All of 3rd party invites<a href="#section-13.4.4-4.4" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.7-4.4">All of 3rd party invites<a href="#section-13.7-4.4" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-13.4.4-4.5">All of Spaces<a href="#section-13.4.4-4.5" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.7-4.5">All of Spaces<a href="#section-13.7-4.5" class="pilcrow">¶</a>
 </li>
-            <li class="normal" id="section-13.4.4-4.6">OpenID API<a href="#section-13.4.4-4.6" class="pilcrow">¶</a>
+          <li class="normal" id="section-13.7-4.6">OpenID API<a href="#section-13.7-4.6" class="pilcrow">¶</a>
 </li>
-          </ul>
-</section>
-</div>
+        </ul>
 </section>
 </div>
 </section>
