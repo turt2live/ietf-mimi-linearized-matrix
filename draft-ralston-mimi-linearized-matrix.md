@@ -497,11 +497,48 @@ the room). In Linearized Matrix, a simple approach to calculating current state 
 over all events in order, overwriting the key-tuple for state events in an adjacent map. That
 map becomes "current state" when the loop is finished.
 
+#### Stripped State {#int-stripped-state}
+
+Stripped state event are extremely simplified state events to provide context to an invite or knock.
+Servers MUST NOT rely on stripped state events being accurate, only using them if the server doesn't
+have access to the room's real state.
+
+When generating stripped state for an invite or knock, the following events SHOULD be included
+if present in the current room state itself:
+
+* `m.room.create` ({{int-ev-create}})
+* `m.room.name` (**TODO**: Link)
+* `m.room.avatar` (**TODO**: Link)
+* `m.room.topic` (**TODO**: Link)
+* `m.room.join_rules` ({{int-ev-join-rules}})
+* `m.room.canonical_alias` (**TODO**: Link)
+* `m.room.encryption` (**TODO**: Link)
+
+Servers MAY include other event types/state keys. The above set gives users enough context to determine
+if they'd like to knock/join the room, as features such as the name and avatar are generally key pieces
+of information for a user.
+
+Stripped state events MUST only have `sender`, `type`, `state_key`, and `content` from the event
+schema ({{int-pdu}}).
+
+Example:
+
+~~~ json
+{
+   "type": "m.room.create",
+   "sender": "@alice:example.org",
+   "state_key": "",
+   "content": {
+      "room_version": "I.1"
+   }
+}
+~~~
+
 ### Event Types
 
 Linearized Matrix defines the following event types. The section headers are the event `type`.
 
-#### `m.room.create`
+#### `m.room.create` {#int-ev-create}
 
 The very first event in the room. It MUST NOT have any `auth_events` or `prev_events`, and the
 domain of the `sender` MUST be the same as the domain in the `room_id`. The `state_key` MUST
@@ -618,7 +655,7 @@ To calculate the required power level to send an event:
 
 #### TODO: Other events
 
-**TODO**: `m.room.name`, `m.room.topic`, `m.room.avatar`, `m.room.encryption`
+**TODO**: `m.room.name`, `m.room.topic`, `m.room.avatar`, `m.room.encryption`, `m.room.canonical_alias`
 
 **TODO**: Drop `m.room.encryption` and pack it into the create event instead?
 
@@ -2052,12 +2089,98 @@ What causes a user to be considered "ineligible" for an invite is left as an imp
 See {{int-user-privacy}} and {{int-spam}} for suggestions on handling user-level privacy controls and
 spam invites.
 
+#### `POST /_matrix/federation/v3/invite/:txnId` {#int-api-invite}
 
+Sends an invite event to a server. If the sender is a participant server, the receiving server (the
+hub) will convert the contained LPDU ({{int-lpdu}}) to a fully-formed event ({{int-pdu}}) before sending
+that event to the intended server.
 
+**Implementation note**: Currently this endpoint doesn't actually exist. Use
+`POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/invite/:txnId`
+when testing against other Linearized Matrix implementations. This string may be updated later to
+account for breaking changes.
+
+**TODO**: Remove implementation notes.
+
+**Rate-limited**: Yes.
+
+**Authentication required**: Yes.
+
+Path parameters:
+
+* `:txnId` - the transaction ID ({{int-txn-ids}}) for the request. The event ID ({{int-pdu}}) of the
+  contained event may be a good option as a readily-available transaction ID.
+
+Query parameters: None applicable.
+
+Request body:
+
+~~~ json
+{
+   "event": {/* the event */},
+   "invite_room_state": [/* stripped state events */],
+   "room_version": "I.1"
+}
+~~~
+
+`invite_room_state` are the stripped state events ({{int-stripped-state}}) for the room's current
+state. `invite_room_state` MAY be excluded from the request body.
+
+`room_version` is the room version identifier ({{int-room-versions}}) the room is currently using. This
+will be retrieved from the `m.room.create` ({{int-ev-create}}) state event.
+
+`event` is the event (LPDU or PDU; {{int-pdu}}) representing the invite for the user. It MUST meet
+the following criteria, in addition to the requirements of an event:
+
+* `type` MUST be `m.room.member`.
+* `membership` in `content` MUST be `invite`.
+
+When the hub server receives a request from a participant server, it MUST populate the event fields
+before sending the event to the intended recipient. This means running the event through the normal
+event authorization steps ({{int-auth-rules}}). If the invite is not allowed under the auth rules,
+the server responds with a `403 Forbidden` HTTP status code and `M_FORBIDDEN` error code ({{int-transport-errors}}).
+
+The intended recipient of the invite can be identified by the `state_key` on the event.
+
+If the invite event is valid, the hub server sends its own `POST /_matrix/federation/v3/invite/:txnId`
+request to the target server (if the target server is not itself) with the fully-formed event. The
+transaction ID does not need to be the same as the original inbound request.
+
+All responses from the target server SHOULD be proxied verbatim to the original requesting server
+through the hub. The hub SHOULD discard what appears to be excess data before sending a response
+to the requesting server, such as extra or large fields. If the target server does not respond with
+JSON, an error response ({{int-transport-errors}}) SHOULD be sent by the hub instead.
+
+The target server then ensures it can support the room version. If it can't, it responds with an HTTP
+status code of `400 Bad Request` and error code of `M_INCOMPATIBLE_ROOM_VERSION` ({{int-transport-errors}}).
+
+Then, the target server runs any implementation-specific checks as needed, such as those implied by
+{{int-user-privacy}} and {{int-spam}}, rejecting/erroring the request as needed.
+
+Finally, the target server signs the event and returns it to the hub. The hub server appends this signed
+event to the room and sends it out to all participants in the room. The signed event is additionally
+returned to the originating participant server, though it also receives the event through the `/send`
+API ({{int-api-send-txn}}).
+
+`200 OK` response:
+
+~~~ json
+{
+   "pdu": {/* signed fully-formed event */}
+}
+~~~
+
+Note that by the time a response is received, the event is signed 2-3 times:
+
+1. The LPDU signature from the participant server ({{int-lpdu}}).
+2. The hub's signature on the PDU ({{int-pdu}}).
+3. The target server's signature on the PDU.
+
+These signatures are to satisfy the auth rules ({{int-auth-rules}}).
+
+**TODO**: Do we ever validate the target server's signature? Do we need to?
 
 <!-- TODO -->
-
-#### Temp Heading 1 {#int-api-invite}
 
 #### Temp Heading 2 {#int-api-make-join}
 
@@ -2066,6 +2189,8 @@ spam invites.
 #### Temp Heading 4 {#int-api-make-leave}
 
 #### Temp Heading 5 {#int-api-send-leave}
+
+#### Temp Heading 6 {#int-transport-leaves}
 
 <!-- /TODO -->
 
@@ -2097,16 +2222,26 @@ really anything else.
 
 # User Privacy {#int-user-privacy}
 
-**TODO**: This section.
+**TODO**: Fully complete this section.
 
-* How to honour user settings (ie: blocks) during invites?
+Messaging providers may have user-level settings to prevent unexpected or unwarranted invites, such
+as automatically blocking invites from non-contacts. This setting can be upheld by returning an error
+on `POST /_matrix/federation/v3/invite/:txnId` ({{int-api-invite}}), and by having the server (optionally)
+auto-decline any invites received directly through `PUT /_matrix/federation/v2/send/:txnId` ({{int-api-send-txn}}).
+See {{int-transport-leaves}} for more information on rejecting invites.
 
 # Spam Prevention {#int-spam}
 
-**TODO**: This section.
+**TODO**: Fully complete this section.
 
-* How to counteract invite spam?
-* Say it's okay to reject invites because the server blocked the room.
+Servers MAY temporarily or permanently block a room entirely by using the room ID. Typically, when a
+room becomes blocked, all local users will be removed from the room using `m.room.member` events with
+`membership` of `leave` ({{int-ev-member}}). Then, any time the server receives a request for that
+room ID it can reject it with an error response ({{int-transport-errors}}).
+
+Blocking a room does not block it from all servers, but does prevent users on a server from accessing
+the content within. This is primarily useful to remove a server from rooms where abusive/illegal content
+is shared.
 
 # Security Considerations
 

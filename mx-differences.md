@@ -314,6 +314,11 @@ and participants can choose their favourite, creating small clusters of LM serve
 
   Further, `pdus` is ordered oldest to newest, and still includes `v`. In other words, `v` should be last.
 
+* `POST /_matrix/federation/v3/invite/:txnId` is a new endpoint, copying its request and response structures
+  from `PUT /_matrix/federation/v2/invite/:roomId/:eventId`. Note the HTTP method change.
+
+  `:txnId` can easily be an event ID.
+
 Some APIs are not implemented at all in LM:
 
 * [3rd party invites](https://spec.matrix.org/v1.6/server-server-api/#third-party-invites)
