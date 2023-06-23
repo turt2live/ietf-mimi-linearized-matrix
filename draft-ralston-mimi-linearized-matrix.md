@@ -607,9 +607,17 @@ To calculate the required power level to send an event:
    2. If `state_key` is not present, use `events_default`.
       1. If `events_default` is not specified, use `0`.
 
+#### `m.room.history_visibility`
+
+**TODO**: Describe.
+
+##### Calculating Event Visibility {#int-calc-event-visibility}
+
+**TODO**: Describe. (when can a server see an event?)
+
 #### TODO: Other events
 
-**TODO**: `m.room.name`, `m.room.topic`, `m.room.avatar`, `m.room.encryption`, `m.room.history_visibility`
+**TODO**: `m.room.name`, `m.room.topic`, `m.room.avatar`, `m.room.encryption`
 
 **TODO**: Drop `m.room.encryption` and pack it into the create event instead?
 
@@ -1048,7 +1056,7 @@ SHOULD trust authorities which would commonly be trusted by an operating system 
 
 ## API Standards
 
-### Requests and Responses
+### Requests and Responses {#int-transport-requests-responses}
 
 All HTTP `POST` and `PUT` endpoints require the sending server to supply a (potentially empty) JSON
 object as the request body. Requesting servers SHOULD supply a `Content-Type` header of `application/json`
@@ -1153,6 +1161,10 @@ wait before retrying, in milliseconds.
   "retry_after_ms": 10254
 }
 ~~~
+
+The exact rate limit mechanics are left as an implementation detail. A potential approach may be to
+prevent repeated requests for the same resource at a high rate and ensuring a remote server does not
+request more than a defined number of resources at a time.
 
 ## Resolving Server Names {#int-resolve-domain}
 
@@ -1498,7 +1510,7 @@ falling back to any cached values if needed.
 
 Path parameters:
 
-* `:serverName` - the target server's name to retrieve keys for.
+* `:serverName` - the target server's name ({{int-server-names}}) to retrieve keys for.
 
 Query parameters:
 
@@ -1715,7 +1727,200 @@ Events which are dropped/ignored or accepted do *not* appear in `failed_pdus`.
 
 ## Event and State APIs
 
-**TODO**: this section.
+When a participant in the room is missing an event, or otherwise needs a new copy of it, it can retrieve
+that event from the hub server. Similar mechanics apply for getting state events, current state of a room,
+and backfilling scrollback in a room.
+
+All servers are required to implement all endpoints ({{int-transport-requests-responses}}), however
+only hub servers are guaranteed to have the full history/state for a room. While other participant
+servers might have history, they SHOULD NOT be contacted due to the high likelihood of a Not Found-style
+error.
+
+### `GET /_matrix/federation/v2/event/:eventId`
+
+Retrieves a single event.
+
+**Implementation note**: Currently this endpoint doesn't actually exist. Use
+`GET /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/event/:eventId`
+when testing against other Linearized Matrix implementations. This string may be updated later to
+account for breaking changes.
+
+**TODO**: Remove implementation notes.
+
+**Rate-limited**: Yes.
+
+**Authentication required**: Yes.
+
+Path parameters:
+
+* `:eventId` - the event ID ({{int-pdu}}) to retrieve. Note that event IDs are typically reference
+  hashes ({{int-reference-hashes}}) of the event itself, which includes the room ID. This makes
+  event IDs globally unique.
+
+Query parameters: None applicable.
+
+Request body: None applicable.
+
+`200 OK` response:
+
+~~~ json
+{
+   /* the event */
+}
+~~~
+
+The response body is simply the event ({{int-pdu}}) itself, if the requesting server has reasonable
+visibility of the event ({{int-calc-event-visibility}}). When the server can see an event but not the
+contents, the event is served redacted ({{int-redactions}}) instead.
+
+If the event isn't known to the server, or the requesting server has no reason to know that the event
+even exists, a `404 Not Found` HTTP status code and `M_NOT_FOUND` error code ({{int-transport-errors}})
+is returned.
+
+The returned event MUST be checked before being used by the requesting server ({{int-receiving-events}}).
+This endpoint MUST NOT return LPDUs ({{int-lpdu}}), instead treating such events as though they didn't
+exist.
+
+### `GET /_matrix/federation/v1/state/:roomId` {#int-api-get-state}
+
+Retrieves a snapshot of the room state ({{int-state-events}}) at the given event. This is typically
+most useful when a participant server prefers to store minimal information about the room, but still
+needs to offer context to its clients.
+
+**Rate-limited**: Yes.
+
+**Authentication required**: Yes.
+
+Path parameters:
+
+* `:roomId` - the room ID ({{int-room-id}}) to retrieve state in.
+
+Query parameters:
+
+* `event_id` (string; required) - The event ID ({{int-pdu}}) to retrieve state at.
+
+Request body: None applicable.
+
+`200 OK` response:
+
+~~~ json
+{
+   "auth_chain": [
+      {/* event */}
+   ],
+   "pdus": [
+      {/* event */}
+   ]
+}
+~~~
+
+The returned room state is in two parts: the `pdus`, consisting of the events which represent "current
+state" ({{int-state-events}}) prior to considering state changes induced by the event in the original
+request, and `auth_chain`, consisting of the events which make up the `auth_events` ({{int-auth-selection}})
+for the `pdus` and the `auth_events` of those events, recursively.
+
+The `auth_chain` will eventually stop recursing when it reaches the `m.room.create` event, as it cannot
+have any `auth_events`.
+
+For example, if the requested event ID was an `m.room.power_levels` event, the returned state would be
+as if the new power levels were not applied.
+
+Both `auth_chain` and `pdus` contain event objects ({{int-pdu}}).
+
+If the requesting server does not have reasonable visibility on the room ({{int-calc-event-visibility}}),
+or either the room ID or event ID don't exist, a `404 Not Found` HTTP status code and `M_NOT_FOUND`
+error code ({{int-transport-errors}}) is returned. The same error is returned if the event ID doesn't
+exist in the requested room ID.
+
+Note that the requesting server will generally always have visibility of the `auth_chain` and `pdu`
+events, but may not be able to see their contents. In this case, they are redacted ({{int-redactions}})
+before being served.
+
+The returned events MUST be checked before being used by the requesting server ({{int-receiving-events}}).
+This endpoint MUST NOT return LPDUs ({{int-lpdu}}), instead treating such events as though they didn't
+exist.
+
+### `GET /_matrix/federation/v1/state_ids/:roomId`
+
+This performs the same function as {{int-api-get-state}} but returns just the event IDs instead.
+
+**Rate-limited**: Yes.
+
+**Authentication required**: Yes.
+
+Path parameters:
+
+* `:roomId` - the room ID ({{int-room-id}}) to retrieve state in.
+
+Query parameters:
+
+* `event_id` (string; required) - The event ID ({{int-pdu}}) to retrieve state at.
+
+Request body: None applicable.
+
+`200 OK` response:
+
+~~~ json
+{
+   "auth_chain_ids": ["$event1", "$event2"],
+   "pdu_ids": ["$event3", "$event4"]
+}
+~~~
+
+See {{int-api-get-state}} for behaviour. Note that `auth_chain` becomes `auth_chain_ids` when using
+this endpoint, and `pdus` becomes `pdu_ids`.
+
+### `GET /_matrix/federation/v2/backfill/:roomId`
+
+Retrieves a sliding window history of previous events in a given room.
+
+**Implementation note**: Currently this endpoint doesn't actually exist. Use
+`GET /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/backfill/:roomId`
+when testing against other Linearized Matrix implementations. This string may be updated later to
+account for breaking changes.
+
+**TODO**: Remove implementation notes.
+
+**Rate-limited**: Yes.
+
+**Authentication required**: Yes.
+
+Path parameters:
+
+* `:roomId` - the room ID ({{int-room-id}}) to retrieve events from.
+
+Query parameters:
+
+* `v` (string; required) - The event ID ({{int-pdu}}) to start backfilling from.
+* `limit` (integer; required) - The maximum number of events to return, including `v`.
+
+Request body: None applicable.
+
+`200 OK` response:
+
+~~~ json
+{
+   "pdus": [
+      {/* event */}
+   ]
+}
+~~~
+
+The number of returned `pdus` MUST NOT exceed the `limit` provided by the caller. `limit` SHOULD have
+a maximum value imposed by the receiving server. `pdus` contains the events ({{int-pdu}}) preceeding
+the requested event ID (`v`), including `v`. `pdus` is ordered from oldest to newest.
+
+If the requesting server does not have reasonable visibility on the room ({{int-calc-event-visibility}}),
+or either the room ID or event ID don't exist, a `404 Not Found` HTTP status code and `M_NOT_FOUND`
+error code ({{int-transport-errors}}) is returned. The same error is returned if the event ID doesn't
+exist in the requested room ID.
+
+If the requesting server does have visibility on the returned events, but not their contents, they
+are redacted ({{int-redactions}}) before being served.
+
+The returned events MUST be checked before being used by the requesting server ({{int-receiving-events}}).
+This endpoint MUST NOT return LPDUs ({{int-lpdu}}), instead treating such events as though they didn't
+exist.
 
 ## TODO: Remainder of Transport
 

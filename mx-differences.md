@@ -260,6 +260,7 @@ and participants can choose their favourite, creating small clusters of LM serve
 * `GET /_matrix/key/v2/server` now returns an *optional* top-level boolean `m.linearized` field. If `true`, the
   server *only* supports Linearized Matrix and cannot handle full-mesh/DAG aspects. These servers are participants
   and sometimes hubs. The field is part of the signature.
+
 * `PUT /_matrix/federation/v2/send/:txnId` is a new endpoint, modeled off of
   `PUT /_matrix/federation/v1/send/:txnId`. In short, the request body has the following changes:
 
@@ -280,6 +281,48 @@ and participants can choose their favourite, creating small clusters of LM serve
 
   **Note**: This is implemented as `PUT /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send/:txnId`
   as an unstable prefix.
+
+* `GET /_matrix/federation/v2/event/:eventId` is a new endpoint, modeled off of
+  `GET /_matrix/federation/v1/event/:eventId`. Instead of returning a single-PDU transaction, the endpoint
+  simply returns the event at the top level, like in the Client-Server API.
+
+  Additionally, `404 M_NOT_FOUND` semantics are more clearly defined. If the server can see the event, but
+  not the contents, it is served redacted. If the server can't see the event or it doesn't exist, a 404 is
+  returned.
+
+  **Note**: This is implemented as `GET /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/event/:eventId`
+  as an unstable prefix.
+
+* `GET /_matrix/federation/v1/state/:roomId` has had its `404 M_NOT_FOUND` semantics clarified. If the server
+  can see the returned events, but not their contents, they are served redacted. If the server can't see the
+  room or the requested event/room doesn't exist, a 404 is returned.
+
+* `GET /_matrix/federation/v1/state_ids/:roomId` has also had it's 404 semantics clarified to match `/state`
+  above.
+
+* `GET /_matrix/federation/v2/backfill/:roomId` is a new endpoint, modeled off of
+  `GET /_matrix/federation/v1/backfill/:roomId`. Instead of returning a single-PDU transaction, it returns
+  `{"pdus": [...]}`.
+
+  It's also had its 404 semantics clarified (see `GET /state/:roomId` above), and returns an empty array if
+  there are no previous events (ie: when requesting the `m.room.create` event). Additionally, the specification
+  for Linearized Matrix only calls for a single `v` parameter, but servers are expected to handle multiple. Use
+  caution if backfilling *from* a LM server because it'll likely use "the first one" rather than something
+  sensible. Prefer to backfill from other DAG servers, or carefully consider your query.
+
+  Further, `pdus` is ordered oldest to newest, and still includes `v`. In other words, `v` should be last.
+
+Some APIs are not implemented at all in LM:
+
+* [3rd party invites](https://spec.matrix.org/v1.6/server-server-api/#third-party-invites)
+* [`get_missing_events`](https://spec.matrix.org/v1.6/server-server-api/#post_matrixfederationv1get_missing_eventsroomid)
+* [Public room directory](https://spec.matrix.org/v1.6/server-server-api/#public-room-directory)
+* [Timestamp-to-event API](https://spec.matrix.org/v1.6/server-server-api/#get_matrixfederationv1timestamp_to_eventroomid)
+* [Spaces](https://spec.matrix.org/v1.6/server-server-api/#spaces)
+* [OpenID](https://spec.matrix.org/v1.6/server-server-api/#openid)
+* `/_matrix/federation/v1/version` (maybe - TBD)
+
+Expect LM servers to return error responses for these "unknown" endpoints.
 
 ## Grammar
 
