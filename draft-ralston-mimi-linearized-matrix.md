@@ -2007,7 +2007,7 @@ The full invite sequence is:
        |     Reject if sender |                        |
        |  cannot invite other |                        |
        |                users |                        |
-       |<┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄|                        |
+       |<---------------------|                        |
        |                      |                        |
        |                      | Otherwise, append      |
        |                      | PDU fields             |
@@ -2020,16 +2020,16 @@ The full invite sequence is:
        |                      |                        |
        |                      |         Reject if room |
        |                      |  version not supported |
-       |                      |<┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄|
+       |                      |<-----------------------|
        |                      |                        |
        |                      |  Reject if target user |
        |                      |      is ineligible for |
        |                      |                invites |
-       |                      |<┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄|
+       |                      |<-----------------------|
        |                      |                        |
        |   Proxy TargetServer |                        |
        |            rejection |                        |
-       |<┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄|                        |
+       |<---------------------|                        |
        |                      |                        |
        |                      |                        | Otherwise, queue
        |                      |                        | sending the invite to
