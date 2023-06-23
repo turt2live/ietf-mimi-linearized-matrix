@@ -1567,7 +1567,7 @@ Responding servers SHOULD only return signed key objects for the key IDs request
 servers MAY respond with more keys than requested. The caller is expected to filter the response if
 needed.
 
-### Sending Events {#int-transport-send-events}
+## Sending Events {#int-transport-send-events}
 
 Events accepted into the room by a hub server must be sent to all other servers in that room. Similarly,
 participant servers need a way to send partial events through the hub server, as mentioned by {{int-lpdu}}.
@@ -1611,7 +1611,7 @@ A typical event send path will be:
 Hubs which generate events would skip to the point where they create a fully-formed PDU and send it
 out to all other participants.
 
-#### `PUT /_matrix/federation/v2/send/:txnId` {#int-api-send-txn}
+### `PUT /_matrix/federation/v2/send/:txnId` {#int-api-send-txn}
 
 Sends (L)PDUs ({{int-pdu}}, {{int-lpdu}}) to another server. The sending server MUST wait for a
 `200 OK` response from the receiver before sending another request with a different `:txnId`.
@@ -1713,11 +1713,11 @@ Events which are dropped/ignored or accepted do *not* appear in `failed_pdus`.
 
 **TODO**: Should we also return fully-formed PDUs for the LPDUs we received?
 
-### Event and State APIs
+## Event and State APIs
 
 **TODO**: this section.
 
-### TODO: Remainder of Transport
+## TODO: Remainder of Transport
 
 **TODO**: This section.
 
