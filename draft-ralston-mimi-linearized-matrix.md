@@ -2557,8 +2557,6 @@ Path parameters:
 
 Query parameters: None applicable.
 
-**TODO**: Incorporate faster joins work.
-
 Request body:
 
 ~~~ json
