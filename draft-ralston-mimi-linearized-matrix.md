@@ -189,7 +189,8 @@ dns-char    = DIGIT / ALPHA / "-" / "."
 
 Server names MUST be treated as case sensitive (`eXaMpLe.OrG`, `example.org`, and `EXAMPLE.ORG`
 are 3 different servers). Server names SHOULD be lower case (`example.org`) and SHOULD NOT exceed
-230 characters for ease of use.
+230 characters for ease of use. The 230 characters specifically gives room for a suitably long
+localpart while being within the 255 allowable characters from {{Section 2.1 of RFC1123}}.
 
 Examples:
 
@@ -1666,6 +1667,12 @@ A typical event send path will be:
 Hubs which generate events would skip to the point where they create a fully-formed PDU and send it
 out to all other participants.
 
+When a hub is broadcasting events to participant servers, it MUST include the following targets:
+
+* The server implied by the `sender` for a kick or ban `m.room.member` ({{int-ev-member}}) event, up
+  to the point of that kick or ban.
+* All servers which have at least 1 user which is joined to the room.
+
 ### `PUT /_matrix/federation/v2/send/:txnId` {#int-api-send-txn}
 
 Sends (L)PDUs ({{int-pdu}}, {{int-lpdu}}) to another server. The sending server MUST wait for a
@@ -1702,11 +1709,11 @@ Request body:
 **TODO**: Describe EDUs.
 
 `edus` are the Ephemeral Data Units to send. If no EDUs are being sent, this field MAY be excluded
-from the request body.
+from the request body. There MUST NOT be more than 100 entries in `edus`.
 
 `pdus` are the events/PDUs ({{int-pdu}}) and LPDUs ({{int-lpdu}}) to send to the server. Whether
 it's an LPDU or PDU depends on the sending server's role in that room: if they are a non-hub server,
-it will be an LPDU.
+it will be an LPDU. There MUST NOT be more than 50 entries in `pdus`.
 
 Each event in the `pdus` array gets processed as such:
 
