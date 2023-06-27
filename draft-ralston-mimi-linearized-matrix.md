@@ -2584,13 +2584,21 @@ of `M_INCOMPATIBLE_ROOM_VERSION`, as the server already checked for support). Se
 that room state MAY change between a `/make_knock` and `/send_knock`, potentially in a way which
 prevents the user from knocking upon the room suddenly.
 
+## Content Repository
+
+The content repository, sometimes called the "media repo", is where user-generated content is stored
+for referencing within an encrypted message.
+
+**TODO**: Complete this section. We want auth/event linking from MSC3911 and MSC3916.
+
+**TODO**: Spell out that content is images, videos, files, etc.
+
 ## TODO: Remainder of Transport
 
 **TODO**: This section.
 
 Topics:
 
-* Media/content repo (images, videos, attachments, etc)
 * EDUs (typing notifications, receipts, presence)
 * Device management & to-device messaging
 * Query APIs (alias resolution, profiles)
@@ -2605,7 +2613,7 @@ Notably/deliberately missing APIs are:
 * All of Spaces
 * OpenID API
 
-# TODOs & Open Questions
+### Open Questions
 
 * Should we include `/_matrix/federation/v1/version` in here? It's used by federation testers, but not
 really anything else.
