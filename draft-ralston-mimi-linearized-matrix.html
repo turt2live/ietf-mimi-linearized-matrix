@@ -1056,7 +1056,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Ralston &amp; Hodgson</td>
-<td class="center">Expires 25 December 2023</td>
+<td class="center">Expires 29 December 2023</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1069,12 +1069,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ralston-mimi-linearized-matrix-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2023-06-23" class="published">23 June 2023</time>
+<time datetime="2023-06-27" class="published">27 June 2023</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2023-12-25">25 December 2023</time></dd>
+<dd class="expires"><time datetime="2023-12-29">29 December 2023</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1128,7 +1128,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 25 December 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 29 December 2023.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1341,10 +1341,16 @@ svg :is([fill="white"], [fill^="#fff"]) {
                 <p id="section-toc.1-1.13.2.7.1"><a href="#section-13.7" class="auto internal xref">13.7</a>.  <a href="#name-room-membership" class="internal xref">Room Membership</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.7.2.1">
-                    <p id="section-toc.1-1.13.2.7.2.1.1"><a href="#section-13.7.1" class="auto internal xref">13.7.1</a>.  <a href="#name-invites" class="internal xref">Invites</a></p>
+                    <p id="section-toc.1-1.13.2.7.2.1.1"><a href="#section-13.7.1" class="auto internal xref">13.7.1</a>.  <a href="#name-make-and-send-handshake" class="internal xref">Make and Send Handshake</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.7.2.2">
-                    <p id="section-toc.1-1.13.2.7.2.2.1"><a href="#section-13.7.2" class="auto internal xref">13.7.2</a>.  <a href="#name-joins" class="internal xref">Joins</a></p>
+                    <p id="section-toc.1-1.13.2.7.2.2.1"><a href="#section-13.7.2" class="auto internal xref">13.7.2</a>.  <a href="#name-invites" class="internal xref">Invites</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.7.2.3">
+                    <p id="section-toc.1-1.13.2.7.2.3.1"><a href="#section-13.7.3" class="auto internal xref">13.7.3</a>.  <a href="#name-joins" class="internal xref">Joins</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.7.2.4">
+                    <p id="section-toc.1-1.13.2.7.2.4.1"><a href="#section-13.7.4" class="auto internal xref">13.7.4</a>.  <a href="#name-knocks" class="internal xref">Knocks</a></p>
 </li>
                 </ul>
 </li>
@@ -2050,6 +2056,9 @@ unbanned first (moderator sends a kick, essentially).<a href="#section-3.5.3.3-4
             </ul>
 <p id="section-3.5.3.3-5">These conditions are checked as part of the event authorization rules (<a href="#int-auth-rules" class="auto internal xref">Section 6.4</a>),
 as are the rules for moving between membership states.<a href="#section-3.5.3.3-5" class="pilcrow">¶</a></p>
+<p id="section-3.5.3.3-6">The <code>content</code> for a membership event <span class="bcp14">MAY</span> additionally have a <code>reason</code> field containing a human-readable
+(and usually human-supplied) description for why the membership change happened. For example, the reason
+why a user was kicked/banned or why they are requesting an invite by knocking.<a href="#section-3.5.3.3-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="mroompowerlevels">
@@ -3874,24 +3883,150 @@ not already participating however, it needs to be welcomed in by the hub server.
             </svg><a href="#section-13.7-3.1" class="pilcrow">¶</a>
 </div>
 </div>
-<p id="section-13.7-4"><code>POST /invite</code> is shorthand for <a href="#int-api-invite" class="auto internal xref">Section 13.7.1.1</a>. Similarly, <code>GET /make_join</code> is <a href="#int-api-make-join" class="auto internal xref">Section 13.7.2.1</a>
-and <code>POST /send_join</code> is <a href="#int-api-send-join" class="auto internal xref">Section 13.7.2.2</a>.<a href="#section-13.7-4" class="pilcrow">¶</a></p>
-<p id="section-13.7-5">If the user decided to reject the invite, the TargetServer would use <code>GET /make_leave</code> (<a href="#int-api-make-leave" class="auto internal xref">Section 13.7.2.3</a>)
-and <code>POST /send_leave</code> (<a href="#int-api-send-leave" class="auto internal xref">Section 13.7.2.4</a>) instead of make/send_join.<a href="#section-13.7-5" class="pilcrow">¶</a></p>
-<div id="int-transport-invites">
+<p id="section-13.7-4"><code>POST /invite</code> is shorthand for <a href="#int-api-invite" class="auto internal xref">Section 13.7.2.1</a>. Similarly, <code>GET /make_join</code> is <a href="#int-api-make-join" class="auto internal xref">Section 13.7.3.1</a>
+and <code>POST /send_join</code> is <a href="#int-api-send-join" class="auto internal xref">Section 13.7.3.2</a>.<a href="#section-13.7-4" class="pilcrow">¶</a></p>
+<p id="section-13.7-5">If the user decided to reject the invite, the TargetServer would use <code>GET /make_leave</code> (<a href="#int-api-make-leave" class="auto internal xref">Section 13.7.2.2.1</a>)
+and <code>POST /send_leave</code> (<a href="#int-api-send-leave" class="auto internal xref">Section 13.7.2.2.2</a>) instead of make/send_join.<a href="#section-13.7-5" class="pilcrow">¶</a></p>
+<div id="int-transport-make-and-send">
 <section id="section-13.7.1">
-          <h4 id="name-invites">
-<a href="#section-13.7.1" class="section-number selfRef">13.7.1. </a><a href="#name-invites" class="section-name selfRef">Invites</a>
+          <h4 id="name-make-and-send-handshake">
+<a href="#section-13.7.1" class="section-number selfRef">13.7.1. </a><a href="#name-make-and-send-handshake" class="section-name selfRef">Make and Send Handshake</a>
           </h4>
-<p id="section-13.7.1-1">When inviting a user belonging to a server already in the room, senders <span class="bcp14">SHOULD</span> use <code>m.room.member</code>
+<p id="section-13.7.1-1">When a server is already participating in a room, it can use <code>m.room.member</code> (<a href="#int-ev-member" class="auto internal xref">Section 3.5.3.3</a>) events
+and the <code>/send</code> API (<a href="#int-api-send-txn" class="auto internal xref">Section 13.5.1</a>) to directly change membership. When the server is not already
+involved in the room, such as when being invited for the first time, the server needs to "make" an event
+and "send" it through the hub server to append it to the room.<a href="#section-13.7.1-1" class="pilcrow">¶</a></p>
+<p id="section-13.7.1-2">The different processes which use this handshake are:<a href="#section-13.7.1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.7.1-3.1">Rejecting Invites (<a href="#int-transport-leaves" class="auto internal xref">Section 13.7.2.2</a>)<a href="#section-13.7.1-3.1" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-13.7.1-3.2">Joins (<a href="#int-transport-joins" class="auto internal xref">Section 13.7.3</a>)<a href="#section-13.7.1-3.2" class="pilcrow">¶</a>
+</li>
+            <li class="normal" id="section-13.7.1-3.3">Knocks (<a href="#int-transport-knocks" class="auto internal xref">Section 13.7.4</a>)<a href="#section-13.7.1-3.3" class="pilcrow">¶</a>
+</li>
+          </ul>
+<p id="section-13.7.1-4">The "make" portion of the endpoints take the shape of <code>GET /_matrix/federation/v1/make_CHANGE/:roomId/:userId</code>,
+where <code>CHANGE</code> is <code>leave</code>, <code>join</code>, or <code>knock</code> (respective to the list above). This endpoint will
+return a partial LPDU (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>) which needs to be turned into a full LPDU and signed before being
+sent using <code>POST /_matrix/federation/v3/send_CHANGE/:txnId</code>.<a href="#section-13.7.1-4" class="pilcrow">¶</a></p>
+<p id="section-13.7.1-5">The flow for this handshake appears as such:<a href="#section-13.7.1-5" class="pilcrow">¶</a></p>
+<div id="section-13.7.1-6">
+            <div class="alignLeft art-svg artwork" id="section-13.7.1-6.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="656" width="568" viewBox="0 0 568 656" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px">
+                <path d="M 8,32 L 8,64" fill="none" stroke="black"></path>
+                <path d="M 72,72 L 72,640" fill="none" stroke="black"></path>
+                <path d="M 144,32 L 144,64" fill="none" stroke="black"></path>
+                <path d="M 232,400 L 232,432" fill="none" stroke="black"></path>
+                <path d="M 232,544 L 232,576" fill="none" stroke="black"></path>
+                <path d="M 512,32 L 512,64" fill="none" stroke="black"></path>
+                <path d="M 536,72 L 536,640" fill="none" stroke="black"></path>
+                <path d="M 560,32 L 560,64" fill="none" stroke="black"></path>
+                <path d="M 8,32 L 144,32" fill="none" stroke="black"></path>
+                <path d="M 512,32 L 560,32" fill="none" stroke="black"></path>
+                <path d="M 8,64 L 144,64" fill="none" stroke="black"></path>
+                <path d="M 512,64 L 560,64" fill="none" stroke="black"></path>
+                <path d="M 80,112 L 528,112" fill="none" stroke="black"></path>
+                <path d="M 80,176 L 528,176" fill="none" stroke="black"></path>
+                <path d="M 80,224 L 528,224" fill="none" stroke="black"></path>
+                <path d="M 80,272 L 280,272" fill="none" stroke="black"></path>
+                <path d="M 80,304 L 280,304" fill="none" stroke="black"></path>
+                <path d="M 80,352 L 528,352" fill="none" stroke="black"></path>
+                <path d="M 232,400 L 528,400" fill="none" stroke="black"></path>
+                <path d="M 232,432 L 528,432" fill="none" stroke="black"></path>
+                <path d="M 80,480 L 528,480" fill="none" stroke="black"></path>
+                <path d="M 232,544 L 528,544" fill="none" stroke="black"></path>
+                <path d="M 232,576 L 528,576" fill="none" stroke="black"></path>
+                <path d="M 80,624 L 528,624" fill="none" stroke="black"></path>
+                <polygon class="arrowhead" points="536,576 524,570.4 524,581.6" fill="black" transform="rotate(0,528,576)"></polygon>
+                <polygon class="arrowhead" points="536,432 524,426.4 524,437.6" fill="black" transform="rotate(0,528,432)"></polygon>
+                <polygon class="arrowhead" points="536,352 524,346.4 524,357.6" fill="black" transform="rotate(0,528,352)"></polygon>
+                <polygon class="arrowhead" points="536,112 524,106.4 524,117.6" fill="black" transform="rotate(0,528,112)"></polygon>
+                <polygon class="arrowhead" points="88,624 76,618.4 76,629.6" fill="black" transform="rotate(180,80,624)"></polygon>
+                <polygon class="arrowhead" points="88,480 76,474.4 76,485.6" fill="black" transform="rotate(180,80,480)"></polygon>
+                <polygon class="arrowhead" points="88,304 76,298.4 76,309.6" fill="black" transform="rotate(180,80,304)"></polygon>
+                <polygon class="arrowhead" points="88,224 76,218.4 76,229.6" fill="black" transform="rotate(180,80,224)"></polygon>
+                <polygon class="arrowhead" points="88,176 76,170.4 76,181.6" fill="black" transform="rotate(180,80,176)"></polygon>
+                <g class="text">
+                  <text x="76" y="52">ExternalServer</text>
+                  <text x="536" y="52">Hub</text>
+                  <text x="96" y="100">GET</text>
+                  <text x="316" y="100">/_matrix/federation/v1/make_CHANGE/:roomId/:userId</text>
+                  <text x="324" y="148">Reject</text>
+                  <text x="364" y="148">if</text>
+                  <text x="400" y="148">event</text>
+                  <text x="452" y="148">future</text>
+                  <text x="504" y="148">event</text>
+                  <text x="272" y="164">would</text>
+                  <text x="312" y="164">not</text>
+                  <text x="340" y="164">be</text>
+                  <text x="384" y="164">allowed</text>
+                  <text x="428" y="164">by</text>
+                  <text x="460" y="164">auth</text>
+                  <text x="504" y="164">rules</text>
+                  <text x="352" y="212">Respond</text>
+                  <text x="404" y="212">with</text>
+                  <text x="456" y="212">partial</text>
+                  <text x="508" y="212">LPDU</text>
+                  <text x="116" y="260">Populate</text>
+                  <text x="172" y="260">LPDU</text>
+                  <text x="208" y="260">and</text>
+                  <text x="244" y="260">sign</text>
+                  <text x="276" y="260">it</text>
+                  <text x="280" y="292">|</text>
+                  <text x="100" y="340">POST</text>
+                  <text x="288" y="340">/_matrix/federation/v3/send_CHANGE/:txnId</text>
+                  <text x="260" y="388">Validate</text>
+                  <text x="320" y="388">event</text>
+                  <text x="360" y="388">and</text>
+                  <text x="404" y="388">append</text>
+                  <text x="444" y="388">to</text>
+                  <text x="472" y="388">the</text>
+                  <text x="508" y="388">room</text>
+                  <text x="220" y="468">Reject</text>
+                  <text x="260" y="468">if</text>
+                  <text x="296" y="468">event</text>
+                  <text x="336" y="468">not</text>
+                  <text x="384" y="468">allowed</text>
+                  <text x="428" y="468">by</text>
+                  <text x="460" y="468">auth</text>
+                  <text x="504" y="468">rules</text>
+                  <text x="324" y="516">Send</text>
+                  <text x="360" y="516">new</text>
+                  <text x="400" y="516">event</text>
+                  <text x="436" y="516">to</text>
+                  <text x="464" y="516">all</text>
+                  <text x="504" y="516">other</text>
+                  <text x="316" y="532">participants</text>
+                  <text x="380" y="532">in</text>
+                  <text x="408" y="532">the</text>
+                  <text x="444" y="532">room</text>
+                  <text x="496" y="532">(async)</text>
+                  <text x="488" y="612">200</text>
+                  <text x="516" y="612">OK</text>
+                </g>
+              </svg><a href="#section-13.7.1-6.1" class="pilcrow">¶</a>
+</div>
+</div>
+<p id="section-13.7.1-7">Note that the <code>send_CHANGE</code> step re-checks the event against the auth rules: any amount of time
+could have passed between the <code>make_CHANGE</code> and <code>send_CHANGE</code> calls.<a href="#section-13.7.1-7" class="pilcrow">¶</a></p>
+<p id="section-13.7.1-8"><strong>TODO</strong>: Describe how the external server is meant to find the hub. Invites work by (usually) trying
+to contact the server which sent the invite, but knocking is a guess.<a href="#section-13.7.1-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="int-transport-invites">
+<section id="section-13.7.2">
+          <h4 id="name-invites">
+<a href="#section-13.7.2" class="section-number selfRef">13.7.2. </a><a href="#name-invites" class="section-name selfRef">Invites</a>
+          </h4>
+<p id="section-13.7.2-1">When inviting a user belonging to a server already in the room, senders <span class="bcp14">SHOULD</span> use <code>m.room.member</code>
 (<a href="#int-ev-member" class="auto internal xref">Section 3.5.3.3</a>) events and the <code>/send</code> API (<a href="#int-api-send-txn" class="auto internal xref">Section 13.5.1</a>). This section's endpoints <span class="bcp14">SHOULD</span>
-only be used when the target server is <em>not</em> participating in the room already.<a href="#section-13.7.1-1" class="pilcrow">¶</a></p>
-<p id="section-13.7.1-2">Note that being invited does not count as the server "participating" in the room. This can mean that
+only be used when the target server is <em>not</em> participating in the room already.<a href="#section-13.7.2-1" class="pilcrow">¶</a></p>
+<p id="section-13.7.2-2">Note that being invited does not count as the server "participating" in the room. This can mean that
 while a server has a user with a pending invite in the room, this section's endpoints are needed to
-send additional invites to other users on the same server.<a href="#section-13.7.1-2" class="pilcrow">¶</a></p>
-<p id="section-13.7.1-3">The full invite sequence is:<a href="#section-13.7.1-3" class="pilcrow">¶</a></p>
-<div id="section-13.7.1-4">
-            <div class="alignLeft art-svg artwork" id="section-13.7.1-4.1">
+send additional invites to other users on the same server.<a href="#section-13.7.2-2" class="pilcrow">¶</a></p>
+<p id="section-13.7.2-3">The full invite sequence is:<a href="#section-13.7.2-3" class="pilcrow">¶</a></p>
+<div id="section-13.7.2-4">
+            <div class="alignLeft art-svg artwork" id="section-13.7.2-4.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="784" width="640" viewBox="0 0 640 784" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px">
                 <path d="M 8,32 L 8,64" fill="none" stroke="black"></path>
                 <path d="M 64,72 L 64,768" fill="none" stroke="black"></path>
@@ -3981,335 +4116,454 @@ send additional invites to other users on the same server.<a href="#section-13.7
                   <text x="200" y="740">200</text>
                   <text x="228" y="740">OK</text>
                 </g>
-              </svg><a href="#section-13.7.1-4.1" class="pilcrow">¶</a>
+              </svg><a href="#section-13.7.2-4.1" class="pilcrow">¶</a>
 </div>
 </div>
-<p id="section-13.7.1-5"><code>POST /invite</code> is shorthand for <a href="#int-api-invite" class="auto internal xref">Section 13.7.1.1</a>.<a href="#section-13.7.1-5" class="pilcrow">¶</a></p>
-<p id="section-13.7.1-6">What causes a user to be considered "ineligible" for an invite is left as an implementation detail.
+<p id="section-13.7.2-5"><code>POST /invite</code> is shorthand for <a href="#int-api-invite" class="auto internal xref">Section 13.7.2.1</a>.<a href="#section-13.7.2-5" class="pilcrow">¶</a></p>
+<p id="section-13.7.2-6">What causes a user to be considered "ineligible" for an invite is left as an implementation detail.
 See <a href="#int-user-privacy" class="auto internal xref">Section 15</a> and <a href="#int-spam" class="auto internal xref">Section 16</a> for suggestions on handling user-level privacy controls and
-spam invites.<a href="#section-13.7.1-6" class="pilcrow">¶</a></p>
+spam invites.<a href="#section-13.7.2-6" class="pilcrow">¶</a></p>
 <div id="int-api-invite">
-<section id="section-13.7.1.1">
+<section id="section-13.7.2.1">
             <h5 id="name-post-_matrix-federation-v3-">
-<a href="#section-13.7.1.1" class="section-number selfRef">13.7.1.1. </a><a href="#name-post-_matrix-federation-v3-" class="section-name selfRef"><code>POST /_matrix/federation/v3/invite/:txnId</code></a>
+<a href="#section-13.7.2.1" class="section-number selfRef">13.7.2.1. </a><a href="#name-post-_matrix-federation-v3-" class="section-name selfRef"><code>POST /_matrix/federation/v3/invite/:txnId</code></a>
             </h5>
-<p id="section-13.7.1.1-1">Sends an invite event to a server. If the sender is a participant server, the receiving server (the
+<p id="section-13.7.2.1-1">Sends an invite event to a server. If the sender is a participant server, the receiving server (the
 hub) will convert the contained LPDU (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>) to a fully-formed event (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) before sending
-that event to the intended server.<a href="#section-13.7.1.1-1" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-2"><strong>Implementation note</strong>: Currently this endpoint doesn't actually exist. Use
+that event to the intended server.<a href="#section-13.7.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-2"><strong>Implementation note</strong>: Currently this endpoint doesn't actually exist. Use
 <code>POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/invite/:txnId</code>
 when testing against other Linearized Matrix implementations. This string may be updated later to
-account for breaking changes.<a href="#section-13.7.1.1-2" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-3"><strong>TODO</strong>: Remove implementation notes.<a href="#section-13.7.1.1-3" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-4"><strong>Rate-limited</strong>: Yes.<a href="#section-13.7.1.1-4" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-5"><strong>Authentication required</strong>: Yes.<a href="#section-13.7.1.1-5" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-6">Path parameters:<a href="#section-13.7.1.1-6" class="pilcrow">¶</a></p>
+account for breaking changes.<a href="#section-13.7.2.1-2" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-3"><strong>TODO</strong>: Remove implementation notes.<a href="#section-13.7.2.1-3" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-4"><strong>Rate-limited</strong>: Yes.<a href="#section-13.7.2.1-4" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-5"><strong>Authentication required</strong>: Yes.<a href="#section-13.7.2.1-5" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-6">Path parameters:<a href="#section-13.7.2.1-6" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.7.1.1-7.1">
+<li class="normal" id="section-13.7.2.1-7.1">
                 <code>:txnId</code> - the transaction ID (<a href="#int-txn-ids" class="auto internal xref">Section 13.2.5</a>) for the request. The event ID (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) of the
-contained event may be a good option as a readily-available transaction ID.<a href="#section-13.7.1.1-7.1" class="pilcrow">¶</a>
+contained event may be a good option as a readily-available transaction ID.<a href="#section-13.7.2.1-7.1" class="pilcrow">¶</a>
 </li>
             </ul>
-<p id="section-13.7.1.1-8">Query parameters: None applicable.<a href="#section-13.7.1.1-8" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-9">Request body:<a href="#section-13.7.1.1-9" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-13.7.1.1-10">
+<p id="section-13.7.2.1-8">Query parameters: None applicable.<a href="#section-13.7.2.1-8" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-9">Request body:<a href="#section-13.7.2.1-9" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.7.2.1-10">
 <pre>
 {
    "event": {/* the event */},
    "invite_room_state": [/* stripped state events */],
    "room_version": "I.1"
 }
-</pre><a href="#section-13.7.1.1-10" class="pilcrow">¶</a>
+</pre><a href="#section-13.7.2.1-10" class="pilcrow">¶</a>
 </div>
-<p id="section-13.7.1.1-11"><code>invite_room_state</code> are the stripped state events (<a href="#int-stripped-state" class="auto internal xref">Section 3.5.2.1</a>) for the room's current
-state. <code>invite_room_state</code> <span class="bcp14">MAY</span> be excluded from the request body.<a href="#section-13.7.1.1-11" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-12"><code>room_version</code> is the room version identifier (<a href="#int-room-versions" class="auto internal xref">Section 3.2.1</a>) the room is currently using. This
-will be retrieved from the <code>m.room.create</code> (<a href="#int-ev-create" class="auto internal xref">Section 3.5.3.1</a>) state event.<a href="#section-13.7.1.1-12" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-13"><code>event</code> is the event (LPDU or PDU; <a href="#int-pdu" class="auto internal xref">Section 3.5</a>) representing the invite for the user. It <span class="bcp14">MUST</span> meet
-the following criteria, in addition to the requirements of an event:<a href="#section-13.7.1.1-13" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-11"><code>invite_room_state</code> are the stripped state events (<a href="#int-stripped-state" class="auto internal xref">Section 3.5.2.1</a>) for the room's current
+state. <code>invite_room_state</code> <span class="bcp14">MAY</span> be excluded from the request body.<a href="#section-13.7.2.1-11" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-12"><code>room_version</code> is the room version identifier (<a href="#int-room-versions" class="auto internal xref">Section 3.2.1</a>) the room is currently using. This
+will be retrieved from the <code>m.room.create</code> (<a href="#int-ev-create" class="auto internal xref">Section 3.5.3.1</a>) state event.<a href="#section-13.7.2.1-12" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-13"><code>event</code> is the event (LPDU or PDU; <a href="#int-pdu" class="auto internal xref">Section 3.5</a>) representing the invite for the user. It <span class="bcp14">MUST</span> meet
+the following criteria, in addition to the requirements of an event:<a href="#section-13.7.2.1-13" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.7.1.1-14.1">
-                <code>type</code> <span class="bcp14">MUST</span> be <code>m.room.member</code>.<a href="#section-13.7.1.1-14.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.7.2.1-14.1">
+                <code>type</code> <span class="bcp14">MUST</span> be <code>m.room.member</code>.<a href="#section-13.7.2.1-14.1" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-13.7.1.1-14.2">
-                <code>membership</code> in <code>content</code> <span class="bcp14">MUST</span> be <code>invite</code>.<a href="#section-13.7.1.1-14.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-13.7.2.1-14.2">
+                <code>membership</code> in <code>content</code> <span class="bcp14">MUST</span> be <code>invite</code>.<a href="#section-13.7.2.1-14.2" class="pilcrow">¶</a>
 </li>
             </ul>
-<p id="section-13.7.1.1-15">When the hub server receives a request from a participant server, it <span class="bcp14">MUST</span> populate the event fields
+<p id="section-13.7.2.1-15">When the hub server receives a request from a participant server, it <span class="bcp14">MUST</span> populate the event fields
 before sending the event to the intended recipient. This means running the event through the normal
 event authorization steps (<a href="#int-auth-rules" class="auto internal xref">Section 6.4</a>). If the invite is not allowed under the auth rules,
-the server responds with a <code>403 Forbidden</code> HTTP status code and <code>M_FORBIDDEN</code> error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>).<a href="#section-13.7.1.1-15" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-16">The intended recipient of the invite can be identified by the <code>state_key</code> on the event.<a href="#section-13.7.1.1-16" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-17">If the invite event is valid, the hub server sends its own <code>POST /_matrix/federation/v3/invite/:txnId</code>
+the server responds with a <code>403 Forbidden</code> HTTP status code and <code>M_FORBIDDEN</code> error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>).<a href="#section-13.7.2.1-15" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-16">The intended recipient of the invite can be identified by the <code>state_key</code> on the event.<a href="#section-13.7.2.1-16" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-17">If the invite event is valid, the hub server sends its own <code>POST /_matrix/federation/v3/invite/:txnId</code>
 request to the target server (if the target server is not itself) with the fully-formed event. The
-transaction ID does not need to be the same as the original inbound request.<a href="#section-13.7.1.1-17" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-18">All responses from the target server <span class="bcp14">SHOULD</span> be proxied verbatim to the original requesting server
+transaction ID does not need to be the same as the original inbound request.<a href="#section-13.7.2.1-17" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-18">All responses from the target server <span class="bcp14">SHOULD</span> be proxied verbatim to the original requesting server
 through the hub. The hub <span class="bcp14">SHOULD</span> discard what appears to be excess data before sending a response
 to the requesting server, such as extra or large fields. If the target server does not respond with
-JSON, an error response (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>) <span class="bcp14">SHOULD</span> be sent by the hub instead.<a href="#section-13.7.1.1-18" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-19">The target server then ensures it can support the room version. If it can't, it responds with an HTTP
-status code of <code>400 Bad Request</code> and error code of <code>M_INCOMPATIBLE_ROOM_VERSION</code> (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>).<a href="#section-13.7.1.1-19" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-20">Then, the target server runs any implementation-specific checks as needed, such as those implied by
-<a href="#int-user-privacy" class="auto internal xref">Section 15</a> and <a href="#int-spam" class="auto internal xref">Section 16</a>, rejecting/erroring the request as needed.<a href="#section-13.7.1.1-20" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-21">Finally, the target server signs the event and returns it to the hub. The hub server appends this signed
+JSON, an error response (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>) <span class="bcp14">SHOULD</span> be sent by the hub instead.<a href="#section-13.7.2.1-18" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-19">The target server then ensures it can support the room version. If it can't, it responds with an HTTP
+status code of <code>400 Bad Request</code> and error code of <code>M_INCOMPATIBLE_ROOM_VERSION</code> (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>).<a href="#section-13.7.2.1-19" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-20">Then, the target server runs any implementation-specific checks as needed, such as those implied by
+<a href="#int-user-privacy" class="auto internal xref">Section 15</a> and <a href="#int-spam" class="auto internal xref">Section 16</a>, rejecting/erroring the request as needed.<a href="#section-13.7.2.1-20" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-21">Finally, the target server signs the event and returns it to the hub. The hub server appends this signed
 event to the room and sends it out to all participants in the room. The signed event is additionally
 returned to the originating participant server, though it also receives the event through the <code>/send</code>
-API (<a href="#int-api-send-txn" class="auto internal xref">Section 13.5.1</a>).<a href="#section-13.7.1.1-21" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-22"><code>200 OK</code> response:<a href="#section-13.7.1.1-22" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-13.7.1.1-23">
+API (<a href="#int-api-send-txn" class="auto internal xref">Section 13.5.1</a>).<a href="#section-13.7.2.1-21" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-22"><code>200 OK</code> response:<a href="#section-13.7.2.1-22" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.7.2.1-23">
 <pre>
 {
    "pdu": {/* signed fully-formed event */}
 }
-</pre><a href="#section-13.7.1.1-23" class="pilcrow">¶</a>
+</pre><a href="#section-13.7.2.1-23" class="pilcrow">¶</a>
 </div>
-<p id="section-13.7.1.1-24">Note that by the time a response is received, the event is signed 2-3 times:<a href="#section-13.7.1.1-24" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-13.7.1.1-25">
-<li id="section-13.7.1.1-25.1">The LPDU signature from the participant server (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>).<a href="#section-13.7.1.1-25.1" class="pilcrow">¶</a>
+<p id="section-13.7.2.1-24">Note that by the time a response is received, the event is signed 2-3 times:<a href="#section-13.7.2.1-24" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-13.7.2.1-25">
+<li id="section-13.7.2.1-25.1">The LPDU signature from the participant server (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>).<a href="#section-13.7.2.1-25.1" class="pilcrow">¶</a>
 </li>
-              <li id="section-13.7.1.1-25.2">The hub's signature on the PDU (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>).<a href="#section-13.7.1.1-25.2" class="pilcrow">¶</a>
+              <li id="section-13.7.2.1-25.2">The hub's signature on the PDU (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>).<a href="#section-13.7.2.1-25.2" class="pilcrow">¶</a>
 </li>
-              <li id="section-13.7.1.1-25.3">The target server's signature on the PDU.<a href="#section-13.7.1.1-25.3" class="pilcrow">¶</a>
+              <li id="section-13.7.2.1-25.3">The target server's signature on the PDU.<a href="#section-13.7.2.1-25.3" class="pilcrow">¶</a>
 </li>
             </ol>
-<p id="section-13.7.1.1-26">These signatures are to satisfy the auth rules (<a href="#int-auth-rules" class="auto internal xref">Section 6.4</a>).<a href="#section-13.7.1.1-26" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.1-27"><strong>TODO</strong>: Do we ever validate the target server's signature? Do we need to?<a href="#section-13.7.1.1-27" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-26">These signatures are to satisfy the auth rules (<a href="#int-auth-rules" class="auto internal xref">Section 6.4</a>).<a href="#section-13.7.2.1-26" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.1-27"><strong>TODO</strong>: Do we ever validate the target server's signature? Do we need to?<a href="#section-13.7.2.1-27" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="int-transport-leaves">
-<section id="section-13.7.1.2">
-            <h5 id="name-rejecting-invites">
-<a href="#section-13.7.1.2" class="section-number selfRef">13.7.1.2. </a><a href="#name-rejecting-invites" class="section-name selfRef">Rejecting Invites</a>
+<section id="section-13.7.2.2">
+            <h5 id="name-rejecting-invites-and-leave">
+<a href="#section-13.7.2.2" class="section-number selfRef">13.7.2.2. </a><a href="#name-rejecting-invites-and-leave" class="section-name selfRef">Rejecting Invites and Leaves</a>
             </h5>
-<p id="section-13.7.1.2-1">Rejecting an invite is done by making a membership transition of <code>invite</code> to <code>leave</code> through the user's
-<code>m.room.member</code> (<a href="#int-ev-member" class="auto internal xref">Section 3.5.3.3</a>) event. As with invites themselves (<a href="#int-transport-invites" class="auto internal xref">Section 13.7.1</a>), if
-a server is already participating in the room then it can send out the membership event directly.<a href="#section-13.7.1.2-1" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.2-2">If the server is not a member of the room, but the user wishes to formally reject an invite (instead
-of ignoring it), the server will need to handshake that with the hub server.<a href="#section-13.7.1.2-2" class="pilcrow">¶</a></p>
-<p id="section-13.7.1.2-3"><strong>TODO</strong>: Finish this section. It's joins, but using <code>leave</code> instead (mostly).<a href="#section-13.7.1.2-3" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2-1">Rejecting an invite is done by making a membership transition of <code>invite</code> to <code>leave</code> through the user's
+<code>m.room.member</code> (<a href="#int-ev-member" class="auto internal xref">Section 3.5.3.3</a>) event. The membership event <span class="bcp14">SHOULD</span> be sent directly when it can and
+use the "make and send" handshake (<a href="#int-transport-make-and-send" class="auto internal xref">Section 13.7.1</a>) described here otherwise.<a href="#section-13.7.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2-2">This same approach is additionally used to retract a knock (<a href="#int-transport-knocks" class="auto internal xref">Section 13.7.4</a>).<a href="#section-13.7.2.2-2" class="pilcrow">¶</a></p>
+<div id="int-api-make-leave">
+<section id="section-13.7.2.2.1">
+              <h6 id="name-get-_matrix-federation-v1-m">
+<a href="#section-13.7.2.2.1" class="section-number selfRef">13.7.2.2.1. </a><a href="#name-get-_matrix-federation-v1-m" class="section-name selfRef"><code>GET /_matrix/federation/v1/make_leave/:roomId/:userId</code></a>
+              </h6>
+<p id="section-13.7.2.2.1-1">Requests an event template from the hub server for a room. The requesting server will have already
+been checked to ensure it supports the room version as part of the invite process prior to making a
+call to this endpoint.<a href="#section-13.7.2.2.1-1" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2.1-2"><strong>Rate-limited</strong>: Yes.<a href="#section-13.7.2.2.1-2" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2.1-3"><strong>Authentication required</strong>: Yes.<a href="#section-13.7.2.2.1-3" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2.1-4">Path parameters:<a href="#section-13.7.2.2.1-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.7.2.2.1-5.1">
+                  <code>:roomId</code> - the room ID (<a href="#int-room-id" class="auto internal xref">Section 3.2</a>) to get a template for.<a href="#section-13.7.2.2.1-5.1" class="pilcrow">¶</a>
+</li>
+                <li class="normal" id="section-13.7.2.2.1-5.2">
+                  <code>:userId</code> - the user ID (<a href="#int-user-id" class="auto internal xref">Section 3.3</a>) attempting to leave.<a href="#section-13.7.2.2.1-5.2" class="pilcrow">¶</a>
+</li>
+              </ul>
+<p id="section-13.7.2.2.1-6">Query parameters: None applicable.<a href="#section-13.7.2.2.1-6" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2.1-7">Request body: None applicable.<a href="#section-13.7.2.2.1-7" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2.1-8"><code>200 OK</code> response:<a href="#section-13.7.2.2.1-8" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.7.2.2.1-9">
+<pre>
+{
+   "event": {/* partial LPDU */},
+   "room_version": "I.1"
+}
+</pre><a href="#section-13.7.2.2.1-9" class="pilcrow">¶</a>
+</div>
+<p id="section-13.7.2.2.1-10">The response body's <code>event</code> <span class="bcp14">MUST</span> be a partial LPDU (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>) with at least the following fields:<a href="#section-13.7.2.2.1-10" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.7.2.2.1-11.1">
+                  <code>type</code> of <code>m.room.member</code>.<a href="#section-13.7.2.2.1-11.1" class="pilcrow">¶</a>
+</li>
+                <li class="normal" id="section-13.7.2.2.1-11.2">
+                  <code>state_key</code> of <code>:userId</code> from the path parameters.<a href="#section-13.7.2.2.1-11.2" class="pilcrow">¶</a>
+</li>
+                <li class="normal" id="section-13.7.2.2.1-11.3">
+                  <code>sender</code> of <code>:userId</code> from the path parameters.<a href="#section-13.7.2.2.1-11.3" class="pilcrow">¶</a>
+</li>
+                <li class="normal" id="section-13.7.2.2.1-11.4">
+                  <code>content</code> of <code>{"membership": "leave"}</code>.<a href="#section-13.7.2.2.1-11.4" class="pilcrow">¶</a>
+</li>
+              </ul>
+<p id="section-13.7.2.2.1-12">The sending server <span class="bcp14">SHOULD</span> remove all other fields before using the event in a <code>send_leave</code> (<a href="#int-api-send-leave" class="auto internal xref">Section 13.7.2.2.2</a>).<a href="#section-13.7.2.2.1-12" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2.1-13">If the receiving server is not the hub server for the room ID, an HTTP status code of <code>400 Bad Request</code>
+and error code <code>M_WRONG_SERVER</code> (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>) is returned. If the room ID is not known,
+<code>404 Not Found</code> is used as an HTTP status code and <code>M_NOT_FOUND</code> as an error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>).<a href="#section-13.7.2.2.1-13" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2.1-14">If the user does not have permission to leave under the auth rules (<a href="#int-auth-rules" class="auto internal xref">Section 6.4</a>), a <code>403 Forbidden</code>
+HTTP status code is returned alongside an error code of <code>M_FORBIDDEN</code> (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>). For example,
+if the user does not have a pending invite, is not a member of the room, or is banned.<a href="#section-13.7.2.2.1-14" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2.1-15">If the sending server does not recognize the returned <code>room_version</code>, it <span class="bcp14">SHOULD NOT</span> attempt to populate
+the template or use the <code>send_leave</code> (<a href="#int-api-send-leave" class="auto internal xref">Section 13.7.2.2.2</a>) endpoint.<a href="#section-13.7.2.2.1-15" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="int-api-send-leave">
+<section id="section-13.7.2.2.2">
+              <h6 id="name-post-_matrix-federation-v3-s">
+<a href="#section-13.7.2.2.2" class="section-number selfRef">13.7.2.2.2. </a><a href="#name-post-_matrix-federation-v3-s" class="section-name selfRef"><code>POST /_matrix/federation/v3/send_leave/:txnId</code></a>
+              </h6>
+<p id="section-13.7.2.2.2-1">Sends a leave membership event to the room through a hub server.<a href="#section-13.7.2.2.2-1" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2.2-2"><strong>Implementation note</strong>: Currently this endpoint doesn't actually exist. Use
+<code>POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send_leave/:txnId</code>
+when testing against other Linearized Matrix implementations. This string may be updated later to
+account for breaking changes.<a href="#section-13.7.2.2.2-2" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2.2-3"><strong>TODO</strong>: Remove implementation notes.<a href="#section-13.7.2.2.2-3" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2.2-4"><strong>Rate-limited</strong>: Yes.<a href="#section-13.7.2.2.2-4" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2.2-5"><strong>Authentication required</strong>: Yes.<a href="#section-13.7.2.2.2-5" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2.2-6">Path parameters:<a href="#section-13.7.2.2.2-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.7.2.2.2-7.1">
+                  <code>:txnId</code> - the transaction ID (<a href="#int-txn-ids" class="auto internal xref">Section 13.2.5</a>) for the request. The event ID (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) of the
+contained event may be a good option as a readily-available transaction ID.<a href="#section-13.7.2.2.2-7.1" class="pilcrow">¶</a>
+</li>
+              </ul>
+<p id="section-13.7.2.2.2-8">Query parameters: None applicable.<a href="#section-13.7.2.2.2-8" class="pilcrow">¶</a></p>
+<p id="section-13.7.2.2.2-9">Request body:<a href="#section-13.7.2.2.2-9" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.7.2.2.2-10">
+<pre>
+{
+   /* LPDU created from make_leave template */
+}
+</pre><a href="#section-13.7.2.2.2-10" class="pilcrow">¶</a>
+</div>
+<p id="section-13.7.2.2.2-11"><code>200 OK</code> response:<a href="#section-13.7.2.2.2-11" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.7.2.2.2-12">
+<pre>
+{/* deliberately empty object */}
+</pre><a href="#section-13.7.2.2.2-12" class="pilcrow">¶</a>
+</div>
+<p id="section-13.7.2.2.2-13">The errors responses from <code>/make_leave</code> (<a href="#int-api-make-leave" class="auto internal xref">Section 13.7.2.2.1</a>) are copied here. Servers should note
+that room state <span class="bcp14">MAY</span> change between a <code>/make_leave</code> and <code>/send_leave</code>, potentially in a way which
+prevents the user from leaving the room suddenly. For example, the invited user may have been banned
+from the room.<a href="#section-13.7.2.2.2-13" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 </section>
 </div>
 <div id="int-transport-joins">
-<section id="section-13.7.2">
+<section id="section-13.7.3">
           <h4 id="name-joins">
-<a href="#section-13.7.2" class="section-number selfRef">13.7.2. </a><a href="#name-joins" class="section-name selfRef">Joins</a>
+<a href="#section-13.7.3" class="section-number selfRef">13.7.3. </a><a href="#name-joins" class="section-name selfRef">Joins</a>
           </h4>
-<p id="section-13.7.2-1">Like invites (<a href="#int-transport-invites" class="auto internal xref">Section 13.7.1</a>), this section can be avoided if the sending server is already
-participating in the room by sending events directly to other servers.<a href="#section-13.7.2-1" class="pilcrow">¶</a></p>
-<p id="section-13.7.2-2">A typical join flow would be:<a href="#section-13.7.2-2" class="pilcrow">¶</a></p>
-<div id="section-13.7.2-3">
-            <div class="alignLeft art-svg artwork" id="section-13.7.2-3.1">
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="592" width="568" viewBox="0 0 568 592" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px">
-                <path d="M 8,32 L 8,64" fill="none" stroke="black"></path>
-                <path d="M 72,72 L 72,576" fill="none" stroke="black"></path>
-                <path d="M 136,32 L 136,64" fill="none" stroke="black"></path>
-                <path d="M 232,336 L 232,368" fill="none" stroke="black"></path>
-                <path d="M 232,480 L 232,512" fill="none" stroke="black"></path>
-                <path d="M 512,32 L 512,64" fill="none" stroke="black"></path>
-                <path d="M 536,72 L 536,576" fill="none" stroke="black"></path>
-                <path d="M 560,32 L 560,64" fill="none" stroke="black"></path>
-                <path d="M 8,32 L 136,32" fill="none" stroke="black"></path>
-                <path d="M 512,32 L 560,32" fill="none" stroke="black"></path>
-                <path d="M 8,64 L 136,64" fill="none" stroke="black"></path>
-                <path d="M 512,64 L 560,64" fill="none" stroke="black"></path>
-                <path d="M 80,112 L 528,112" fill="none" stroke="black"></path>
-                <path d="M 80,160 L 528,160" fill="none" stroke="black"></path>
-                <path d="M 80,208 L 280,208" fill="none" stroke="black"></path>
-                <path d="M 80,240 L 280,240" fill="none" stroke="black"></path>
-                <path d="M 80,288 L 528,288" fill="none" stroke="black"></path>
-                <path d="M 232,336 L 528,336" fill="none" stroke="black"></path>
-                <path d="M 232,368 L 528,368" fill="none" stroke="black"></path>
-                <path d="M 80,416 L 528,416" fill="none" stroke="black"></path>
-                <path d="M 232,480 L 528,480" fill="none" stroke="black"></path>
-                <path d="M 232,512 L 528,512" fill="none" stroke="black"></path>
-                <path d="M 80,560 L 528,560" fill="none" stroke="black"></path>
-                <polygon class="arrowhead" points="536,512 524,506.4 524,517.6" fill="black" transform="rotate(0,528,512)"></polygon>
-                <polygon class="arrowhead" points="536,368 524,362.4 524,373.6" fill="black" transform="rotate(0,528,368)"></polygon>
-                <polygon class="arrowhead" points="536,288 524,282.4 524,293.6" fill="black" transform="rotate(0,528,288)"></polygon>
-                <polygon class="arrowhead" points="536,112 524,106.4 524,117.6" fill="black" transform="rotate(0,528,112)"></polygon>
-                <polygon class="arrowhead" points="88,560 76,554.4 76,565.6" fill="black" transform="rotate(180,80,560)"></polygon>
-                <polygon class="arrowhead" points="88,416 76,410.4 76,421.6" fill="black" transform="rotate(180,80,416)"></polygon>
-                <polygon class="arrowhead" points="88,240 76,234.4 76,245.6" fill="black" transform="rotate(180,80,240)"></polygon>
-                <polygon class="arrowhead" points="88,160 76,154.4 76,165.6" fill="black" transform="rotate(180,80,160)"></polygon>
-                <g class="text">
-                  <text x="72" y="52">JoiningServer</text>
-                  <text x="536" y="52">Hub</text>
-                  <text x="96" y="100">GET</text>
-                  <text x="308" y="100">/_matrix/federation/v1/make_join/:roomId/:userId</text>
-                  <text x="352" y="148">Respond</text>
-                  <text x="404" y="148">with</text>
-                  <text x="456" y="148">partial</text>
-                  <text x="508" y="148">LPDU</text>
-                  <text x="116" y="196">Populate</text>
-                  <text x="172" y="196">LPDU</text>
-                  <text x="208" y="196">and</text>
-                  <text x="244" y="196">sign</text>
-                  <text x="276" y="196">it</text>
-                  <text x="280" y="228">|</text>
-                  <text x="100" y="276">POST</text>
-                  <text x="280" y="276">/_matrix/federation/v3/send_join/:txnId</text>
-                  <text x="260" y="324">Validate</text>
-                  <text x="320" y="324">event</text>
-                  <text x="360" y="324">and</text>
-                  <text x="404" y="324">append</text>
-                  <text x="444" y="324">to</text>
-                  <text x="472" y="324">the</text>
-                  <text x="508" y="324">room</text>
-                  <text x="220" y="404">Reject</text>
-                  <text x="260" y="404">if</text>
-                  <text x="296" y="404">event</text>
-                  <text x="336" y="404">not</text>
-                  <text x="384" y="404">allowed</text>
-                  <text x="428" y="404">by</text>
-                  <text x="460" y="404">auth</text>
-                  <text x="504" y="404">rules</text>
-                  <text x="324" y="452">Send</text>
-                  <text x="360" y="452">new</text>
-                  <text x="400" y="452">event</text>
-                  <text x="436" y="452">to</text>
-                  <text x="464" y="452">all</text>
-                  <text x="504" y="452">other</text>
-                  <text x="380" y="468">participants</text>
-                  <text x="444" y="468">in</text>
-                  <text x="472" y="468">the</text>
-                  <text x="508" y="468">room</text>
-                  <text x="368" y="548">Respond</text>
-                  <text x="420" y="548">with</text>
-                  <text x="460" y="548">room</text>
-                  <text x="504" y="548">state</text>
-                </g>
-              </svg><a href="#section-13.7.2-3.1" class="pilcrow">¶</a>
-</div>
-</div>
-<p id="section-13.7.2-4"><strong>TODO</strong>: Describe in a bit more detail how a server is meant to figure out which server to send the
-join sequence to. It'll need to be the hub, but who is the hub!? For now, invites work by tracking
-which server sent the invite in the first place and assuming that they are the hub for the room.<a href="#section-13.7.2-4" class="pilcrow">¶</a></p>
+<p id="section-13.7.3-1">Joins for users <span class="bcp14">SHOULD</span> be sent directly whenever possible, and otherwise use the "make and send" handshake
+(<a href="#int-transport-make-and-send" class="auto internal xref">Section 13.7.1</a>) approach described here.<a href="#section-13.7.3-1" class="pilcrow">¶</a></p>
 <div id="int-api-make-join">
-<section id="section-13.7.2.1">
-            <h5 id="name-get-_matrix-federation-v1-m">
-<a href="#section-13.7.2.1" class="section-number selfRef">13.7.2.1. </a><a href="#name-get-_matrix-federation-v1-m" class="section-name selfRef"><code>GET /_matrix/federation/v1/make_join/:roomId/:userId</code></a>
+<section id="section-13.7.3.1">
+            <h5 id="name-get-_matrix-federation-v1-ma">
+<a href="#section-13.7.3.1" class="section-number selfRef">13.7.3.1. </a><a href="#name-get-_matrix-federation-v1-ma" class="section-name selfRef"><code>GET /_matrix/federation/v1/make_join/:roomId/:userId</code></a>
             </h5>
-<p id="section-13.7.2.1-1">Requests an event template from the hub server for a room. This is done to ensure the requesting
+<p id="section-13.7.3.1-1">Requests an event template from the hub server for a room. This is done to ensure the requesting
 server supports the room's version (<a href="#int-room-versions" class="auto internal xref">Section 3.2.1</a>), as well as hint at the event format
-needed to participate.<a href="#section-13.7.2.1-1" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.1-2"><strong>Rate-limited</strong>: Yes.<a href="#section-13.7.2.1-2" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.1-3"><strong>Authentication required</strong>: Yes.<a href="#section-13.7.2.1-3" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.1-4">Path parameters:<a href="#section-13.7.2.1-4" class="pilcrow">¶</a></p>
+needed to participate.<a href="#section-13.7.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.1-2">Note that this endpoint is extremely similar to <code>/make_leave</code> (<a href="#int-api-make-leave" class="auto internal xref">Section 13.7.2.2.1</a>).<a href="#section-13.7.3.1-2" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.1-3"><strong>Rate-limited</strong>: Yes.<a href="#section-13.7.3.1-3" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.1-4"><strong>Authentication required</strong>: Yes.<a href="#section-13.7.3.1-4" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.1-5">Path parameters:<a href="#section-13.7.3.1-5" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.7.2.1-5.1">
-                <code>:roomId</code> - the room ID (<a href="#int-room-id" class="auto internal xref">Section 3.2</a>) to get a template for.<a href="#section-13.7.2.1-5.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.7.3.1-6.1">
+                <code>:roomId</code> - the room ID (<a href="#int-room-id" class="auto internal xref">Section 3.2</a>) to get a template for.<a href="#section-13.7.3.1-6.1" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-13.7.2.1-5.2">
-                <code>:userId</code> - the user ID (<a href="#int-user-id" class="auto internal xref">Section 3.3</a>) attempting to join.<a href="#section-13.7.2.1-5.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-13.7.3.1-6.2">
+                <code>:userId</code> - the user ID (<a href="#int-user-id" class="auto internal xref">Section 3.3</a>) attempting to join.<a href="#section-13.7.3.1-6.2" class="pilcrow">¶</a>
 </li>
             </ul>
-<p id="section-13.7.2.1-6">Query parameters:<a href="#section-13.7.2.1-6" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.1-7">Query parameters:<a href="#section-13.7.3.1-7" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.7.2.1-7.1">
+<li class="normal" id="section-13.7.3.1-8.1">
                 <code>ver</code> (string; required; repeated) - The room versions (<a href="#int-room-versions" class="auto internal xref">Section 3.2.1</a>) the sending server
-supports.<a href="#section-13.7.2.1-7.1" class="pilcrow">¶</a>
+supports.<a href="#section-13.7.3.1-8.1" class="pilcrow">¶</a>
 </li>
             </ul>
-<p id="section-13.7.2.1-8">Request body: None applicable.<a href="#section-13.7.2.1-8" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.1-9"><code>200 OK</code> response:<a href="#section-13.7.2.1-9" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-13.7.2.1-10">
+<p id="section-13.7.3.1-9">Request body: None applicable.<a href="#section-13.7.3.1-9" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.1-10"><code>200 OK</code> response:<a href="#section-13.7.3.1-10" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.7.3.1-11">
 <pre>
 {
    /* partial LPDU */
 }
-</pre><a href="#section-13.7.2.1-10" class="pilcrow">¶</a>
+</pre><a href="#section-13.7.3.1-11" class="pilcrow">¶</a>
 </div>
-<p id="section-13.7.2.1-11">The response body <span class="bcp14">MUST</span> be a partial LPDU (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>) with at least the following fields:<a href="#section-13.7.2.1-11" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.1-12">The response body <span class="bcp14">MUST</span> be a partial LPDU (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>) with at least the following fields:<a href="#section-13.7.3.1-12" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.7.2.1-12.1">
-                <code>type</code> of <code>m.room.member</code>.<a href="#section-13.7.2.1-12.1" class="pilcrow">¶</a>
+<li class="normal" id="section-13.7.3.1-13.1">
+                <code>type</code> of <code>m.room.member</code>.<a href="#section-13.7.3.1-13.1" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-13.7.2.1-12.2">
-                <code>state_key</code> of <code>:userId</code> from the path parameters.<a href="#section-13.7.2.1-12.2" class="pilcrow">¶</a>
+              <li class="normal" id="section-13.7.3.1-13.2">
+                <code>state_key</code> of <code>:userId</code> from the path parameters.<a href="#section-13.7.3.1-13.2" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-13.7.2.1-12.3">
-                <code>sender</code> of <code>:userId</code> from the path parameters.<a href="#section-13.7.2.1-12.3" class="pilcrow">¶</a>
+              <li class="normal" id="section-13.7.3.1-13.3">
+                <code>sender</code> of <code>:userId</code> from the path parameters.<a href="#section-13.7.3.1-13.3" class="pilcrow">¶</a>
 </li>
-              <li class="normal" id="section-13.7.2.1-12.4">
-                <code>content</code> of <code>{"membership": "join"}</code>.<a href="#section-13.7.2.1-12.4" class="pilcrow">¶</a>
+              <li class="normal" id="section-13.7.3.1-13.4">
+                <code>content</code> of <code>{"membership": "join"}</code>.<a href="#section-13.7.3.1-13.4" class="pilcrow">¶</a>
 </li>
             </ul>
-<p id="section-13.7.2.1-13">The sending server <span class="bcp14">SHOULD</span> remove all other fields before using the event in a <code>send_join</code> (<a href="#int-api-send-join" class="auto internal xref">Section 13.7.2.2</a>).<a href="#section-13.7.2.1-13" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.1-14">If the receiving server is not the hub server for the room ID, an HTTP status code of <code>400 Bad Request</code>
+<p id="section-13.7.3.1-14">The sending server <span class="bcp14">SHOULD</span> remove all other fields before using the event in a <code>send_join</code> (<a href="#int-api-send-join" class="auto internal xref">Section 13.7.3.2</a>).<a href="#section-13.7.3.1-14" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.1-15">If the receiving server is not the hub server for the room ID, an HTTP status code of <code>400 Bad Request</code>
 and error code <code>M_WRONG_SERVER</code> (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>) is returned. If the room ID is not known,
-<code>404 Not Found</code> is used as an HTTP status code and <code>M_NOT_FOUND</code> as an error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>).<a href="#section-13.7.2.1-14" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.1-15">If the user does not have permission to join under the auth rules (<a href="#int-auth-rules" class="auto internal xref">Section 6.4</a>), a <code>403 Forbidden</code>
-HTTP status code is returned alongside an error code of <code>M_FORBIDDEN</code> (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>).<a href="#section-13.7.2.1-15" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.1-16">If the room version is not one of the <code>ver</code> strings the sender supplied, a <code>400 Bad Request</code> HTTP status
-code is returned alongside <code>M_INCOMPATIBLE_ROOM_VERSION</code> error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>).<a href="#section-13.7.2.1-16" class="pilcrow">¶</a></p>
+<code>404 Not Found</code> is used as an HTTP status code and <code>M_NOT_FOUND</code> as an error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>).<a href="#section-13.7.3.1-15" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.1-16">If the user does not have permission to join under the auth rules (<a href="#int-auth-rules" class="auto internal xref">Section 6.4</a>), a <code>403 Forbidden</code>
+HTTP status code is returned alongside an error code of <code>M_FORBIDDEN</code> (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>).<a href="#section-13.7.3.1-16" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.1-17">If the room version is not one of the <code>ver</code> strings the sender supplied, a <code>400 Bad Request</code> HTTP status
+code is returned alongside <code>M_INCOMPATIBLE_ROOM_VERSION</code> error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>).<a href="#section-13.7.3.1-17" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="int-api-send-join">
-<section id="section-13.7.2.2">
-            <h5 id="name-post-_matrix-federation-v3-s">
-<a href="#section-13.7.2.2" class="section-number selfRef">13.7.2.2. </a><a href="#name-post-_matrix-federation-v3-s" class="section-name selfRef"><code>POST /_matrix/federation/v3/send_join/:txnId</code></a>
+<section id="section-13.7.3.2">
+            <h5 id="name-post-_matrix-federation-v3-se">
+<a href="#section-13.7.3.2" class="section-number selfRef">13.7.3.2. </a><a href="#name-post-_matrix-federation-v3-se" class="section-name selfRef"><code>POST /_matrix/federation/v3/send_join/:txnId</code></a>
             </h5>
-<p id="section-13.7.2.2-1">Sends a join membership event to the room through a hub server.<a href="#section-13.7.2.2-1" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.2-2"><strong>Implementation note</strong>: Currently this endpoint doesn't actually exist. Use
+<p id="section-13.7.3.2-1">Sends a join membership event to the room through a hub server.<a href="#section-13.7.3.2-1" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.2-2">Note that this endpoint is extremely similar to <code>/send_leave</code> (<a href="#int-api-send-leave" class="auto internal xref">Section 13.7.2.2.2</a>).<a href="#section-13.7.3.2-2" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.2-3"><strong>Implementation note</strong>: Currently this endpoint doesn't actually exist. Use
 <code>POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send_join/:txnId</code>
 when testing against other Linearized Matrix implementations. This string may be updated later to
-account for breaking changes.<a href="#section-13.7.2.2-2" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.2-3"><strong>TODO</strong>: Remove implementation notes.<a href="#section-13.7.2.2-3" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.2-4"><strong>Rate-limited</strong>: Yes.<a href="#section-13.7.2.2-4" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.2-5"><strong>Authentication required</strong>: Yes.<a href="#section-13.7.2.2-5" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.2-6">Path parameters:<a href="#section-13.7.2.2-6" class="pilcrow">¶</a></p>
+account for breaking changes.<a href="#section-13.7.3.2-3" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.2-4"><strong>TODO</strong>: Remove implementation notes.<a href="#section-13.7.3.2-4" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.2-5"><strong>Rate-limited</strong>: Yes.<a href="#section-13.7.3.2-5" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.2-6"><strong>Authentication required</strong>: Yes.<a href="#section-13.7.3.2-6" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.2-7">Path parameters:<a href="#section-13.7.3.2-7" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.7.2.2-7.1">
+<li class="normal" id="section-13.7.3.2-8.1">
                 <code>:txnId</code> - the transaction ID (<a href="#int-txn-ids" class="auto internal xref">Section 13.2.5</a>) for the request. The event ID (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) of the
-contained event may be a good option as a readily-available transaction ID.<a href="#section-13.7.2.2-7.1" class="pilcrow">¶</a>
+contained event may be a good option as a readily-available transaction ID.<a href="#section-13.7.3.2-8.1" class="pilcrow">¶</a>
 </li>
             </ul>
-<p id="section-13.7.2.2-8">Query parameters: None applicable.<a href="#section-13.7.2.2-8" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.2-9"><strong>TODO</strong>: Incorporate faster joins work.<a href="#section-13.7.2.2-9" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.2-10">Request body:<a href="#section-13.7.2.2-10" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-13.7.2.2-11">
+<p id="section-13.7.3.2-9">Query parameters: None applicable.<a href="#section-13.7.3.2-9" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.2-10"><strong>TODO</strong>: Incorporate faster joins work.<a href="#section-13.7.3.2-10" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.2-11">Request body:<a href="#section-13.7.3.2-11" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.7.3.2-12">
 <pre>
 {
    /* LPDU created from make_join template */
 }
-</pre><a href="#section-13.7.2.2-11" class="pilcrow">¶</a>
+</pre><a href="#section-13.7.3.2-12" class="pilcrow">¶</a>
 </div>
-<p id="section-13.7.2.2-12"><code>200 OK</code> response:<a href="#section-13.7.2.2-12" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-13.7.2.2-13">
+<p id="section-13.7.3.2-13"><code>200 OK</code> response:<a href="#section-13.7.3.2-13" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.7.3.2-14">
 <pre>
 {
    "state": [/* events */],
    "auth_chain": [/* events */],
    "event": {/* fully-formed event */}
 }
-</pre><a href="#section-13.7.2.2-13" class="pilcrow">¶</a>
+</pre><a href="#section-13.7.3.2-14" class="pilcrow">¶</a>
 </div>
-<p id="section-13.7.2.2-14"><code>state</code> is the current room state, consisting of the events which represent "current state" (<a href="#int-state-events" class="auto internal xref">Section 3.5.2</a>)
+<p id="section-13.7.3.2-15"><code>state</code> is the current room state, consisting of the events which represent "current state" (<a href="#int-state-events" class="auto internal xref">Section 3.5.2</a>)
 prior to considering the membership state change. <code>auth_chain</code> consists of the events which make up
 the <code>auth_events</code> (<a href="#int-auth-selection" class="auto internal xref">Section 6.4.1</a>) for the <code>state</code> events, and the <code>auth_events</code> of those events,
 recursively. <code>event</code> will be the fully-formed PDU (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) that is sent by the hub to all other
-participants in the room.<a href="#section-13.7.2.2-14" class="pilcrow">¶</a></p>
-<p id="section-13.7.2.2-15">The errors responses from <code>/make_join</code> (<a href="#int-api-make-join" class="auto internal xref">Section 13.7.2.1</a>) are copied here (with the exception
+participants in the room.<a href="#section-13.7.3.2-15" class="pilcrow">¶</a></p>
+<p id="section-13.7.3.2-16">The errors responses from <code>/make_join</code> (<a href="#int-api-make-join" class="auto internal xref">Section 13.7.3.1</a>) are copied here (with the exception
 of <code>M_INCOMPATIBLE_ROOM_VERSION</code>, as the server already checked for support). Servers should note
 that room state <span class="bcp14">MAY</span> change between a <code>/make_join</code> and <code>/send_join</code>, potentially in a way which
-prevents the user from joining the room suddenly.<a href="#section-13.7.2.2-15" class="pilcrow">¶</a></p>
+prevents the user from joining the room suddenly.<a href="#section-13.7.3.2-16" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="int-api-make-leave">
-<section id="section-13.7.2.3">
-            <h5 id="name-temp-heading-4">
-<a href="#section-13.7.2.3" class="section-number selfRef">13.7.2.3. </a><a href="#name-temp-heading-4" class="section-name selfRef">Temp Heading 4</a>
-          </h5>
 </section>
 </div>
-<div id="int-api-send-leave">
-<section id="section-13.7.2.4">
-            <h5 id="name-temp-heading-5">
-<a href="#section-13.7.2.4" class="section-number selfRef">13.7.2.4. </a><a href="#name-temp-heading-5" class="section-name selfRef">Temp Heading 5</a>
+<div id="int-transport-knocks">
+<section id="section-13.7.4">
+          <h4 id="name-knocks">
+<a href="#section-13.7.4" class="section-number selfRef">13.7.4. </a><a href="#name-knocks" class="section-name selfRef">Knocks</a>
+          </h4>
+<p id="section-13.7.4-1">To knock on a room is to request an invite to that room. It is not a join, nor is it an invite itself.
+"Approving" the knock is done by inviting the user, which is typically only allowed by moderators in
+these rooms. "Denying" the knock is done through kicking (sending a <code>leave</code> membership) or banning the
+user. If the user is kicked, they may re-send their knock.<a href="#section-13.7.4-1" class="pilcrow">¶</a></p>
+<p id="section-13.7.4-2">Senders should note the <code>reason</code> field on <code>m.room.member</code> events (<a href="#int-ev-member" class="auto internal xref">Section 3.5.3.3</a>) to provide context
+for their knock.<a href="#section-13.7.4-2" class="pilcrow">¶</a></p>
+<p id="section-13.7.4-3">To retract a knock, the sending server uses the same APIs as rejecting an invite (<a href="#int-transport-leaves" class="auto internal xref">Section 13.7.2.2</a>).<a href="#section-13.7.4-3" class="pilcrow">¶</a></p>
+<p id="section-13.7.4-4">Where possible, knocks from users <span class="bcp14">SHOULD</span> be sent directly, otherwise using the "make and send" handshake
+(<a href="#int-transport-make-and-send" class="auto internal xref">Section 13.7.1</a>) approach described here.<a href="#section-13.7.4-4" class="pilcrow">¶</a></p>
+<div id="int-api-make-knock">
+<section id="section-13.7.4.1">
+            <h5 id="name-get-_matrix-federation-v1-mak">
+<a href="#section-13.7.4.1" class="section-number selfRef">13.7.4.1. </a><a href="#name-get-_matrix-federation-v1-mak" class="section-name selfRef"><code>GET /_matrix/federation/v1/make_knock/:roomId/:userId</code></a>
             </h5>
-<p id="section-13.7.2.4-1"><strong>TODO</strong>: Knocking<a href="#section-13.7.2.4-1" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.1-1">Requests an event template from the hub server for a room. This is done to ensure the requesting
+server supports the room's version (<a href="#int-room-versions" class="auto internal xref">Section 3.2.1</a>), as well as hint at the event format
+needed to participate.<a href="#section-13.7.4.1-1" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.1-2">Note that this endpoint is almost exactly the same as <code>/make_join</code> (<a href="#int-api-make-join" class="auto internal xref">Section 13.7.3.1</a>).<a href="#section-13.7.4.1-2" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.1-3"><strong>TODO</strong>: It's so similar to make_join that we should probably just combine the two endpoints.<a href="#section-13.7.4.1-3" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.1-4"><strong>Rate-limited</strong>: Yes.<a href="#section-13.7.4.1-4" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.1-5"><strong>Authentication required</strong>: Yes.<a href="#section-13.7.4.1-5" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.1-6">Path parameters:<a href="#section-13.7.4.1-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.7.4.1-7.1">
+                <code>:roomId</code> - the room ID (<a href="#int-room-id" class="auto internal xref">Section 3.2</a>) to get a template for.<a href="#section-13.7.4.1-7.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-13.7.4.1-7.2">
+                <code>:userId</code> - the user ID (<a href="#int-user-id" class="auto internal xref">Section 3.3</a>) attempting to knock.<a href="#section-13.7.4.1-7.2" class="pilcrow">¶</a>
+</li>
+            </ul>
+<p id="section-13.7.4.1-8">Query parameters:<a href="#section-13.7.4.1-8" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.7.4.1-9.1">
+                <code>ver</code> (string; required; repeated) - The room versions (<a href="#int-room-versions" class="auto internal xref">Section 3.2.1</a>) the sending server
+supports.<a href="#section-13.7.4.1-9.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+<p id="section-13.7.4.1-10">Request body: None applicable.<a href="#section-13.7.4.1-10" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.1-11"><code>200 OK</code> response:<a href="#section-13.7.4.1-11" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.7.4.1-12">
+<pre>
+{
+   /* partial LPDU */
+}
+</pre><a href="#section-13.7.4.1-12" class="pilcrow">¶</a>
+</div>
+<p id="section-13.7.4.1-13">The response body <span class="bcp14">MUST</span> be a partial LPDU (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>) with at least the following fields:<a href="#section-13.7.4.1-13" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.7.4.1-14.1">
+                <code>type</code> of <code>m.room.member</code>.<a href="#section-13.7.4.1-14.1" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-13.7.4.1-14.2">
+                <code>state_key</code> of <code>:userId</code> from the path parameters.<a href="#section-13.7.4.1-14.2" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-13.7.4.1-14.3">
+                <code>sender</code> of <code>:userId</code> from the path parameters.<a href="#section-13.7.4.1-14.3" class="pilcrow">¶</a>
+</li>
+              <li class="normal" id="section-13.7.4.1-14.4">
+                <code>content</code> of <code>{"membership": "knock"}</code>.<a href="#section-13.7.4.1-14.4" class="pilcrow">¶</a>
+</li>
+            </ul>
+<p id="section-13.7.4.1-15">The sending server <span class="bcp14">SHOULD</span> remove all other fields before using the event in a <code>send_knock</code> (<a href="#int-api-send-knock" class="auto internal xref">Section 13.7.4.2</a>).<a href="#section-13.7.4.1-15" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.1-16">If the receiving server is not the hub server for the room ID, an HTTP status code of <code>400 Bad Request</code>
+and error code <code>M_WRONG_SERVER</code> (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>) is returned. If the room ID is not known,
+<code>404 Not Found</code> is used as an HTTP status code and <code>M_NOT_FOUND</code> as an error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>).<a href="#section-13.7.4.1-16" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.1-17">If the user does not have permission to knock under the auth rules (<a href="#int-auth-rules" class="auto internal xref">Section 6.4</a>), a <code>403 Forbidden</code>
+HTTP status code is returned alongside an error code of <code>M_FORBIDDEN</code> (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>).<a href="#section-13.7.4.1-17" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.1-18">If the room version is not one of the <code>ver</code> strings the sender supplied, a <code>400 Bad Request</code> HTTP status
+code is returned alongside <code>M_INCOMPATIBLE_ROOM_VERSION</code> error code (<a href="#int-transport-errors" class="auto internal xref">Section 13.2.2</a>).<a href="#section-13.7.4.1-18" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="int-api-send-knock">
+<section id="section-13.7.4.2">
+            <h5 id="name-post-_matrix-federation-v3-sen">
+<a href="#section-13.7.4.2" class="section-number selfRef">13.7.4.2. </a><a href="#name-post-_matrix-federation-v3-sen" class="section-name selfRef"><code>POST /_matrix/federation/v3/send_knock/:txnId</code></a>
+            </h5>
+<p id="section-13.7.4.2-1">Sends a knock membership event to the room through a hub server.<a href="#section-13.7.4.2-1" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.2-2"><strong>Implementation note</strong>: Currently this endpoint doesn't actually exist. Use
+<code>POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send_knock/:txnId</code>
+when testing against other Linearized Matrix implementations. This string may be updated later to
+account for breaking changes.<a href="#section-13.7.4.2-2" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.2-3"><strong>TODO</strong>: Remove implementation notes.<a href="#section-13.7.4.2-3" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.2-4"><strong>Rate-limited</strong>: Yes.<a href="#section-13.7.4.2-4" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.2-5"><strong>Authentication required</strong>: Yes.<a href="#section-13.7.4.2-5" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.2-6">Path parameters:<a href="#section-13.7.4.2-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.7.4.2-7.1">
+                <code>:txnId</code> - the transaction ID (<a href="#int-txn-ids" class="auto internal xref">Section 13.2.5</a>) for the request. The event ID (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) of the
+contained event may be a good option as a readily-available transaction ID.<a href="#section-13.7.4.2-7.1" class="pilcrow">¶</a>
+</li>
+            </ul>
+<p id="section-13.7.4.2-8">Query parameters: None applicable.<a href="#section-13.7.4.2-8" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.2-9"><strong>TODO</strong>: Incorporate faster joins work.<a href="#section-13.7.4.2-9" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.2-10">Request body:<a href="#section-13.7.4.2-10" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.7.4.2-11">
+<pre>
+{
+   /* LPDU created from make_knock template */
+}
+</pre><a href="#section-13.7.4.2-11" class="pilcrow">¶</a>
+</div>
+<p id="section-13.7.4.2-12"><code>200 OK</code> response:<a href="#section-13.7.4.2-12" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.7.4.2-13">
+<pre>
+{
+   "stripped_state": [
+      /* stripped state events */
+   ]
+}
+</pre><a href="#section-13.7.4.2-13" class="pilcrow">¶</a>
+</div>
+<p id="section-13.7.4.2-14"><code>stripped_state</code> are the stripped state events (<a href="#int-stripped-state" class="auto internal xref">Section 3.5.2.1</a>) for the room.<a href="#section-13.7.4.2-14" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.2-15">The errors responses from <code>/make_knock</code> (<a href="#int-api-make-knock" class="auto internal xref">Section 13.7.4.1</a>) are copied here (with the exception
+of <code>M_INCOMPATIBLE_ROOM_VERSION</code>, as the server already checked for support). Servers should note
+that room state <span class="bcp14">MAY</span> change between a <code>/make_knock</code> and <code>/send_knock</code>, potentially in a way which
+prevents the user from knocking upon the room suddenly.<a href="#section-13.7.4.2-15" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -4375,9 +4629,9 @@ really anything else.<a href="#section-14-1.1" class="pilcrow">¶</a>
 <p id="section-15-1"><strong>TODO</strong>: Fully complete this section.<a href="#section-15-1" class="pilcrow">¶</a></p>
 <p id="section-15-2">Messaging providers may have user-level settings to prevent unexpected or unwarranted invites, such
 as automatically blocking invites from non-contacts. This setting can be upheld by returning an error
-on <code>POST /_matrix/federation/v3/invite/:txnId</code> (<a href="#int-api-invite" class="auto internal xref">Section 13.7.1.1</a>), and by having the server (optionally)
+on <code>POST /_matrix/federation/v3/invite/:txnId</code> (<a href="#int-api-invite" class="auto internal xref">Section 13.7.2.1</a>), and by having the server (optionally)
 auto-decline any invites received directly through <code>PUT /_matrix/federation/v2/send/:txnId</code> (<a href="#int-api-send-txn" class="auto internal xref">Section 13.5.1</a>).
-See <a href="#int-transport-leaves" class="auto internal xref">Section 13.7.1.2</a> for more information on rejecting invites.<a href="#section-15-2" class="pilcrow">¶</a></p>
+See <a href="#int-transport-leaves" class="auto internal xref">Section 13.7.2.2</a> for more information on rejecting invites.<a href="#section-15-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="int-spam">
