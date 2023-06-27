@@ -2021,6 +2021,74 @@ and `POST /send_join` is {{int-api-send-join}}.
 If the user decided to reject the invite, the TargetServer would use `GET /make_leave` ({{int-api-make-leave}})
 and `POST /send_leave` ({{int-api-send-leave}}) instead of make/send_join.
 
+### Make and Send Handshake {#int-transport-make-and-send}
+
+When a server is already participating in a room, it can use `m.room.member` ({{int-ev-member}}) events
+and the `/send` API ({{int-api-send-txn}}) to directly change membership. When the server is not already
+involved in the room, such as when being invited for the first time, the server needs to "make" an event
+and "send" it through the hub server to append it to the room.
+
+The different processes which use this handshake are:
+
+* Rejecting Invites ({{int-transport-leaves}})
+* Joins ({{int-transport-joins}})
+* Knocks ({{int-transport-knocks}})
+
+The "make" portion of the endpoints take the shape of `GET /_matrix/federation/v1/make_CHANGE/:roomId/:userId`,
+where `CHANGE` is `leave`, `join`, or `knock` (respective to the list above). This endpoint will
+return a partial LPDU ({{int-lpdu}}) which needs to be turned into a full LPDU and signed before being
+sent using `POST /_matrix/federation/v3/send_CHANGE/:txnId`.
+
+The flow for this handshake appears as such:
+
+~~~ aasvg
++----------------+                                             +-----+
+| ExternalServer |                                             | Hub |
++----------------+                                             +-----+
+        |                                                         |
+        | GET /_matrix/federation/v1/make_CHANGE/:roomId/:userId  |
+        |-------------------------------------------------------->|
+        |                                                         |
+        |                            Reject if event future event |
+        |                      would not be allowed by auth rules |
+        |<--------------------------------------------------------|
+        |                                                         |
+        |                               Respond with partial LPDU |
+        |<--------------------------------------------------------|
+        |                                                         |
+        | Populate LPDU and sign it                               |
+        |--------------------------                               |
+        |                         |                               |
+        |<-------------------------                               |
+        |                                                         |
+        | POST /_matrix/federation/v3/send_CHANGE/:txnId          |
+        |-------------------------------------------------------->|
+        |                                                         |
+        |                   Validate event and append to the room |
+        |                   +-------------------------------------|
+        |                   |                                     |
+        |                   +------------------------------------>|
+        |                                                         |
+        |               Reject if event not allowed by auth rules |
+        |<--------------------------------------------------------|
+        |                                                         |
+        |                             Send new event to all other |
+        |                        participants in the room (async) |
+        |                   +-------------------------------------|
+        |                   |                                     |
+        |                   +------------------------------------>|
+        |                                                         |
+        |                                                  200 OK |
+        |<--------------------------------------------------------|
+        |                                                         |
+~~~
+
+Note that the `send_CHANGE` step re-checks the event against the auth rules: any amount of time
+could have passed between the `make_CHANGE` and `send_CHANGE` calls.
+
+**TODO**: Describe how the external server is meant to find the hub. Invites work by (usually) trying
+to contact the server which sent the invite, but knocking is a guess.
+
 ### Invites {#int-transport-invites}
 
 When inviting a user belonging to a server already in the room, senders SHOULD use `m.room.member`
@@ -2183,68 +2251,110 @@ These signatures are to satisfy the auth rules ({{int-auth-rules}}).
 #### Rejecting Invites {#int-transport-leaves}
 
 Rejecting an invite is done by making a membership transition of `invite` to `leave` through the user's
-`m.room.member` ({{int-ev-member}}) event. As with invites themselves ({{int-transport-invites}}), if
-a server is already participating in the room then it can send out the membership event directly.
+`m.room.member` ({{int-ev-member}}) event. The membership event should be sent directly when it can and
+use the "make and send" handshake ({{int-transport-make-and-send}}) described here otherwise.
 
-If the server is not a member of the room, but the user wishes to formally reject an invite (instead
-of ignoring it), the server will need to handshake that with the hub server.
+##### `GET /_matrix/federation/v1/make_leave/:roomId/:userId` {#int-api-make-leave}
 
-**TODO**: Finish this section. It's joins, but using `leave` instead (mostly).
+Requests an event template from the hub server for a room. The requesting server will have already
+been checked to ensure it supports the room version as part of the invite process prior to making a
+call to this endpoint.
+
+**Rate-limited**: Yes.
+
+**Authentication required**: Yes.
+
+Path parameters:
+
+* `:roomId` - the room ID ({{int-room-id}}) to get a template for.
+* `:userId` - the user ID ({{int-user-id}}) attempting to join.
+
+Query parameters: None applicable.
+
+Request body: None applicable.
+
+`200 OK` response:
+
+~~~ json
+{
+   "event": {/* partial LPDU */},
+   "room_version": "I.1"
+}
+~~~
+
+The response body's `event` MUST be a partial LPDU ({{int-lpdu}}) with at least the following fields:
+
+* `type` of `m.room.member`.
+* `state_key` of `:userId` from the path parameters.
+* `sender` of `:userId` from the path parameters.
+* `content` of `{"membership": "leave"}`.
+
+The sending server SHOULD remove all other fields before using the event in a `send_leave` ({{int-api-send-leave}}).
+
+If the receiving server is not the hub server for the room ID, an HTTP status code of `400 Bad Request`
+and error code `M_WRONG_SERVER` ({{int-transport-errors}}) is returned. If the room ID is not known,
+`404 Not Found` is used as an HTTP status code and `M_NOT_FOUND` as an error code ({{int-transport-errors}}).
+
+If the user does not have permission to leave under the auth rules ({{int-auth-rules}}), a `403 Forbidden`
+HTTP status code is returned alongside an error code of `M_FORBIDDEN` ({{int-transport-errors}}). For example,
+if the user does not have a pending invite, is not a member of the room, or is banned.
+
+If the sending server does not recognize the returned `room_version`, it SHOULD NOT attempt to populate
+the template or use the `send_leave` ({{int-api-send-leave}}) endpoint.
+
+##### `POST /_matrix/federation/v3/send_leave/:txnId` {#int-api-send-leave}
+
+Sends a leave membership event to the room through a hub server.
+
+**Implementation note**: Currently this endpoint doesn't actually exist. Use
+`POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send_leave/:txnId`
+when testing against other Linearized Matrix implementations. This string may be updated later to
+account for breaking changes.
+
+**TODO**: Remove implementation notes.
+
+**Rate-limited**: Yes.
+
+**Authentication required**: Yes.
+
+Path parameters:
+
+* `:txnId` - the transaction ID ({{int-txn-ids}}) for the request. The event ID ({{int-pdu}}) of the
+  contained event may be a good option as a readily-available transaction ID.
+
+Query parameters: None applicable.
+
+Request body:
+
+~~~ json
+{
+   /* LPDU created from make_leave template */
+}
+~~~
+
+`200 OK` response:
+
+~~~ json
+{}
+~~~
+
+The errors responses from `/make_leave` ({{int-api-make-leave}}) are copied here. Servers should note
+that room state MAY change between a `/make_leave` and `/send_leave`, potentially in a way which
+prevents the user from leaving the room suddenly. For example, the invited user may have been banned
+from the room.
 
 ### Joins {#int-transport-joins}
 
-Like invites ({{int-transport-invites}}), this section can be avoided if the sending server is already
-participating in the room by sending events directly to other servers.
-
-A typical join flow would be:
-
-~~~ aasvg
-+---------------+                                              +-----+
-| JoiningServer |                                              | Hub |
-+---------------+                                              +-----+
-        |                                                         |
-        | GET /_matrix/federation/v1/make_join/:roomId/:userId    |
-        |-------------------------------------------------------->|
-        |                                                         |
-        |                               Respond with partial LPDU |
-        |<--------------------------------------------------------|
-        |                                                         |
-        | Populate LPDU and sign it                               |
-        |--------------------------                               |
-        |                         |                               |
-        |<-------------------------                               |
-        |                                                         |
-        | POST /_matrix/federation/v3/send_join/:txnId            |
-        |-------------------------------------------------------->|
-        |                                                         |
-        |                   Validate event and append to the room |
-        |                   +-------------------------------------|
-        |                   |                                     |
-        |                   +------------------------------------>|
-        |                                                         |
-        |               Reject if event not allowed by auth rules |
-        |<--------------------------------------------------------|
-        |                                                         |
-        |                             Send new event to all other |
-        |                                participants in the room |
-        |                   +-------------------------------------|
-        |                   |                                     |
-        |                   +------------------------------------>|
-        |                                                         |
-        |                                 Respond with room state |
-        |<--------------------------------------------------------|
-        |                                                         |
-~~~
-
-**TODO**: Describe in a bit more detail how a server is meant to figure out which server to send the
-join sequence to. It'll need to be the hub, but who is the hub!? For now, invites work by tracking
-which server sent the invite in the first place and assuming that they are the hub for the room.
+Joins for users should be sent directly whenever possible, and otherwise use the "make and send" handshake
+({{int-transport-make-and-send}}) approach described here.
 
 #### `GET /_matrix/federation/v1/make_join/:roomId/:userId` {#int-api-make-join}
 
 Requests an event template from the hub server for a room. This is done to ensure the requesting
 server supports the room's version ({{int-room-versions}}), as well as hint at the event format
 needed to participate.
+
+Note that this endpoint is extremely similar to `/make_leave` ({{int-api-make-leave}}).
 
 **Rate-limited**: Yes.
 
@@ -2292,6 +2402,8 @@ code is returned alongside `M_INCOMPATIBLE_ROOM_VERSION` error code ({{int-trans
 #### `POST /_matrix/federation/v3/send_join/:txnId` {#int-api-send-join}
 
 Sends a join membership event to the room through a hub server.
+
+Note that this endpoint is extremely similar to `/send_leave` ({{int-api-send-leave}}).
 
 **Implementation note**: Currently this endpoint doesn't actually exist. Use
 `POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send_join/:txnId`
@@ -2343,10 +2455,6 @@ that room state MAY change between a `/make_join` and `/send_join`, potentially 
 prevents the user from joining the room suddenly.
 
 <!-- TODO -->
-
-#### Temp Heading 4 {#int-api-make-leave}
-
-#### Temp Heading 5 {#int-api-send-leave}
 
 **TODO**: Knocking
 
