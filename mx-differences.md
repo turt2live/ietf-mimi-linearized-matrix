@@ -326,7 +326,7 @@ and participants can choose their favourite, creating small clusters of LM serve
   as an unstable prefix.
 
 * `POST /_matrix/federation/v3/send_join/:txnId` is a new endpoint, copying much of the behaviour from
-  `PUT /_matrix/federation/v2/make_join/:roomId/:eventId`. Note the HTTP method change.
+  `PUT /_matrix/federation/v2/send_join/:roomId/:eventId`. Note the HTTP method change.
 
   `:txnId` can easily be an event ID.
 
@@ -338,6 +338,34 @@ and participants can choose their favourite, creating small clusters of LM serve
 
   **Note**: This is implemented as `POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send_join/:txnId`
   as an unstable prefix.
+
+* `POST /_matrix/federation/v3/send_leave/:txnId` is a new endpoint, copying much of the behaviour from
+  `PUT /_matrix/federation/v2/send_leave/:roomId/:eventId`. Note the HTTP method change.
+
+  `:txnId` can easily be an event ID.
+
+  The request body will contain an LPDU instead of a PDU when coming from LM. The response body is still
+  an empty object.
+
+  **Note**: This is implemented as `POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send_leave/:txnId`
+  as an unstable prefix.
+
+* `POST /_matrix/federation/v3/send_knock/:txnId` is a new endpoint, copying much of the behaviour from
+  `PUT /_matrix/federation/v1/send_knock/:roomId/:eventId`. Note the HTTP method change.
+
+  `:txnId` can easily be an event ID.
+
+  The request body will contain an LPDU instead of a PDU when coming from LM. The response body only consists
+  of `state`, `auth_chain`, and `event`, though including other fields is okay too.
+
+  Faster joins is not currently possible in LM, but will be in future. `omit_members` continues to default
+  to false.
+
+  **Note**: This is implemented as `POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send_knock/:txnId`
+  as an unstable prefix.
+
+  **Note for future MSC**: This skips `v2`, and should be combined with the send_invite endpoint. make_knock
+  should be part of a single make_membership endpoint.
 
 Some APIs are not implemented at all in LM:
 

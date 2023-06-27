@@ -587,6 +587,10 @@ membership state for the user. Allowable values are:
 These conditions are checked as part of the event authorization rules ({{int-auth-rules}}),
 as are the rules for moving between membership states.
 
+The `content` for a membership event MAY additionally have a `reason` field containing a human-readable
+(and usually human-supplied) description for why the membership change happened. For example, the reason
+why a user was kicked/banned or why they are requesting an invite by knocking.
+
 #### `m.room.power_levels`
 
 Defines what given users can and can't do, as well as which event types they are able to send.
@@ -2248,11 +2252,13 @@ These signatures are to satisfy the auth rules ({{int-auth-rules}}).
 
 **TODO**: Do we ever validate the target server's signature? Do we need to?
 
-#### Rejecting Invites {#int-transport-leaves}
+#### Rejecting Invites and Leaves {#int-transport-leaves}
 
 Rejecting an invite is done by making a membership transition of `invite` to `leave` through the user's
-`m.room.member` ({{int-ev-member}}) event. The membership event should be sent directly when it can and
+`m.room.member` ({{int-ev-member}}) event. The membership event SHOULD be sent directly when it can and
 use the "make and send" handshake ({{int-transport-make-and-send}}) described here otherwise.
+
+This same approach is additionally used to retract a knock ({{int-transport-knocks}}).
 
 ##### `GET /_matrix/federation/v1/make_leave/:roomId/:userId` {#int-api-make-leave}
 
@@ -2267,7 +2273,7 @@ call to this endpoint.
 Path parameters:
 
 * `:roomId` - the room ID ({{int-room-id}}) to get a template for.
-* `:userId` - the user ID ({{int-user-id}}) attempting to join.
+* `:userId` - the user ID ({{int-user-id}}) attempting to leave.
 
 Query parameters: None applicable.
 
@@ -2335,7 +2341,7 @@ Request body:
 `200 OK` response:
 
 ~~~ json
-{}
+{/* deliberately empty object */}
 ~~~
 
 The errors responses from `/make_leave` ({{int-api-make-leave}}) are copied here. Servers should note
@@ -2345,7 +2351,7 @@ from the room.
 
 ### Joins {#int-transport-joins}
 
-Joins for users should be sent directly whenever possible, and otherwise use the "make and send" handshake
+Joins for users SHOULD be sent directly whenever possible, and otherwise use the "make and send" handshake
 ({{int-transport-make-and-send}}) approach described here.
 
 #### `GET /_matrix/federation/v1/make_join/:roomId/:userId` {#int-api-make-join}
@@ -2454,11 +2460,126 @@ of `M_INCOMPATIBLE_ROOM_VERSION`, as the server already checked for support). Se
 that room state MAY change between a `/make_join` and `/send_join`, potentially in a way which
 prevents the user from joining the room suddenly.
 
-<!-- TODO -->
+### Knocks {#int-transport-knocks}
 
-**TODO**: Knocking
+To knock on a room is to request an invite to that room. It is not a join, nor is it an invite itself.
+"Approving" the knock is done by inviting the user, which is typically only allowed by moderators in
+these rooms. "Denying" the knock is done through kicking (sending a `leave` membership) or banning the
+user. If the user is kicked, they may re-send their knock.
 
-<!-- /TODO -->
+Senders should note the `reason` field on `m.room.member` events ({{int-ev-member}}) to provide context
+for their knock.
+
+To retract a knock, the sending server uses the same APIs as rejecting an invite ({{int-transport-leaves}}).
+
+Where possible, knocks from users SHOULD be sent directly, otherwise using the "make and send" handshake
+({{int-transport-make-and-send}}) approach described here.
+
+#### `GET /_matrix/federation/v1/make_knock/:roomId/:userId` {#int-api-make-knock}
+
+Requests an event template from the hub server for a room. This is done to ensure the requesting
+server supports the room's version ({{int-room-versions}}), as well as hint at the event format
+needed to participate.
+
+Note that this endpoint is almost exactly the same as `/make_join` ({{int-api-make-join}}).
+
+**TODO**: It's so similar to make_join that we should probably just combine the two endpoints.
+
+**Rate-limited**: Yes.
+
+**Authentication required**: Yes.
+
+Path parameters:
+
+* `:roomId` - the room ID ({{int-room-id}}) to get a template for.
+* `:userId` - the user ID ({{int-user-id}}) attempting to knock.
+
+Query parameters:
+
+* `ver` (string; required; repeated) - The room versions ({{int-room-versions}}) the sending server
+  supports.
+
+Request body: None applicable.
+
+`200 OK` response:
+
+~~~ json
+{
+   /* partial LPDU */
+}
+~~~
+
+The response body MUST be a partial LPDU ({{int-lpdu}}) with at least the following fields:
+
+* `type` of `m.room.member`.
+* `state_key` of `:userId` from the path parameters.
+* `sender` of `:userId` from the path parameters.
+* `content` of `{"membership": "knock"}`.
+
+The sending server SHOULD remove all other fields before using the event in a `send_knock` ({{int-api-send-knock}}).
+
+If the receiving server is not the hub server for the room ID, an HTTP status code of `400 Bad Request`
+and error code `M_WRONG_SERVER` ({{int-transport-errors}}) is returned. If the room ID is not known,
+`404 Not Found` is used as an HTTP status code and `M_NOT_FOUND` as an error code ({{int-transport-errors}}).
+
+If the user does not have permission to knock under the auth rules ({{int-auth-rules}}), a `403 Forbidden`
+HTTP status code is returned alongside an error code of `M_FORBIDDEN` ({{int-transport-errors}}).
+
+If the room version is not one of the `ver` strings the sender supplied, a `400 Bad Request` HTTP status
+code is returned alongside `M_INCOMPATIBLE_ROOM_VERSION` error code ({{int-transport-errors}}).
+
+#### `POST /_matrix/federation/v3/send_knock/:txnId` {#int-api-send-knock}
+
+Sends a knock membership event to the room through a hub server.
+
+Note that this endpoint is similar to `/send_invite` ({{int-api-send-invite}}).
+
+**TODO**: We should just combine this with send_invite, and make send_invite return stripped state.
+
+**Implementation note**: Currently this endpoint doesn't actually exist. Use
+`POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send_knock/:txnId`
+when testing against other Linearized Matrix implementations. This string may be updated later to
+account for breaking changes.
+
+**TODO**: Remove implementation notes.
+
+**Rate-limited**: Yes.
+
+**Authentication required**: Yes.
+
+Path parameters:
+
+* `:txnId` - the transaction ID ({{int-txn-ids}}) for the request. The event ID ({{int-pdu}}) of the
+  contained event may be a good option as a readily-available transaction ID.
+
+Query parameters: None applicable.
+
+**TODO**: Incorporate faster joins work.
+
+Request body:
+
+~~~ json
+{
+   /* LPDU created from make_knock template */
+}
+~~~
+
+`200 OK` response:
+
+~~~ json
+{
+   "stripped_state": [
+      /* stripped state events */
+   ]
+}
+~~~
+
+`stripped_state` are the stripped state events ({{int-stripped-state}}) for the room.
+
+The errors responses from `/make_knock` ({{int-api-make-knock}}) are copied here (with the exception
+of `M_INCOMPATIBLE_ROOM_VERSION`, as the server already checked for support). Servers should note
+that room state MAY change between a `/make_knock` and `/send_knock`, potentially in a way which
+prevents the user from knocking upon the room suddenly.
 
 ## TODO: Remainder of Transport
 
