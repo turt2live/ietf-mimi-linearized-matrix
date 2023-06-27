@@ -124,15 +124,16 @@ Table of Contents
        13.7.2.  Invites
        13.7.3.  Joins
        13.7.4.  Knocks
-     13.8.  TODO: Remainder of Transport
-   14. TODOs & Open Questions
-   15. User Privacy
-   16. Spam Prevention
-   17. Security Considerations
-   18. IANA Considerations
-   19. References
-     19.1.  Normative References
-     19.2.  Informative References
+     13.8.  Content Repository
+     13.9.  TODO: Remainder of Transport
+       13.9.1.  Open Questions
+   14. User Privacy
+   15. Spam Prevention
+   16. Security Considerations
+   17. IANA Considerations
+   18. References
+     18.1.  Normative References
+     18.2.  Informative References
    Acknowledgments
    Authors' Addresses
 
@@ -2637,7 +2638,7 @@ Table of Contents
    POST /invite is shorthand for Section 13.7.2.1.
 
    What causes a user to be considered "ineligible" for an invite is
-   left as an implementation detail.  See Section 15 and Section 16 for
+   left as an implementation detail.  See Section 14 and Section 15 for
    suggestions on handling user-level privacy controls and spam invites.
 
 13.7.2.1.  POST /_matrix/federation/v3/invite/:txnId
@@ -2720,7 +2721,7 @@ Table of Contents
    error code of M_INCOMPATIBLE_ROOM_VERSION (Section 13.2.2).
 
    Then, the target server runs any implementation-specific checks as
-   needed, such as those implied by Section 15 and Section 16,
+   needed, such as those implied by Section 14 and Section 15,
    rejecting/erroring the request as needed.
 
    Finally, the target server signs the event and returns it to the hub.
@@ -3115,13 +3116,22 @@ Table of Contents
    in a way which prevents the user from knocking upon the room
    suddenly.
 
-13.8.  TODO: Remainder of Transport
+13.8.  Content Repository
+
+   The content repository, sometimes called the "media repo", is where
+   user-generated content is stored for referencing within an encrypted
+   message.
+
+   *TODO*: Complete this section.  We want auth/event linking from
+   MSC3911 and MSC3916.
+
+   *TODO*: Spell out that content is images, videos, files, etc.
+
+13.9.  TODO: Remainder of Transport
 
    *TODO*: This section.
 
    Topics:
-
-   *  Media/content repo (images, videos, attachments, etc)
 
    *  EDUs (typing notifications, receipts, presence)
 
@@ -3145,12 +3155,12 @@ Table of Contents
 
    *  OpenID API
 
-14.  TODOs & Open Questions
+13.9.1.  Open Questions
 
    *  Should we include /_matrix/federation/v1/version in here?  It's
       used by federation testers, but not really anything else.
 
-15.  User Privacy
+14.  User Privacy
 
    *TODO*: Fully complete this section.
 
@@ -3163,7 +3173,7 @@ Table of Contents
    /_matrix/federation/v2/send/:txnId (Section 13.5.1).  See
    Section 13.7.2.2 for more information on rejecting invites.
 
-16.  Spam Prevention
+15.  Spam Prevention
 
    *TODO*: Fully complete this section.
 
@@ -3179,7 +3189,7 @@ Table of Contents
    primarily useful to remove a server from rooms where abusive/illegal
    content is shared.
 
-17.  Security Considerations
+16.  Security Considerations
 
    *TODO*: Expand upon this section.
 
@@ -3195,7 +3205,7 @@ Table of Contents
    no strong cryptographic link between the sending device and the event
    which gets emitted.
 
-18.  IANA Considerations
+17.  IANA Considerations
 
    The m.* namespace likely needs formal registration in some capacity.
 
@@ -3209,9 +3219,9 @@ Table of Contents
    The .well-known/matrix namespace is already registered for use by The
    Matrix.org Foundation C.I.C.
 
-19.  References
+18.  References
 
-19.1.  Normative References
+18.1.  Normative References
 
    [I-D.ietf-mls-architecture]
               Beurdouche, B., Rescorla, E., Omara, E., Inguva, S., and
@@ -3328,7 +3338,7 @@ Table of Contents
               DOI 10.17487/RFC9113, June 2022,
               <https://www.rfc-editor.org/rfc/rfc9113>.
 
-19.2.  Informative References
+18.2.  Informative References
 
    [DMLS]     Chathi, H., "Decentralised MLS", 29 May 2023,
               <https://gitlab.matrix.org/matrix-org/mls-ts/-
