@@ -355,16 +355,13 @@ and participants can choose their favourite, creating small clusters of LM serve
 
   `:txnId` can easily be an event ID.
 
-  The request body will contain an LPDU instead of a PDU when coming from LM. The response body only consists
-  of `state`, `auth_chain`, and `event`, though including other fields is okay too.
-
-  Faster joins is not currently possible in LM, but will be in future. `omit_members` continues to default
-  to false.
+  The request body will contain an LPDU instead of a PDU when coming from LM. The response body instead
+  contains `stripped_state`, retaining the same meaning as `knock_room_state`.
 
   **Note**: This is implemented as `POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send_knock/:txnId`
   as an unstable prefix.
 
-  **Note for future MSC**: This skips `v2`, and should be combined with the send_invite endpoint. make_knock
+  **Note for future MSC**: This skips `v2`, and should be combined with the invite endpoint. make_knock
   should be part of a single make_membership endpoint.
 
 Some APIs are not implemented at all in LM:

@@ -2532,10 +2532,6 @@ code is returned alongside `M_INCOMPATIBLE_ROOM_VERSION` error code ({{int-trans
 
 Sends a knock membership event to the room through a hub server.
 
-Note that this endpoint is similar to `/send_invite` ({{int-api-send-invite}}).
-
-**TODO**: We should just combine this with send_invite, and make send_invite return stripped state.
-
 **Implementation note**: Currently this endpoint doesn't actually exist. Use
 `POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/send_knock/:txnId`
 when testing against other Linearized Matrix implementations. This string may be updated later to
