@@ -1579,7 +1579,8 @@ dns-char    = DIGIT / ALPHA / "-" / "."
 </div>
 <p id="section-3.1-6">Server names <span class="bcp14">MUST</span> be treated as case sensitive (<code>eXaMpLe.OrG</code>, <code>example.org</code>, and <code>EXAMPLE.ORG</code>
 are 3 different servers). Server names <span class="bcp14">SHOULD</span> be lower case (<code>example.org</code>) and <span class="bcp14">SHOULD NOT</span> exceed
-230 characters for ease of use.<a href="#section-3.1-6" class="pilcrow">¶</a></p>
+230 characters for ease of use. The 230 characters specifically gives room for a suitably long
+localpart while being within the 255 allowable characters from <span><a href="https://rfc-editor.org/rfc/rfc1123#section-2.1" class="relref">Section 2.1</a> of [<a href="#RFC1123" class="cite xref">RFC1123</a>]</span>.<a href="#section-3.1-6" class="pilcrow">¶</a></p>
 <p id="section-3.1-7">Examples:<a href="#section-3.1-7" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-3.1-8.1">
@@ -3472,6 +3473,14 @@ applicable room.<a href="#section-13.5-2" class="pilcrow">¶</a></p>
 <p id="section-13.5-5"><code>PUT /send/:txnId</code> is shorthand for <a href="#int-api-send-txn" class="auto internal xref">Section 13.5.1</a>.<a href="#section-13.5-5" class="pilcrow">¶</a></p>
 <p id="section-13.5-6">Hubs which generate events would skip to the point where they create a fully-formed PDU and send it
 out to all other participants.<a href="#section-13.5-6" class="pilcrow">¶</a></p>
+<p id="section-13.5-7">When a hub is broadcasting events to participant servers, it <span class="bcp14">MUST</span> include the following targets:<a href="#section-13.5-7" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-13.5-8.1">The server implied by the <code>sender</code> for a kick or ban <code>m.room.member</code> (<a href="#int-ev-member" class="auto internal xref">Section 3.5.3.3</a>) event, up
+to the point of that kick or ban.<a href="#section-13.5-8.1" class="pilcrow">¶</a>
+</li>
+          <li class="normal" id="section-13.5-8.2">All servers which have at least 1 user which is joined to the room.<a href="#section-13.5-8.2" class="pilcrow">¶</a>
+</li>
+        </ul>
 <div id="int-api-send-txn">
 <section id="section-13.5.1">
           <h4 id="name-put-_matrix-federation-v2-s">
@@ -3506,10 +3515,10 @@ account for breaking changes.<a href="#section-13.5.1-2" class="pilcrow">¶</a><
 </div>
 <p id="section-13.5.1-11"><strong>TODO</strong>: Describe EDUs.<a href="#section-13.5.1-11" class="pilcrow">¶</a></p>
 <p id="section-13.5.1-12"><code>edus</code> are the Ephemeral Data Units to send. If no EDUs are being sent, this field <span class="bcp14">MAY</span> be excluded
-from the request body.<a href="#section-13.5.1-12" class="pilcrow">¶</a></p>
+from the request body. There <span class="bcp14">MUST NOT</span> be more than 100 entries in <code>edus</code>.<a href="#section-13.5.1-12" class="pilcrow">¶</a></p>
 <p id="section-13.5.1-13"><code>pdus</code> are the events/PDUs (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) and LPDUs (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>) to send to the server. Whether
 it's an LPDU or PDU depends on the sending server's role in that room: if they are a non-hub server,
-it will be an LPDU.<a href="#section-13.5.1-13" class="pilcrow">¶</a></p>
+it will be an LPDU. There <span class="bcp14">MUST NOT</span> be more than 50 entries in <code>pdus</code>.<a href="#section-13.5.1-13" class="pilcrow">¶</a></p>
 <p id="section-13.5.1-14">Each event in the <code>pdus</code> array gets processed as such:<a href="#section-13.5.1-14" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-13.5.1-15">
 <li id="section-13.5.1-15.1">

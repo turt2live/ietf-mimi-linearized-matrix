@@ -265,7 +265,9 @@ Table of Contents
    Server names MUST be treated as case sensitive (eXaMpLe.OrG,
    example.org, and EXAMPLE.ORG are 3 different servers).  Server names
    SHOULD be lower case (example.org) and SHOULD NOT exceed 230
-   characters for ease of use.
+   characters for ease of use.  The 230 characters specifically gives
+   room for a suitably long localpart while being within the 255
+   allowable characters from Section 2.1 of [RFC1123].
 
    Examples:
 
@@ -2091,6 +2093,15 @@ Table of Contents
    Hubs which generate events would skip to the point where they create
    a fully-formed PDU and send it out to all other participants.
 
+   When a hub is broadcasting events to participant servers, it MUST
+   include the following targets:
+
+   *  The server implied by the sender for a kick or ban m.room.member
+      (Section 3.5.3.3) event, up to the point of that kick or ban.
+
+   *  All servers which have at least 1 user which is joined to the
+      room.
+
 13.5.1.  PUT /_matrix/federation/v2/send/:txnId
 
    Sends (L)PDUs (Section 3.5, Section 3.5.1) to another server.  The
@@ -2127,12 +2138,13 @@ Table of Contents
    *TODO*: Describe EDUs.
 
    edus are the Ephemeral Data Units to send.  If no EDUs are being
-   sent, this field MAY be excluded from the request body.
+   sent, this field MAY be excluded from the request body.  There MUST
+   NOT be more than 100 entries in edus.
 
    pdus are the events/PDUs (Section 3.5) and LPDUs (Section 3.5.1) to
    send to the server.  Whether it's an LPDU or PDU depends on the
    sending server's role in that room: if they are a non-hub server, it
-   will be an LPDU.
+   will be an LPDU.  There MUST NOT be more than 50 entries in pdus.
 
    Each event in the pdus array gets processed as such:
 
