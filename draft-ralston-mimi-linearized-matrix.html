@@ -4554,30 +4554,29 @@ contained event may be a good option as a readily-available transaction ID.<a hr
 </li>
             </ul>
 <p id="section-13.7.4.2-8">Query parameters: None applicable.<a href="#section-13.7.4.2-8" class="pilcrow">¶</a></p>
-<p id="section-13.7.4.2-9"><strong>TODO</strong>: Incorporate faster joins work.<a href="#section-13.7.4.2-9" class="pilcrow">¶</a></p>
-<p id="section-13.7.4.2-10">Request body:<a href="#section-13.7.4.2-10" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-13.7.4.2-11">
+<p id="section-13.7.4.2-9">Request body:<a href="#section-13.7.4.2-9" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.7.4.2-10">
 <pre>
 {
    /* LPDU created from make_knock template */
 }
-</pre><a href="#section-13.7.4.2-11" class="pilcrow">¶</a>
+</pre><a href="#section-13.7.4.2-10" class="pilcrow">¶</a>
 </div>
-<p id="section-13.7.4.2-12"><code>200 OK</code> response:<a href="#section-13.7.4.2-12" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-13.7.4.2-13">
+<p id="section-13.7.4.2-11"><code>200 OK</code> response:<a href="#section-13.7.4.2-11" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-13.7.4.2-12">
 <pre>
 {
    "stripped_state": [
       /* stripped state events */
    ]
 }
-</pre><a href="#section-13.7.4.2-13" class="pilcrow">¶</a>
+</pre><a href="#section-13.7.4.2-12" class="pilcrow">¶</a>
 </div>
-<p id="section-13.7.4.2-14"><code>stripped_state</code> are the stripped state events (<a href="#int-stripped-state" class="auto internal xref">Section 3.5.2.1</a>) for the room.<a href="#section-13.7.4.2-14" class="pilcrow">¶</a></p>
-<p id="section-13.7.4.2-15">The errors responses from <code>/make_knock</code> (<a href="#int-api-make-knock" class="auto internal xref">Section 13.7.4.1</a>) are copied here (with the exception
+<p id="section-13.7.4.2-13"><code>stripped_state</code> are the stripped state events (<a href="#int-stripped-state" class="auto internal xref">Section 3.5.2.1</a>) for the room.<a href="#section-13.7.4.2-13" class="pilcrow">¶</a></p>
+<p id="section-13.7.4.2-14">The errors responses from <code>/make_knock</code> (<a href="#int-api-make-knock" class="auto internal xref">Section 13.7.4.1</a>) are copied here (with the exception
 of <code>M_INCOMPATIBLE_ROOM_VERSION</code>, as the server already checked for support). Servers should note
 that room state <span class="bcp14">MAY</span> change between a <code>/make_knock</code> and <code>/send_knock</code>, potentially in a way which
-prevents the user from knocking upon the room suddenly.<a href="#section-13.7.4.2-15" class="pilcrow">¶</a></p>
+prevents the user from knocking upon the room suddenly.<a href="#section-13.7.4.2-14" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
