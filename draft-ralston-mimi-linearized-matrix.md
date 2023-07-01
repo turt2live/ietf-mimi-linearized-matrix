@@ -332,7 +332,7 @@ to user IDs.
 
 User IDs are sometimes informally referenced as "MXIDs", short for "Matrix User IDs".
 
-## Devices
+## Devices {#int-device-id}
 
 Each user can have zero or more devices/active clients. These devices are intended to be members
 of the MLS group and thus have their own key package material associated with them.
@@ -687,17 +687,128 @@ The hub server MUST enforce the room version's algorithms upon the room. Partici
 SHOULD enforce the room version's algorithm, but can opt to believe the hub server if they
 wish.
 
-# MLS Considerations
+# MLS Considerations {#int-mls-considerations}
 
-MIMI has a chartered requirement to use Messaging Layer Security (MLS) {{!I-D.ietf-mls-protocol}}
-{{!I-D.ietf-mls-architecture}} for encryption, and MLS requires that all group members (devices)
-know of all other devices.
+The MIMI working group is chartered to use Messaging Layer Security (MLS) {{!I-D.ietf-mls-protocol}}
+{{!I-D.ietf-mls-architecture}} for encryption in chats, and this document specifies no different.
+Each room has a single MLS Group associated with it, both identified by the room ID ({{int-room-id}}).
 
-Each room has a single MLS Group associated with it, starting with the `m.room.create` event.
+Rooms additionally track membership at a per-user level while MLS tracks group membership at a
+per-device level. With this consideration, commits to the MLS Group MUST use `PublicMessage`, giving
+the hub server an ability to inspect MLS group membership changes for illegal joins and leaves.
 
-**TODO**: Details on how key material is stored/shared within the room.
+Encryption can only be enabled at the time the room is created. This prevents the room having encryption
+disabled or downgraded without an entirely new room being created. The exact ciphersuite and other
+algorithmic details are contained in the `content` for the `m.room.create` event ({{int-ev-create}}):
 
-**TODO**: What does `m.room.encrypted` (user message) look like here?
+~~~ json
+{
+   "encryption": {
+      "algorithm": "m.dmls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
+   }
+}
+~~~
+
+`algorithm` denotes which specific algorithm clients MUST use for sending and receiving encrypted
+events in the room. If a received event is encrypted using a different algorith, it MUST be treated
+as undecryptable (even if the client has sufficient key information to decrypt it).
+
+`m.dmls.v1.` as a prefix describes the behaviour for encrypted clients, with the remainder of the
+algorithm string covering the exact ciphersuite. This document uses the same mandatory ciphersuite
+as MLS: `MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519`. Thus, this is encoded as
+`m.dmls.v1.dhkemx25519-aes128gcm-sha256-ed25519`.
+
+Custom or non-standard encryption algorithms are possible with this approach, however out of scope
+for MIMI. If such an algorithm is used, it SHOULD be prefixed using reverse domain name notation.
+For example, `org.example.my-encryption`.
+
+## Device Credentials
+
+Under Section 5.3 of {{!I-D.ietf-mls-protocol}}, each MLS group member (a device, {{int-device-id}})
+has a "credential" or signing key associated with it. These are published to each client's local server
+and available over federation ({{int-transport-mls}}).
+
+This document relies upon out-of-band verification and therefore uses basic credentials. The format
+for the credential is:
+
+~~~
+struct {
+    opaque identity<V>;
+    SignatureScheme signature_scheme;
+    opaque signature_key<V>;
+} BasicCredential;
+~~~
+
+**TODO**: Verify `BasicCredential` format.
+
+The device then constructs the following object, signs it using each of the listed `keys`, and publishes
+it through its local server ({{int-transport-devices}}):
+
+~~~ json
+{
+   "device_id": "ABCDEF",
+   "user_id": "@alice:example.org",
+   "algorithms": [
+      "m.dmls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
+   ],
+   "keys": {
+      "m.dmls.v1.credential.ed25519:ABCDEF": "<unpadded base64 BasicCredential>"
+   },
+   "signatures": {
+      "@alice:example.org": {
+         "m.dmls.v1.credential.ed25519:ABCDEF": "<unpadded base64 signature>"
+      }
+   }
+}
+~~~
+
+`device_id` is the client's device ID ({{int-device-id}}). `user_id` is the user ID ({{int-user-id}})
+to which the device ID belongs. `algorithms` are the encryption algorithms the device supports, and
+SHOULD contain at least `m.dmls.v1.dhkemx25519-aes128gcm-sha256-ed25519`.
+
+When a device supports `m.dmls.v1.dhkemx25519-aes128gcm-sha256-ed25519`, it MUST specify its basic
+credential with the `m.dmls.v1.credential.ed25519` key algorithm.
+
+`keys` is an object containing each algorithm-specific key (or keys) for the device. The fields for
+the object form a key ID, with the device ID representing the "key version", as per {{int-signing}}.
+
+All top-level fields in the object above MUST be supplied.
+
+For each of the device's `keys`, a valid signature MUST be produced. If there is a missing signature
+from any of the keys, or from the `user_id`, the device information is considered invalid. Invalid
+devices MUST NOT be members of the MLS group, and are removed if already members prior to the device
+information becoming invalid.
+
+## Group Creation
+
+After the `m.room.create` event and other initial state events for the room are sent, the room creator
+MUST establish the appropriate MLS group. This is sent as an `m.mls.commit` event ({{int-ev-mls-commit}}).
+Afterwards, the remaining devices are added as normal ({{int-mls-add-remove}}).
+
+Ideally, the `m.room.create` event would also contain the initial public group state, however doing
+so would mean either tracking an independent MLS group ID or allowing the client to specify the room
+ID. While servers MAY allow the client to specify the room ID, servers usually have better context
+for which localparts (see {{int-room-id}}) are already claimed by other rooms. Having independent
+group IDs and room IDs can lead to confusion and a similar sort of namespacing issue (a room creator
+can create a conflicting group ID). Instead, the server (usually) creates the room on behalf of the
+client, allowing the client to then send the initial public group state to the room for other MLS
+members.
+
+## Updating Group State {#int-mls-add-remove}
+
+**TODO**: This section
+
+## Room Event Types
+
+**TODO**: This section
+
+### `m.mls.commit` {#int-ev-mls-commit}
+
+**TODO**: Event schema. It's a PublicMessage commit.
+
+### `m.room.encrypted` {#int-ev-encrypted}
+
+**TODO**: Event schema. (non-commit)
 
 # Event Signing & Authorization
 
@@ -2590,6 +2701,14 @@ for referencing within an encrypted message.
 **TODO**: Complete this section. We want auth/event linking from MSC3911 and MSC3916.
 
 **TODO**: Spell out that content is images, videos, files, etc.
+
+## MLS {#int-transport-mls}
+
+**TODO**: This section. Talk about to-device messaging, device management/querying/key claiming, etc.
+
+### TODO: Device Info Publishing {#int-transport-devices}
+
+**TODO**: This section.
 
 ## TODO: Remainder of Transport
 
