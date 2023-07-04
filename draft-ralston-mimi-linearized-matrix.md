@@ -846,6 +846,9 @@ a reverse lookup of epoch to event ID to MLS group state. Note that a client *al
 **TODO**: We may need to store the group state in the media repo if it gets to be too big, or otherwise
 allow oversized events.
 
+**TODO**: The server also likely needs to prevent devices being added to the group which don't support
+the ciphersuite/algorithm.
+
 ## Key Packages {#int-mls-key-packages}
 
 Clients "claim" another device's key package through their server ({{int-transport-key-claim}}). Clients
