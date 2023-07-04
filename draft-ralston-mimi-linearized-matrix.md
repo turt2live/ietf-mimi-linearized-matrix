@@ -59,7 +59,7 @@ informative:
        - fullname: Travis Ralston
          organization: The Matrix.org Foundation C.I.C.
          email: travisr@matrix.org
-  DMLS: # TODO: Actually link to this somewhere in the doc.
+  DMLS:
     target: https://gitlab.matrix.org/matrix-org/mls-ts/-/blob/48efb972075233c3a0f3e3ca01c4d4f888342205/decentralised.org
     title: "Decentralised MLS"
     date: 2023-05-29
@@ -77,7 +77,7 @@ This document specifies Linearized Matrix for use in messaging interoperability.
 
 --- middle
 
-# Introduction
+# Introduction {#int-intro}
 
 Alongside messaging, Matrix operates as an openly federated communications protocol for
 VoIP, IoT, and more. The existing Matrix network uses fully decentralized access control
@@ -656,7 +656,7 @@ To calculate the required power level to send an event:
 
 ##### Calculating Event Visibility {#int-calc-event-visibility}
 
-**TODO**: Describe. (when can a server see an event?)
+**TODO**: Describe. (when can a server see an event?). Mention that `m.mls.commit` is exempt.
 
 #### TODO: Other events
 
@@ -716,11 +716,17 @@ as undecryptable (even if the client has sufficient key information to decrypt i
 `m.mls.v1.` as a prefix describes the behaviour for encrypted clients, with the remainder of the
 algorithm string covering the exact ciphersuite. This document uses the same mandatory ciphersuite
 as MLS: `MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519`. Thus, this is encoded as
-`m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519`.
+`m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519`. Other ciphersuites can be represented similarly,
+though are considered to be entirely new encryption algorithms for the purposes of this document.
 
 Custom or non-standard encryption algorithms are possible with this approach, however out of scope
 for MIMI. If such an algorithm is used, it SHOULD be prefixed using reverse domain name notation.
 For example, `org.example.my-encryption`.
+
+Mentioned in the introduction ({{int-intro}}), this document does not explore the details for what is
+needed to interconnect Linearized Matrix and Matrix's existing room model. However, for interconnection
+to be successful, extensions to MLS are needed to support decentralization. One possible extension
+is "Decentralised MLS" {{DMLS}}.
 
 ## Device Credentials
 
@@ -796,19 +802,100 @@ members.
 
 ## Updating Group State {#int-mls-add-remove}
 
-**TODO**: This section
+This document does not provide a way to send proposals to the MLS group, meaning all commits MUST only
+contain proposals which are sent by the same member (see {{Section 12 of I-D.ietf-mls-protocol}}).
+
+All commits are encoded as `m.mls.commit` events ({{int-ev-mls-commit}}) and are sent to the room.
+These commits are additionally encoded using `PublicMessage`, giving servers visibility on the contents
+of the commits. Upon receiving the event (see {{int-receiving-events}}), the hub server MUST additionally
+validate that any membership changes match what is possible with the room membership:
+
+* Devices can only be added to the group if they belong to a user which is joined to the room. It is
+  not enough to be invited, knocking, etc on the room - the user ID MUST be in the `join` state.
+* A device can remove another device if they both belong to the same user ID.
+* A device can be removed by anyone if the user ID to which it belongs is no longer in the `join` state.
+* A device cannot be removed any other way, as per MLS.
+
+If this validation fails, the hub server MUST reject the request if it's shaped as an LPDU ({{int-lpdu}})
+and soft-fail ({{int-soft-failure}}) the event if it's a PDU ({{int-pdu}}).
+
+Welcome messages are sent to devices over to-device messaging ({{int-transport-to-device}}). The `type`
+for the message is `m.room.encrypted` [**TODO**: Rename to avoid confusion with room event?] and `content`
+of:
+
+~~~ json
+{
+   "algorithm": "m.mls.v1.welcome.[ciphersuite]",
+   "ciphertext": "<unpadded base64 encoded welcome message>",
+   "commit_event_id": "<event ID of the m.mls.commit event>"
+}
+~~~
+
+`algorithm` is the ciphersuite, `dhkemx25519-aes128gcm-sha256-ed25519`, prefixed with `m.mls.v1.welcome`.
+
+The remaining fields are as described in the example. See {{int-unpadded-base64}} for "unpadded base64".
+
+All fields MUST be supplied. Note that the sender's user ID and device ID are made available over the
+to-device messaging endpoints ({{int-transport-to-device}}).
+
+In all cases, a device remembers the event ID (either from the `m.mls.commit` event or `commit_event_id`
+from a to-device message) after decryption to associate it with the MLS epoch. The device can then do
+a reverse lookup of epoch to event ID to MLS group state. Note that a client *always* has access to
+`m.mls.commit` events, even when hidden by history visibility ({{int-calc-event-visibility}}).
+
+**TODO**: We may need to store the group state in the media repo if it gets to be too big, or otherwise
+allow oversized events.
+
+## Key Packages {#int-mls-key-packages}
+
+Clients "claim" another device's key package through their server ({{int-transport-key-claim}}). Clients
+will typically generate several key packages and upload them to their server, making them available even
+if the client goes offline.
+
+The algorithm for a key package is `m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519` and is
+combined with a device-generated key version, forming a key ID described by {{int-signing}}. The key
+version SHOULD be generated based upon the key package itself rather than using an unrelated string,
+such as a hash or the public key of the key package.
 
 ## Room Event Types
 
-**TODO**: This section
+This document describes the following event types for use with MLS-encrypted rooms. The section headers
+are the event `type`. See {{int-pdu}} for more information on events.
+
+These event types are non-state events, also called "room events".
 
 ### `m.mls.commit` {#int-ev-mls-commit}
 
-**TODO**: Event schema. It's a PublicMessage commit.
+Represents an MLS commit, which may be rejected by the hub server.
+
+`content` for the event MUST contain at least the following example:
+
+~~~ json
+{
+   "auth": "<unpadded base64 encoded FramedMessageAuth>",
+   "message": "<unpadded base64 encoded FramedMessage>"
+}
+~~~
+
+**TODO**: Verify shape of `content`.
 
 ### `m.room.encrypted` {#int-ev-encrypted}
 
-**TODO**: Event schema. (non-commit)
+Represents an encrypted MLS application message. The sender first encrypts the message per the content
+format then MUST send an event with `content` matching:
+
+~~~ json
+{
+   "algorithm": "m.mls.v1.[ciphersuite]",
+   "ciphertext": "<unpadded base64 encoded MLS ciphertext>",
+   "commit_event_id": "<event ID of applicable m.mls.commit event>"
+}
+~~~
+
+Within this document, `algorithm` will be `m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519`. The other
+fields are as described in the example.
+
+Clients SHOULD treat `m.room.encrypted` events which are improperly structured as undecryptable events.
 
 # Event Signing & Authorization
 
@@ -874,6 +961,8 @@ also complete the checks to validate the hub's behaviour.
 7. Ensures the event passes the authorization rules ({{int-auth-rules}}) for the current
    state of the room (which may very well be the same as the step above). If it fails, it
    is soft-failed ({{int-soft-failure}}).
+
+8. The constraints described by {{int-mls-add-remove}} validated, if the room is encrypted.
 
 ## Rejection {#int-rejection}
 
@@ -2709,6 +2798,14 @@ for referencing within an encrypted message.
 ### TODO: Device Info Publishing {#int-transport-devices}
 
 **TODO**: This section.
+
+### TODO: To-Device Messaging {#int-transport-to-device}
+
+**TODO**: This section.
+
+### TODO: One Time Key Claiming {#int-transport-key-claim}
+
+**TODO**: This section. Don't serve expired keys. Use last resort key in an emergency.
 
 ## TODO: Remainder of Transport
 
