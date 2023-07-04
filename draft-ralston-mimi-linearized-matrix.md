@@ -704,7 +704,7 @@ algorithmic details are contained in the `content` for the `m.room.create` event
 ~~~ json
 {
    "encryption": {
-      "algorithm": "m.dmls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
+      "algorithm": "m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
    }
 }
 ~~~
@@ -713,10 +713,10 @@ algorithmic details are contained in the `content` for the `m.room.create` event
 events in the room. If a received event is encrypted using a different algorith, it MUST be treated
 as undecryptable (even if the client has sufficient key information to decrypt it).
 
-`m.dmls.v1.` as a prefix describes the behaviour for encrypted clients, with the remainder of the
+`m.mls.v1.` as a prefix describes the behaviour for encrypted clients, with the remainder of the
 algorithm string covering the exact ciphersuite. This document uses the same mandatory ciphersuite
 as MLS: `MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519`. Thus, this is encoded as
-`m.dmls.v1.dhkemx25519-aes128gcm-sha256-ed25519`.
+`m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519`.
 
 Custom or non-standard encryption algorithms are possible with this approach, however out of scope
 for MIMI. If such an algorithm is used, it SHOULD be prefixed using reverse domain name notation.
@@ -749,14 +749,14 @@ it through its local server ({{int-transport-devices}}):
    "device_id": "ABCDEF",
    "user_id": "@alice:example.org",
    "algorithms": [
-      "m.dmls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
+      "m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
    ],
    "keys": {
-      "m.dmls.v1.credential.ed25519:ABCDEF": "<unpadded base64 BasicCredential>"
+      "m.mls.v1.credential.ed25519:ABCDEF": "<unpadded base64 BasicCredential>"
    },
    "signatures": {
       "@alice:example.org": {
-         "m.dmls.v1.credential.ed25519:ABCDEF": "<unpadded base64 signature>"
+         "m.mls.v1.credential.ed25519:ABCDEF": "<unpadded base64 signature>"
       }
    }
 }
@@ -764,10 +764,10 @@ it through its local server ({{int-transport-devices}}):
 
 `device_id` is the client's device ID ({{int-device-id}}). `user_id` is the user ID ({{int-user-id}})
 to which the device ID belongs. `algorithms` are the encryption algorithms the device supports, and
-SHOULD contain at least `m.dmls.v1.dhkemx25519-aes128gcm-sha256-ed25519`.
+SHOULD contain at least `m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519`.
 
-When a device supports `m.dmls.v1.dhkemx25519-aes128gcm-sha256-ed25519`, it MUST specify its basic
-credential with the `m.dmls.v1.credential.ed25519` key algorithm.
+When a device supports `m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519`, it MUST specify its basic
+credential with the `m.mls.v1.credential.ed25519` key algorithm.
 
 `keys` is an object containing each algorithm-specific key (or keys) for the device. The fields for
 the object form a key ID, with the device ID representing the "key version", as per {{int-signing}}.
