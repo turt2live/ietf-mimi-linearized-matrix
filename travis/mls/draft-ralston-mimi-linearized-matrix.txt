@@ -1085,6 +1085,9 @@ Table of Contents
    *TODO*: We may need to store the group state in the media repo if it
    gets to be too big, or otherwise allow oversized events.
 
+   *TODO*: The server also likely needs to prevent devices being added
+   to the group which don't support the ciphersuite/algorithm.
+
 5.4.  Key Packages
 
    Clients "claim" another device's key package through their server
