@@ -925,12 +925,20 @@ Represents an MLS commit, which may be rejected by the hub server.
 
 ~~~ json
 {
-   "auth": "<unpadded base64 encoded FramedMessageAuth>",
-   "message": "<unpadded base64 encoded FramedMessage>"
+   "message": "<unpadded base64 encoded PublicMessage>",
+   "public_group_state": "<unpadded base64 encoded public group state>"
 }
 ~~~
 
-**TODO**: Verify shape of `content`.
+As mentioned, `message` is a `PublicMessage` from MLS. `public_group_state` is to enable external
+joins.
+
+An optional field, `prev_commit_event_id`, SHOULD be specified when a parent commit exists. This is
+to enable clients to find the commit they have keys for upon joining the room, as the most recent one
+may not be decryptable to them. The client can then work forwards from where they can decrypt the
+message.
+
+**TODO**: Should we use the `RatchetTree` extension? It might make the group state massive...
 
 ### `m.room.encrypted` {#int-ev-encrypted}
 
