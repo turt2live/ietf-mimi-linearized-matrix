@@ -783,13 +783,14 @@ for the credential is:
 
 ~~~
 struct {
-    opaque identity<V>;
-    SignatureScheme signature_scheme;
+    opaque user_id<V>;
+    opaque device_id<V>;
     opaque signature_key<V>;
 } BasicCredential;
 ~~~
 
-**TODO**: Verify `BasicCredential` format.
+`user_id` is as described by {{int-user-id}}, and `device_id` is as described by {{int-device-id}}.
+`signature_key` is from MLS.
 
 The device then constructs the following object, signs it using each of the listed `keys`, and publishes
 it through its local server ({{int-transport-devices}}):
