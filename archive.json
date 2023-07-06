@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-07-02T00:17:49.155529+00:00",
+  "timestamp": "2023-07-06T00:17:07.070493+00:00",
   "repo": "turt2live/ietf-mimi-linearized-matrix",
   "labels": [
     {
@@ -177,21 +177,218 @@
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
-      "body": "",
+      "body": "[Rendered: HTML](https://turt2live.github.io/ietf-mimi-linearized-matrix/travis/mls/draft-ralston-mimi-linearized-matrix.html)\r\n[Rendered: text](https://turt2live.github.io/ietf-mimi-linearized-matrix/travis/mls/draft-ralston-mimi-linearized-matrix.txt)",
       "createdAt": "2023-07-01T03:14:42Z",
-      "updatedAt": "2023-07-01T03:14:42Z",
+      "updatedAt": "2023-07-06T00:08:42Z",
       "baseRepository": "turt2live/ietf-mimi-linearized-matrix",
       "baseRefName": "main",
       "baseRefOid": "b0bfecf5133b4e0e549e12a06615ccb55e692027",
       "headRepository": "turt2live/ietf-mimi-linearized-matrix",
       "headRefName": "travis/mls",
-      "headRefOid": "8a0b2f24bed027f99c9a4cac528347dfeab5b74a",
+      "headRefOid": "ed4b1077a71f7ee8355cdb7015f28f86b3f9b954",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOJM90Qc5aNZer",
+          "commit": {
+            "abbreviatedOid": "84680ff"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-04T22:44:52Z",
+          "updatedAt": "2023-07-04T22:48:06Z",
+          "comments": [
+            {
+              "originalPosition": 237,
+              "body": "Reviewer: please verify",
+              "createdAt": "2023-07-04T22:44:52Z",
+              "updatedAt": "2023-07-04T22:48:06Z"
+            },
+            {
+              "originalPosition": 105,
+              "body": "Reviewer: please verify",
+              "createdAt": "2023-07-04T22:45:08Z",
+              "updatedAt": "2023-07-04T22:48:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aUrO_",
+          "commit": {
+            "abbreviatedOid": "ed4b107"
+          },
+          "author": "uhoreg",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-05T21:05:26Z",
+          "updatedAt": "2023-07-05T21:31:17Z",
+          "comments": [
+            {
+              "originalPosition": 105,
+              "body": "My thinking was that the BasicCredential would contain separate user ID and device ID fields.  Though I don't know if there's a better way to it.",
+              "createdAt": "2023-07-05T21:05:26Z",
+              "updatedAt": "2023-07-05T21:31:17Z"
+            },
+            {
+              "originalPosition": 170,
+              "body": "shouldn't invited users be added in rooms that allow them access to room history?  Or is that not a thing in LM?",
+              "createdAt": "2023-07-05T21:09:02Z",
+              "updatedAt": "2023-07-05T21:31:17Z"
+            },
+            {
+              "originalPosition": 172,
+              "body": "This can be an issue if a user logs out of their device -- others need to be able to remove that device from the tree.  The device can't remove itself, and the user may not have another device to do the removal.",
+              "createdAt": "2023-07-05T21:14:53Z",
+              "updatedAt": "2023-07-05T21:31:17Z"
+            },
+            {
+              "originalPosition": 201,
+              "body": "Is this for supporting external joins?  I don't think it's needed for anything else.",
+              "createdAt": "2023-07-05T21:17:29Z",
+              "updatedAt": "2023-07-05T21:31:17Z"
+            },
+            {
+              "originalPosition": 237,
+              "body": "I'm not sure what `FramedMessageAuth` and `FramedMessage` are, but I'm guessing they're parts of the MLS message?  We should probably just use the whole serialized MLS `PublicMessage` as a single chunk.\r\n\r\nWe also need a `commit_event_id` property, pointing to the event ID where the parent epoch was created.  This is to allow for backfilling.  i.e. the client gets a `limited` sync, and so can't decrypt the latest messages because it hasn't created those epochs yet.  So it looks up the `commit_event_id` to get the commit, and does so recursively until it gets to a commit that it can process. (or realizes that it wasn't in the group at the time, and so can't decrypt)",
+              "createdAt": "2023-07-05T21:28:54Z",
+              "updatedAt": "2023-07-05T21:31:17Z"
+            },
+            {
+              "originalPosition": 237,
+              "body": "Also we need a property for the public group state, if we need to support external joins.",
+              "createdAt": "2023-07-05T21:30:37Z",
+              "updatedAt": "2023-07-05T21:31:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aU24V",
+          "commit": {
+            "abbreviatedOid": "ed4b107"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-05T21:41:55Z",
+          "updatedAt": "2023-07-05T21:41:56Z",
+          "comments": [
+            {
+              "originalPosition": 105,
+              "body": "I borrowed this from a much earlier draft of the MLS protocol, so not sure it makes much sense either. I imagine `identity` is the only bit which needs to be split apart?",
+              "createdAt": "2023-07-05T21:41:55Z",
+              "updatedAt": "2023-07-05T21:41:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aU2-1",
+          "commit": {
+            "abbreviatedOid": "ed4b107"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-05T21:42:18Z",
+          "updatedAt": "2023-07-05T21:42:18Z",
+          "comments": [
+            {
+              "originalPosition": 170,
+              "body": "bleh, it is. Will have to figure out how that works exactly.",
+              "createdAt": "2023-07-05T21:42:18Z",
+              "updatedAt": "2023-07-05T21:42:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aU3KA",
+          "commit": {
+            "abbreviatedOid": "ed4b107"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-05T21:43:05Z",
+          "updatedAt": "2023-07-05T21:43:05Z",
+          "comments": [
+            {
+              "originalPosition": 172,
+              "body": "yup - this is the reason for the condition below. The lack of \"only\" might be a bit too subtle, I suppose.",
+              "createdAt": "2023-07-05T21:43:05Z",
+              "updatedAt": "2023-07-05T21:43:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aU3dp",
+          "commit": {
+            "abbreviatedOid": "ed4b107"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-05T21:44:12Z",
+          "updatedAt": "2023-07-05T21:44:13Z",
+          "comments": [
+            {
+              "originalPosition": 201,
+              "body": "This is largely based on my understanding for what's needed to ensure that the membership rules above are honoured, though maybe that's something the clients can figure out on their own?",
+              "createdAt": "2023-07-05T21:44:12Z",
+              "updatedAt": "2023-07-05T21:44:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aU4qZ",
+          "commit": {
+            "abbreviatedOid": "ed4b107"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-05T21:47:45Z",
+          "updatedAt": "2023-07-05T21:47:46Z",
+          "comments": [
+            {
+              "originalPosition": 237,
+              "body": "`FramedMessage*` comes from the MLS protocol spec, which makes up a `PublicMessage`. I'm sure there was a reason why I broke it down, but equally we don't seem to need to, so meh. \r\n\r\nIs the public room state not part of the `PublicMessage` parts? If we need it as an additional field, can add it.\r\n\r\nI might call the commit ID field `prev_commit_event_id` though to denote it's pointing at a predecessor. We might also need to shorten some of these names eventually.",
+              "createdAt": "2023-07-05T21:47:45Z",
+              "updatedAt": "2023-07-05T21:47:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aVT0q",
+          "commit": {
+            "abbreviatedOid": "84680ff"
+          },
+          "author": "uhoreg",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-06T00:08:42Z",
+          "updatedAt": "2023-07-06T00:08:42Z",
+          "comments": [
+            {
+              "originalPosition": 237,
+              "body": "I'm seeing `FramedContent` and `FramedContentAuthData` at https://github.com/mlswg/mls-protocol/blob/main/draft-ietf-mls-protocol.md#encoding-and-decoding-a-public-message and https://messaginglayersecurity.rocks/mls-protocol/draft-ietf-mls-protocol.html#name-encoding-and-decoding-a-pub\r\n\r\nPart of the public room state is in the `PublicMessage` part.  The `RatchetTree` may be included, if the group uses the `RatchetTree` extension.  We may or may not want to use the `RatchetTree` extension.  One downside with it is that's the part of the public group state that can get really big, and could necessitate storing in the media repo.",
+              "createdAt": "2023-07-06T00:08:42Z",
+              "updatedAt": "2023-07-06T00:08:42Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
