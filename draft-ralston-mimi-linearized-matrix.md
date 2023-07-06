@@ -77,7 +77,7 @@ This document specifies Linearized Matrix for use in messaging interoperability.
 
 --- middle
 
-# Introduction
+# Introduction {#int-intro}
 
 Alongside messaging, Matrix operates as an openly federated communications protocol for
 VoIP, IoT, and more. The existing Matrix network uses fully decentralized access control
@@ -92,6 +92,11 @@ Matrix with the existing Matrix room model - interested readers may wish to revi
 At a high level, a central server is designated as the "hub" server, responsible for
 ensuring events in a given room are provided to all other participants equally. Servers
 communicate with each other over HTTPS and JSON, using the specified API endpoints.
+
+**TODO**: Improve introduction. The draft should be covered in better detail, and describe
+why it's designed the way it is. Clarify the interconnection component more deliberately.
+
+**TODO**: Update the abstract too.
 
 # Conventions and Definitions
 
@@ -125,7 +130,7 @@ For a given conversation/room:
 |                  +----------( events )------->|                  |
 | Provider/Server  |                            | Provider/Server  |
 |        A         |<---------( events )--------+        B         |
-+-----+------------+     Server-Server API      +------------------+
++-----+------------+   Server-Server Protocol   +------------------+
       |     ^
       |     |                      +------------------+
       |     +----( events )--------+                  |
@@ -140,9 +145,13 @@ For a given conversation/room:
                                       '------------'
 ~~~
 
-In this diagram, Server A is acting as a hub for the other two servers. Servers B and C do
+In this diagram, events are objects which carry information about the room as well as messages
+between users within that room. See {{int-pdu}} for schema and further definition.
+
+Server A is acting as a hub for the other two servers in the diagram. Servers B and C do
 not converse directly when sending events to the room: those events are instead sent to the
-hub which then distributes them back out to all participating servers.
+hub which then distributes them back out to all participating servers. Servers communicate
+with each other using the API surface described by {{int-transport}}.
 
 Clients are shown in the diagram here for demonstrative purposes only. No Client-Server API
 or other requirements of clients are specified in this document.
@@ -152,8 +161,8 @@ This leads to two distinct roles:
 * **Hub server**: the server responsible for holding conversation history on behalf of
   other servers in the room.
 
-* **Participant server**: any non-hub server. This server is not required to persist
-  conversation history as it can fetch it from the hub if needed.
+* **Participant server**: any non-hub server. This server MAY persist conversation history
+  or rely on the hub server instead.
 
 **OPEN QUESTION**: Should we support having multiple hubs for increased trust between
 participant and hub? (participant can pick the hub it wants to use rather than being
@@ -161,8 +170,9 @@ forced to use a single hub)
 
 ## Server Names {#int-server-names}
 
-Each server has a "domain name" or "server name" to uniquely identify it. This server name is
-then used to namespace user IDs, room IDs/aliases, etc.
+Each messaging provider is referred to as a "server" and has a "domain name" or "server name"
+to uniquely identify it. This server name is then used to namespace user IDs, room IDs/aliases,
+etc.
 
 A server name MUST be compliant with {{Section 2.1 of RFC1123}} and, when an IPv6 address,
 encoded per {{Section 2.2 of RFC4291}} surrounded by square brackets (`[]`). Improper server
@@ -172,6 +182,8 @@ A server SHOULD NOT use a literal IPv4 or IPv6 address as a server name. Doing s
 ability for the server to move to another internet address later, and IP addresses are generally
 difficult to acquire certificates for (required in {{int-transport}}). Additionally, servers
 SHOULD NOT use an explicit port in their server name for similar portability reasons.
+
+**TODO**: We should probably disallow literal IP addresses.
 
 The approximate ABNF {{!RFC5234}} grammar for a server name is:
 
@@ -236,40 +248,63 @@ be parsed, and cannot be assumed to be human-readable.
 
 **TODO**: We should consider naming this something else.
 
-A room version is a set of algorithms which define how the room operates, identified by a single
-string. Room versions are immutable once specified, as otherwise a change in algorithms could
-cause a split-brain between participating servers.
+Each room declares which room version it's using, and each room version (identified by a single
+string) describes the specific algorithms a server needs to follow in order to particpate in rooms
+with that version. Room versions are immutable once specified, as otherwise a change in algorithms
+could cause a split-brain between servers participating in affected rooms.
 
 Room versions prefixed with `I.` MUST only be used within the IETF specification process.
 Room versions consisting solely of `0-9` and `.` MUST only be used by the Matrix protocol.
 
-There is no implicit ordering or hierarchy to room versions. Although there is a recommended
-default room version, some rooms might benefit from features of a different room version.
+This document as a whole describes `I.1` as a room version.
+
+Servers MUST implement support for `I.1` at a minimum. Servers SHOULD use `I.1` when creating
+new rooms.
+
+**Implementation note**: Currently `I.1` is not a real thing. Use
+`org.matrix.i-d.ralston-mimi-linearized-matrix.02` when testing against other Linearized Matrix
+implementations. This string may be updated later to account for breaking changes.
+
+**Implementation note**: `org.matrix.i-d.ralston-mimi-linearized-matrix.00` also exists in the
+wild, defining a set of algorithms which exist in a prior version of this document (00 and 01).
+
+**TODO**: Remove implementation notes.
+
+There is no implicit ordering or hierarchy to room versions. Future room versions, such as an `I.2`,
+can choose to build upon `I.1`'s algorithms or start completely from scratch if they prefer.
 
 A room version has the following algorithms defined:
 
 * Event authorization - Rules which govern when events are accepted, rejected, or soft-failed
-  by a server.
+  by a server. For `I.1`, this is {{int-auth-rules}}.
 * Redaction - Description of which fields to keep on an event during redaction. Redaction is
   used by the signing and hash algorithms, meaning they need to be consistent across implementations.
-* Event format - Which fields are expected to be present on an event, and the schema for each.
+  For `I.1`, this is {{int-redactions}}.
+* Event format - Which fields are expected to be present on an event, and the schema for each. For
+  `I.1`, this is {{int-pdu}}.
 * Canonical JSON - Specific details about how to canonicalize an event as JSON. This is used
-  by the signing algorithm and must be consistent between implementations.
-* Hub selection - Rules around picking the hub server and transferring to a new hub.
+  by the signing algorithm and must be consistent between implementations. For `I.1`, this is
+  {{int-canonical-json}}.
+* Hub selection - Rules around picking the hub server and transferring to a new hub. For `I.1`,
+  this is {{int-hub-selection}}.
 * Identifier grammar - All identifiers (room IDs, user IDs, event IDs, etc) can change grammar
   within a room version. As such, they SHOULD generally be treated as opaque as possible over a
-  transport.
+  transport. For `I.1`, these details are described in {{int-server-name}}, {{int-room-id}},
+  {{int-user-id}}, {{int-device-id}}, and {{int-pdu}}.
 
-A server is capable of supporting multiple room versions at a time. The transport API decouples
-specific details regarding room versions from the wire formats. For example, events are treated
-as JSON blobs in this document's Server-Server API ({{int-transport}}).
-
-Room versions are normally specified using a dedicated document. An example of this can be found
-in the existing Matrix Spec Change process as {{MSC3820}}.
+The transport between servers is decoupled from the algorithms above. For example, events are
+treated as blobs with no specific format over the wire but have strict schema in the context
+of a room or room version. Endpoints MUST be designed with this distinction in mind.
 
 Each room version has a "stable" or "unstable" designation. Stable room versions SHOULD be used
 in production by messaging providers. Unstable room versions might contain bugs or are not yet
 fully specified and SHOULD NOT be used in production by messaging providers.
+
+`I.1` shall be considered "stable".
+
+**Implementation note**: `org.matrix.i-d.ralston-mimi-linearized-matrix.02` is considered "unstable".
+
+**TODO**: Remove implementation notes.
 
 **TODO**: Matrix considers a version as stable once accepted through FCP. When would be the
 process equivalent for the IETF?
@@ -360,19 +395,26 @@ An event has the following minimum fields:
   being carried by events. Event types are case sensitive. This MUST NOT exceed 255 characters.
 
 * `state_key` (string; optional) - A UTF-8 {{!RFC3629}} string to further distinguish an event
-  type from other related events. Only specified on State Events ({{int-state-events}}). Can be
-  empty. This MUST NOT exceed 255 characters.
+  as a state event (see {{int-state-events}}). Can be an empty string. This MUST NOT exceed 255
+  characters.
+
+  Each event type specifies its own state key requirements. For `m.room.member` ({{int-ev-member}}),
+  the state key is the user ID ({{int-user-id}}) for which the membership applies to. For
+  `m.room.join_rules` ({{int-ev-join-rules}}), this is an empty string. For a custom event type
+  this may be an opaque string such as a UUID or randomly generated string.
 
 * `sender` (string; required) - The user ID which is sending this event. This MUST be a valid
   user ID ({{int-user-id}}).
 
-* `origin_server_ts` (integer; required) - The milliseconds since the unix epoch for when this
+* `origin_server_ts` (64-bit integer; required) - The milliseconds since the unix epoch for when this
   event was created.
 
-* `hub_server` (string; technically optional) - The domain name of the hub server which is
-  sending this event to the remainder of the room. All events created within Linearized Matrix
-  MUST have this field set, however events created externally MUST NOT set this field. This
-  MUST be a valid server name ({{int-server-names}}).
+* `hub_server` (string; optional) - When a hub server is converting an LPDU ({{int-lpdu}}) to a
+  formal event, it MUST specify its own server name ({{int-server-name}}) here. The value MUST be
+  a valid server name.
+
+  To support interconnection with non-linearized Matrix, as discussed in {{int-intro}}, events
+  created outside of a hub server MUST NOT populate this field.
 
 * `content` (object; required) - The event content. The specific schema depends on the event
   type. Clients and servers processing an event MUST NOT assume the `content` is safe or
@@ -380,11 +422,14 @@ An event has the following minimum fields:
   comply with a given schema, which may cause unexpected behaviour on the receiving side.
   For example, a field marked as "required" might be missing.
 
-* `hashes` (object; required) - The *content hashes* for the event. The `lpdu` key within this
-  object is an object itself, keyed by hash algorithm with value being the encoded hash. Similarly,
-  outside of `lpdu`, `hashes` is keyed by hash algorithm with value being the encoded hash.
-  Events created within Linearized Matrix MUST specify an LPDU hash, however events created
-  externally MUST NOT set such a hash.
+* `hashes` (object; required) - The content hashes ({{int-content-hashes}}) for the event. There is
+  a special `lpdu` key to contain the LPDU (partial PDU schema; see {{int-lpdu}}) hashes, which is
+  itself keyed by hash algorithm and has the encoded hash as the value. The `hashes` object, outside
+  of `lpdu`, similarly is keyed by hash algorithm with encoded hash values.
+
+  Events which specify a `hub_server` MUST additionally contain an `lpdu` hash. All other events MUST
+  NOT contain `lpdu` hashes. This is to support interconnection with non-linearized Matrix, as discussed
+  in {{int-intro}}.
 
 * `signatures` (object; required) - Keyed first by domain name then by key ID, the signatures for
   the event.
@@ -393,12 +438,9 @@ An event has the following minimum fields:
   send this event in the room. Which specific events are put here are defined by the auth events
   selection algorithm ({{int-auth-selection}}).
 
-* `prev_events` (array of strings; required) - The event IDs which precede the event. Events
-  created within Linearized Matrix MUST only ever have a single event ID here, however events
-  created externally MAY have one or more referenced event IDs.
-
-* `unsigned` (object; optional) - Additional metadata not covered by the signing algorithm. Like
-  `content`, a receiver MUST NOT trust the values to match any particular schema.
+* `prev_events` (array of strings; required) - This field is to support interconnection with
+  non-linearized Matrix, discussed in {{int-intro}}. Events which specify a `hub_server` are expected
+  to have exactly 1 entry in this array, while other events MAY have 1 or more entries.
 
 Note that an event ID is not specified on the schema. Event IDs are calculated to ensure accuracy
 and consistency between servers. To determine the ID for an event, calculate the reference hash
@@ -450,10 +492,7 @@ An example event is:
     }
   },
   "auth_events": ["$first", "$second"],
-  "prev_events": ["$parent"],
-  "unsigned": {
-    "arbitrary": "fields"
-  }
+  "prev_events": ["$parent"]
 }
 ~~~
 
@@ -465,13 +504,14 @@ event.
 
 ### Linearized PDU {#int-lpdu}
 
-The hub server is responsible for ensuring events are linearly added to the room from all participants,
-which means participants cannot set fields such as `prev_events` on their events. Additionally,
-participant servers are not expected to store past conversation history or even "current state" for
-the room, further making participants unable to reliably populate `auth_events` and `prev_events`.
+All events generated by participant servers are routed through the hub, but the participant servers
+themselves are unable to populate fields like `prev_events` because they can't guarantee order and
+those fields contribute to the event ID, signatures, and overall validity. To fix this, participant
+servers send the hub server a "Linearized PDU" or "LPDU" which does not include the fields they cannot
+set while still ensuring integrity of the event contents themselves.
 
-To avoid these problems, the participant server MUST NOT populate the following fields on events
-they are sending to the hub:
+The participant server MUST NOT populate the following fields on events (LPDUs) they are sending to
+the hub:
 
 * `auth_events` - the participant cannot reliably determine what allows it to send the event.
 * `prev_events` - the participant cannot reliably know what event precedes theirs.
@@ -487,22 +527,43 @@ to the room.
 ### State Events {#int-state-events}
 
 State events track metadata for the room, such as name, topic, and members. State is keyed by a
-tuple of `type` and `state_key`, noting that an empty string is a valid state key. State in the
-room with the same key-tuple will be overwritten as "current state".
+tuple of `type` and `state_key`. The state "at" an event is the set of state events which have
+the most recent (in terms of event ordering, not timestamp) state tuple.
 
-State events are otherwise processed like regular events in the room: they're appended to the
-room history and can be referenced by that room history.
+For example, consider the following (simplified) room history:
 
-"Current state" is the state at the time being considered (which is often the implied `HEAD` of
-the room). In Linearized Matrix, a simple approach to calculating current state is to iterate
-over all events in order, overwriting the key-tuple for state events in an adjacent map. That
-map becomes "current state" when the loop is finished.
+~~~ json
+[
+   /* in all events, irrelevant fields are not shown for brevity */
+
+   /* 0 */ {"type": "m.room.create", "state_key": ""},
+   /* 1 */ {"type": "m.room.member", "state_key": "@alice:example.org"},
+   /* 2 */ {"type": "m.room.encrypted"},
+   /* 3 */ {"type": "m.room.member", "state_key": "@bob:example.org"}
+   /* 4 */ {"type": "m.room.member", "state_key": "@alice:example.org"}
+]
+~~~
+
+The state at index 2 consists of Alice's `m.room.member` event ({{int-ev-member}}) and the `m.room.create`
+event ({{int-ev-create}}) from the room. The `m.room.encrypted` event itself is not a state event
+and therefore does not get appended to the state "at" any particular event.
+
+The state at index 4 would have Alice's new `m.room.member` event, Bob's `m.room.member` event, and the
+`m.room.create` event from before. Alice's old membership event is overridden due to having the same
+`type` and `state_key` as the previous event. Note however that the state at index 3 still contains
+the older membership event, as the new event happens later with respect to event ordering.
+
+"Current state" is the state at the most recent event in the room. Calculating the state at a given
+event is needed for the authorization rules ({{int-auth-rules}}) and event visibility ({{int-calc-event-visibility}})
+algorithms. Clients additionally need to know current state to show accurate room names, topics,
+avatars, etc.
 
 #### Stripped State {#int-stripped-state}
 
-Stripped state event are extremely simplified state events to provide context to an invite or knock.
-Servers MUST NOT rely on stripped state events being accurate, only using them if the server doesn't
-have access to the room's real state.
+Stripped state event are extremely simplified state events to provide context to a user for an invite
+({{int-transport-invites}}) or knock ({{int-transport-knocks}}). Servers and clients have no ability
+to verify the events outside of the context for a room, so all such fields are removed. Servers and
+clients MUST NOT rely on the events being accurate because they cannot independently verify them.
 
 When generating stripped state for an invite or knock, the following events SHOULD be included
 if present in the current room state itself:
@@ -664,29 +725,6 @@ To calculate the required power level to send an event:
 
 **TODO**: Drop `m.room.encryption` and pack it into the create event instead?
 
-# Initial Room Version
-
-Room versions are described by {{int-room-versions}}.
-
-As a whole, this document describes the `I.1` room version. Future room versions can build
-upon this version's principles (or entirely replace them) through dedicated documents.
-
-Servers MUST implement support for `I.1`, and SHOULD implement other specified room versions
-as needed. Servers SHOULD use `I.1` when creating new rooms. `I.1` shall be considered "stable".
-
-**Implementation note**: Currently `I.1` is not a real thing. Use
-`org.matrix.i-d.ralston-mimi-linearized-matrix.02` when testing against other Linearized Matrix
-implementations. This string may be updated later to account for breaking changes.
-
-**Implementation note**: `org.matrix.i-d.ralston-mimi-linearized-matrix.00` also exists in the
-wild, defining a set of algorithms which exist in a prior version of this document (00 and 01).
-
-**TODO**: Remove implementation notes.
-
-The hub server MUST enforce the room version's algorithms upon the room. Participant servers
-SHOULD enforce the room version's algorithm, but can opt to believe the hub server if they
-wish.
-
 # MLS Considerations
 
 MIMI has a chartered requirement to use Messaging Layer Security (MLS) {{!I-D.ietf-mls-protocol}}
@@ -699,7 +737,7 @@ Each room has a single MLS Group associated with it, starting with the `m.room.c
 
 **TODO**: What does `m.room.encrypted` (user message) look like here?
 
-# Event Signing & Authorization
+# Processing Events
 
 An event has several authenticity properties:
 
@@ -721,16 +759,16 @@ stored as a redacted copy.
 When a hub receives an LPDU from a participant it MUST add the missing fields to create a fully
 formed PDU then MUST send that PDU back out to all participants, including the original sender.
 
-A server is considered to have "received" an event when it sees it for the first time. This
-might be because the server specifically reached out to fetch that specific event, or because
-the server was pushed that event through normal operation.
+A server is considered to have "received" an event when it does not recognize the event ID. This
+may be because the event has not yet been persisted, or the server is not persisting anything (in
+the case of a participant server). This includes when the server asks another server for an event
+it might be missing.
 
 When a server (hub or participant) receives an event, it MUST:
 
-1. Verify the event is in a valid shape ({{int-pdu}}). In practice, this means ensuring the
-   overall schema for an event is applied, without considering specific schemas for `content`.
-   For example, ensuring a `type` is present, a string, and less than 255 characters. If an
-   event fails to meet this requirement, it is dropped/ignored.
+1. Verify the event matches the schema for the room version ({{int-pdu}}), without considering
+   type-specific schemas applied to `content`. If an event fails to meet this requirement, it is
+   dropped/ignored.
 
 2. Ensure the required signatures are present and that they are valid ({{int-checking-signatures}}).
    If the event has a `hub_server` field, the event MUST be signed by that server. The event
@@ -745,26 +783,40 @@ When a server (hub or participant) receives an event, it MUST:
    redacted before further processing. The server will ultimately persist the redacted copy.
 
 Additionally, a hub server MUST complete the following checks. Participant servers SHOULD
-also complete the checks to validate the hub's behaviour.
+also perform the following checks to validate that the hub server is acting in a compliant
+manner. If the hub is not acting appropriately (for example, by sending the participant an
+event which never should have been accepted), the participant server MAY choose to warn its
+local users that the room history may have been tampered with.
 
 4. Ensure the event is not referencing rejected ({{int-rejection}}) events. If it is, it is
    rejected itself.
 
+   **TODO**: This doesn't make sense in Linearized Matrix. The hub already doesn't reference
+   rejected events, so why bother saying it can't twice? This matters more on the non-linearized
+   matrix side (not covered by this document).
+
 5. Ensure the event passes the authorization rules ({{int-auth-rules}}) for the state identified
    by the event's `auth_events`. If it fails, it is rejected ({{int-rejection}}).
+
+   **TODO**: Like above, this doesn't make sense in this document.
 
 6. Ensures the event passes the authorization rules ({{int-auth-rules}}) for the state of the
    room immediately before where the event would be inserted. If it fails, it is rejected
    ({{int-rejection}}).
 
-   **TODO**: Clarify that this step only applies if you're on the DAG side. On LM, this is
-   the same as Step 6. We may need to adjust the rejection/soft-fail logic.
+   **TODO**: Even more like above, this step really shouldn't be here. It's only for the
+   non-linearized matrix interconnection stuff. We may need to adjust the rejection/soft-fail
+   logic.
 
 7. Ensures the event passes the authorization rules ({{int-auth-rules}}) for the current
    state of the room (which may very well be the same as the step above). If it fails, it
    is soft-failed ({{int-soft-failure}}).
 
+   **TODO**: Like the above three, does this need to be here?
+
 ## Rejection {#int-rejection}
+
+**TODO**: Unless we keep steps 4 through 7 above, this section can probably go.
 
 Events which are rejected are not relayed to any local clients and are not appended to the
 room in any way. Events which reference rejected events through `prev_events` or `auth_events`
@@ -774,6 +826,8 @@ Servers which utilize persistence (hub servers) SHOULD persist rejections to mak
 faster.
 
 ## Soft Failure {#int-soft-failure}
+
+**TODO**: Unless we keep steps 4 through 7 above, this section can probably go.
 
 When an event is "soft-failed" it should not be relayed to any local clients nor be used
 in `auth_events`. The event is otherwise handled as per usual.
@@ -945,7 +999,8 @@ There are some consequences to these rules:
 # Signing {#int-signing}
 
 All servers, including hubs and participants, publish an ed25519 {{!RFC8032}} signing key
-to be used by other servers when verifying signatures.
+to be used by other servers when verifying signatures. These keys can then be fetched over
+the transport as needed ({{int-transport-get-server-keys}}).
 
 **TODO**: Verify RFC reference. We might be using a slightly different ed25519 key today?
 See https://hdevalence.ca/blog/2020-10-04-its-25519am
@@ -980,7 +1035,7 @@ To sign an event:
 
 To sign an object:
 
-1. Remove `signatures` and `unsigned`.
+1. Remove `signatures` if present.
 2. Encode the result with Canonical JSON ({{int-canonical-json}}).
 3. Using the relevant ed25519 signing key (usually the server's), sign the object.
 4. Encode that signature under `signatures` using unpadded base64 ({{int-unpadded-base64}}).
@@ -999,7 +1054,7 @@ If decoding the base64 fails, the check fails.
 
 If the object is an event, redact ({{int-redactions}}) it before continuing.
 
-If removing the `signatures` and `unsigned` properties, canonicalizing the JSON ({{int-canonical-json}}),
+If removing the `signatures` property, canonicalizing the JSON ({{int-canonical-json}}),
 and verifying the signature fails, the check fails. Note that to verify the signature the server
 may need to fetch another server's key first ({{int-transport-get-server-keys}}).
 
@@ -1051,8 +1106,8 @@ fields of the event, including content hashes, and serves as the event's ID.
 
 ## Content Hash Calculation {#int-content-hashes}
 
-1. Remove any existing `unsigned` and `signatures` fields.
-   1. If calculating an LPDU's content hash, remove any existing `hashes` field as well.
+1. Remove any existing `signatures` field.
+   1. If calculating an LPDU's ({{int-lpdu}}) content hash, remove any existing `hashes` field as well.
    2. If *not* calculating an LPDU's content hash, remove any existing fields under `hashes` except
       for `lpdu`.
 2. Encode the object using canonical JSON.
@@ -1062,7 +1117,7 @@ fields of the event, including content hashes, and serves as the event's ID.
 ## Reference Hash Calculation {#int-reference-hashes}
 
 1. Redact the event.
-2. Remove `signatures` and `unsigned` fields.
+2. Remove `signatures` field.
 3. Encode the object using canonical JSON.
 4. Hash the resulting bytes with SHA-256 {{!RFC6234}}.
 5. Encode the hash using URL-safe unpadded base64 ({{int-unpadded-base64}}).
@@ -1079,7 +1134,16 @@ Implementations SHOULD accept input with or without padding on base64 values, wh
 62nd and 63rd characters are replaced with `-` and `_` respectively. The unpadded behaviour is as
 described above.
 
-# Hub Transfers
+# Hub Selection {#int-hub-selection}
+
+**TODO**: Describe impacts of hub transfers
+
+The hub server for a room is the server denoted by the `sender` of the `m.room.create` event
+({{int-ev-create}}). Note that this is effectively the same as the server name contained in the
+room ID ({{int-room-id}}) currently, however is deliberately not defined as such. In a future
+scenario where hub transfers are possible, the room ID does not change when the hub server does.
+
+## Hub Transfers
 
 **TODO**: This section, if we want a single canonical hub in the room. Some expected problems in this
 area are: who signs the transfer event? who *sends* the transfer event? how does a transfer start?
@@ -1438,6 +1502,8 @@ If an endpoint does *not* require authentication, `Authorization` headers are ig
 Responses from a server are authenticated using TLS and do not have additional signing requirements.
 
 ### Retrieving Server Keys {#int-transport-get-server-keys}
+
+**TODO**: Explain what notaries are and what they do, if we keep this section at all.
 
 A server's signing keys are published under `/_matrix/key/v2/server` ({{int-api-self-key}}) and can
 be queried through notary servers in two ways: {{int-api-notary-query}} and {{int-api-notary-query-bulk}}.
@@ -1872,6 +1938,9 @@ for the `pdus` and the `auth_events` of those events, recursively.
 The `auth_chain` will eventually stop recursing when it reaches the `m.room.create` event, as it cannot
 have any `auth_events`.
 
+**TODO**: Do we actually need to recurse auth events to get the full auth chain here? What are participant
+servers expected to do with this information? (Do they even care about it?)
+
 For example, if the requested event ID was an `m.room.power_levels` event, the returned state would be
 as if the new power levels were not applied.
 
@@ -1889,6 +1958,9 @@ before being served.
 The returned events MUST be checked before being used by the requesting server ({{int-receiving-events}}).
 This endpoint MUST NOT return LPDUs ({{int-lpdu}}), instead treating such events as though they didn't
 exist.
+
+If the receiving server is not the hub server for the room ID, an HTTP status code of `400 Bad Request`
+and error code `M_WRONG_SERVER` ({{int-transport-errors}}) is returned.
 
 ### `GET /_matrix/federation/v1/state_ids/:roomId`
 
@@ -2629,6 +2701,8 @@ See {{int-transport-leaves}} for more information on rejecting invites.
 # Spam Prevention {#int-spam}
 
 **TODO**: Fully complete this section.
+
+**TODO**: Talk about how to deal with spammy/unwanted invites.
 
 Servers MAY temporarily or permanently block a room entirely by using the room ID. Typically, when a
 room becomes blocked, all local users will be removed from the room using `m.room.member` events with
