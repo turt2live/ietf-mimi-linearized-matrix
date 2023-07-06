@@ -855,11 +855,14 @@ These commits are additionally encoded using `PublicMessage`, giving servers vis
 of the commits. Upon receiving the event (see {{int-receiving-events}}), the hub server MUST additionally
 validate that any membership changes match what is possible with the room membership:
 
-* Devices can only be added to the group if they belong to a user which is joined to the room. It is
-  not enough to be invited, knocking, etc on the room - the user ID MUST be in the `join` state.
-* A device can remove another device if they both belong to the same user ID.
-* A device can be removed by anyone if the user ID to which it belongs is no longer in the `join` state.
-* A device cannot be removed any other way, as per MLS.
+* Devices can only be added to the group if they belong to a user which is joined to the room, or if the
+  room is "world readable" ({{int-calc-event-visibility}}). It is generally not enough to be invited,
+  knocking, etc on the room - the user ID must usually be in the `join` state.
+* Devices can be removed in two ways:
+   * A device can remove another device if they both belong to the same user ID.
+   * A device can be removed by anyone if the user ID to which it belongs is no longer in the `join` state.
+     This condition is required to satisy a case in MLS where a device cannot self-remove itself from
+     the group.
 
 If this validation fails, the hub server MUST reject the request if it's shaped as an LPDU ({{int-lpdu}})
 and soft-fail ({{int-soft-failure}}) the event if it's a PDU ({{int-pdu}}).
