@@ -289,7 +289,7 @@ A room version has the following algorithms defined:
   this is {{int-hub-selection}}.
 * Identifier grammar - All identifiers (room IDs, user IDs, event IDs, etc) can change grammar
   within a room version. As such, they SHOULD generally be treated as opaque as possible over a
-  transport. For `I.1`, these details are described in {{int-server-name}}, {{int-room-id}},
+  transport. For `I.1`, these details are described in {{int-server-names}}, {{int-room-id}},
   {{int-user-id}}, {{int-device-id}}, and {{int-pdu}}.
 
 The transport between servers is decoupled from the algorithms above. For example, events are
@@ -367,7 +367,7 @@ to user IDs.
 
 User IDs are sometimes informally referenced as "MXIDs", short for "Matrix User IDs".
 
-## Devices
+## Devices {#int-device-id}
 
 Each user can have zero or more devices/active clients. These devices are intended to be members
 of the MLS group and thus have their own key package material associated with them.
@@ -410,7 +410,7 @@ An event has the following minimum fields:
   event was created.
 
 * `hub_server` (string; optional) - When a hub server is converting an LPDU ({{int-lpdu}}) to a
-  formal event, it MUST specify its own server name ({{int-server-name}}) here. The value MUST be
+  formal event, it MUST specify its own server name ({{int-server-names}}) here. The value MUST be
   a valid server name.
 
   To support interconnection with non-linearized Matrix, as discussed in {{int-intro}}, events
