@@ -2455,7 +2455,7 @@ to-device messaging endpoints (<a href="#int-transport-to-device" class="auto in
 from a to-device message) after decryption to associate it with the MLS epoch. The device can then do
 a reverse lookup of epoch to event ID to MLS group state. Note that a client <em>always</em> has access to
 <code>m.mls.commit</code> events, even when hidden by history visibility (<a href="#int-calc-event-visibility" class="auto internal xref">Section 3.5.3.5.1</a>).<a href="#section-4.3-10" class="pilcrow">¶</a></p>
-<p id="section-4.3-11"><strong>TODO</strong>: Is it correct to say that all MLS commits <em>must</em> be stored in the room?<a href="#section-4.3-11" class="pilcrow">¶</a></p>
+<p id="section-4.3-11"><strong>TODO</strong>: Is it correct to say all commits are visible as "shared"?<a href="#section-4.3-11" class="pilcrow">¶</a></p>
 <p id="section-4.3-12"><strong>TODO</strong>: We may need to store the group state in the media repo if it gets to be too big, or otherwise
 allow oversized events.<a href="#section-4.3-12" class="pilcrow">¶</a></p>
 <p id="section-4.3-13"><strong>TODO</strong>: The server also likely needs to prevent devices being added to the group which don't support
