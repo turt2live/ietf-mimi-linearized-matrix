@@ -372,7 +372,13 @@ User IDs are sometimes informally referenced as "MXIDs", short for "Matrix User 
 Each user can have zero or more devices/active clients. These devices are intended to be members
 of the MLS group and thus have their own key package material associated with them.
 
-**TODO**: Do we need to define grammar and such for device IDs, or is that covered by MLS already?
+Because device IDs are used as "key versions" in a key ID ({{int-signing}}), they have a compatible
+ABNF {{!RFC5234}} grammar:
+
+~~~
+device_id = 1*key_version_char
+device_id_char = ALPHA / DIGIT / "_"
+~~~
 
 ## Events {#int-pdu}
 
