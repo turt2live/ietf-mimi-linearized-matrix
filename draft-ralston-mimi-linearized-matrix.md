@@ -891,7 +891,7 @@ from a to-device message) after decryption to associate it with the MLS epoch. T
 a reverse lookup of epoch to event ID to MLS group state. Note that a client *always* has access to
 `m.mls.commit` events, even when hidden by history visibility ({{int-calc-event-visibility}}).
 
-**TODO**: Is it correct to say that all MLS commits *must* be stored in the room?
+**TODO**: Is it correct to say all commits are visible as "shared"?
 
 **TODO**: We may need to store the group state in the media repo if it gets to be too big, or otherwise
 allow oversized events.
