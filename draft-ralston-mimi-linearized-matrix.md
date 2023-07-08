@@ -580,7 +580,6 @@ if present in the current room state itself:
 * `m.room.topic` (**TODO**: Link)
 * `m.room.join_rules` ({{int-ev-join-rules}})
 * `m.room.canonical_alias` (**TODO**: Link)
-* `m.room.encryption` (**TODO**: Link)
 
 Servers MAY include other event types/state keys. The above set gives users enough context to determine
 if they'd like to knock/join the room, as features such as the name and avatar are generally key pieces
@@ -727,9 +726,7 @@ To calculate the required power level to send an event:
 
 #### TODO: Other events
 
-**TODO**: `m.room.name`, `m.room.topic`, `m.room.avatar`, `m.room.encryption`, `m.room.canonical_alias`
-
-**TODO**: Drop `m.room.encryption` and pack it into the create event instead?
+**TODO**: `m.room.name`, `m.room.topic`, `m.room.avatar`, `m.room.canonical_alias`
 
 # MLS Considerations {#int-mls-considerations}
 
@@ -942,6 +939,8 @@ message.
 
 **TODO**: Should we use the `RatchetTree` extension? It might make the group state massive...
 
+**TODO**: Which fields from this need to be protected by {{int-redactions}}?
+
 ### `m.room.encrypted` {#int-ev-encrypted}
 
 Represents an encrypted MLS application message. The sender first encrypts the message per the content
@@ -959,6 +958,8 @@ Within this document, `algorithm` will be `m.mls.v1.dhkemx25519-aes128gcm-sha256
 fields are as described in the example.
 
 Clients SHOULD treat `m.room.encrypted` events which are improperly structured as undecryptable events.
+
+**TODO**: Which fields from this need to be protected by {{int-redactions}}?
 
 # Processing Events
 
