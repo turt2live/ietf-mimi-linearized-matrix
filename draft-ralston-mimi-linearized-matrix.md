@@ -164,6 +164,9 @@ This leads to two distinct roles:
 * **Participant server**: any non-hub server. This server MAY persist conversation history
   or rely on the hub server instead.
 
+**TODO**: Describe how much history each server needs to store, somewhere. ie: minimum state events,
+HEAD for the room, etc. Maybe the hub can drop events it doesn't need anymore too.
+
 **OPEN QUESTION**: Should we support having multiple hubs for increased trust between
 participant and hub? (participant can pick the hub it wants to use rather than being
 forced to use a single hub)
@@ -361,6 +364,8 @@ Identity systems and messaging providers SHOULD NOT use a phone number in a loca
 localpart for a user ID is unchangeable. In these cases, a GUID (scoped to the allocating server)
 is recommended so the associated human can change their phone number without losing chats.
 
+**TODO**: Clarify that phone numbers aren't banned, but that takeover considerations need to be made.
+
 This document does not define how a user ID is acquired. It is expected that an identity specification
 under MIMI will handle resolving email addresses, phone numbers, names, and other common queries
 to user IDs.
@@ -446,6 +451,9 @@ Note that an event ID is not specified on the schema. Event IDs are calculated t
 and consistency between servers. To determine the ID for an event, calculate the reference hash
 ({{int-reference-hashes}}) then encode it using URL-safe Unpadded Base64 ({{int-unpadded-base64}})
 and prefix that with the event ID sigil, `$`. For example, `$nKHVqt3iyLA_HEE8lT1yUaaVjjBRR-fAqpN4t7opadc`.
+
+**TODO**: Describe security benefits of using hashes-as-IDs here, in contrast to privacy concern of
+having a hash as the ID.
 
 The ABNF {{!RFC5234}} for an event ID is:
 
@@ -1106,6 +1114,8 @@ fields of the event, including content hashes, and serves as the event's ID.
 
 ## Content Hash Calculation {#int-content-hashes}
 
+**TODO**: Describe what this protects, and why it matters.
+
 1. Remove any existing `signatures` field.
    1. If calculating an LPDU's ({{int-lpdu}}) content hash, remove any existing `hashes` field as well.
    2. If *not* calculating an LPDU's content hash, remove any existing fields under `hashes` except
@@ -1115,6 +1125,8 @@ fields of the event, including content hashes, and serves as the event's ID.
 4. Encode the hash using unpadded base64 ({{int-unpadded-base64}}).
 
 ## Reference Hash Calculation {#int-reference-hashes}
+
+**TODO**: Describe what this protects, and why it matters.
 
 1. Redact the event.
 2. Remove `signatures` field.
