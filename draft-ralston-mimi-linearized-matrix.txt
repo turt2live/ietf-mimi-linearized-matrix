@@ -3440,10 +3440,6 @@ Table of Contents
               /blob/48efb972075233c3a0f3e3ca01c4d4f888342205/
               decentralised.org>.
 
-   [MSC3820]  Ralston, T., "MSC3820: Room Version 11", 8 June 2023,
-              <https://github.com/matrix-org/matrix-spec-proposals/
-              pull/3820>.
-
    [MSC3995]  Ralston, T., "MSC3995: [WIP] Linearized Matrix", 12 April
               2023, <https://github.com/matrix-org/matrix-spec-
               proposals/pull/3995>.
