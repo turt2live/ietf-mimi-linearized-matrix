@@ -1380,6 +1380,13 @@ area are: who signs the transfer event? who *sends* the transfer event? how does
 This document specifies a wire transport which uses JSON {{!RFC8259}} over HTTPS {{!RFC9110}}. Servers
 MUST support a minimum of HTTP/2 {{!RFC9113}} and TLS 1.3 {{!RFC8446}}.
 
+**TODO**: This transport doesn't scale, and doesn't use RESTful endpoints. It really should be replaced
+with something that works better. This draft defines a protocol that can run over nearly any transport
+or server-server API. A better option might be something which uses gRPC for example, which might change
+how events are structured, but the semantics remain the same. This draft's transport is heavily inspired
+by Matrix's existing server-server API, and exists largely as a starting point for implementation
+validation work - it is not really meant to live on indefinitely.
+
 ## TLS Certificates {#int-tls}
 
 Servers MUST provide a TLS certificate signed by a known Certificate Authority. Requesting servers
