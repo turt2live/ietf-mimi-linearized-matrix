@@ -5,7 +5,7 @@
 More Instant Messaging Interoperability                       T. Ralston
 Internet-Draft                                                M. Hodgson
 Intended status: Standards Track        The Matrix.org Foundation C.I.C.
-Expires: 7 January 2024                                      6 July 2023
+Expires: 9 January 2024                                      8 July 2023
 
 
                            Linearized Matrix
@@ -49,7 +49,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 January 2024.
+   This Internet-Draft will expire on 9 January 2024.
 
 Copyright Notice
 
@@ -238,6 +238,10 @@ Table of Contents
 
    *  *Participant server*: any non-hub server.  This server MAY persist
       conversation history or rely on the hub server instead.
+
+   *TODO*: Describe how much history each server needs to store,
+   somewhere. ie: minimum state events, HEAD for the room, etc.  Maybe
+   the hub can drop events it doesn't need anymore too.
 
    *OPEN QUESTION*: Should we support having multiple hubs for increased
    trust between participant and hub? (participant can pick the hub it
@@ -470,6 +474,9 @@ Table of Contents
    server) is recommended so the associated human can change their phone
    number without losing chats.
 
+   *TODO*: Clarify that phone numbers aren't banned, but that takeover
+   considerations need to be made.
+
    This document does not define how a user ID is acquired.  It is
    expected that an identity specification under MIMI will handle
    resolving email addresses, phone numbers, names, and other common
@@ -576,6 +583,9 @@ Table of Contents
    (Section 9.2) then encode it using URL-safe Unpadded Base64
    (Section 10) and prefix that with the event ID sigil, $. For example,
    $nKHVqt3iyLA_HEE8lT1yUaaVjjBRR-fAqpN4t7opadc.
+
+   *TODO*: Describe security benefits of using hashes-as-IDs here, in
+   contrast to privacy concern of having a hash as the ID.
 
    The ABNF [RFC5234] for an event ID is:
 
@@ -1418,6 +1428,8 @@ Table of Contents
 
 9.1.  Content Hash Calculation
 
+   *TODO*: Describe what this protects, and why it matters.
+
    1.  Remove any existing signatures field.
 
        1.  If calculating an LPDU's (Section 3.5.1) content hash, remove
@@ -1433,6 +1445,8 @@ Table of Contents
    4.  Encode the hash using unpadded base64 (Section 10).
 
 9.2.  Reference Hash Calculation
+
+   *TODO*: Describe what this protects, and why it matters.
 
    1.  Redact the event.
 

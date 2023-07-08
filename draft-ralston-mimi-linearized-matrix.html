@@ -1056,7 +1056,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Ralston &amp; Hodgson</td>
-<td class="center">Expires 7 January 2024</td>
+<td class="center">Expires 9 January 2024</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1069,12 +1069,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ralston-mimi-linearized-matrix-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2023-07-06" class="published">6 July 2023</time>
+<time datetime="2023-07-08" class="published">8 July 2023</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2024-01-07">7 January 2024</time></dd>
+<dd class="expires"><time datetime="2024-01-09">9 January 2024</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1128,7 +1128,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 7 January 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 9 January 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1559,9 +1559,11 @@ other servers in the room.<a href="#section-3-7.1" class="pilcrow">¶</a>
 or rely on the hub server instead.<a href="#section-3-7.2" class="pilcrow">¶</a>
 </li>
       </ul>
-<p id="section-3-8"><strong>OPEN QUESTION</strong>: Should we support having multiple hubs for increased trust between
+<p id="section-3-8"><strong>TODO</strong>: Describe how much history each server needs to store, somewhere. ie: minimum state events,
+HEAD for the room, etc. Maybe the hub can drop events it doesn't need anymore too.<a href="#section-3-8" class="pilcrow">¶</a></p>
+<p id="section-3-9"><strong>OPEN QUESTION</strong>: Should we support having multiple hubs for increased trust between
 participant and hub? (participant can pick the hub it wants to use rather than being
-forced to use a single hub)<a href="#section-3-8" class="pilcrow">¶</a></p>
+forced to use a single hub)<a href="#section-3-9" class="pilcrow">¶</a></p>
 <div id="int-server-names">
 <section id="section-3.1">
         <h3 id="name-server-names">
@@ -1767,10 +1769,11 @@ the ID if the user doesn't exist yet.<a href="#section-3.3-9" class="pilcrow">¶
 <p id="section-3.3-10">Identity systems and messaging providers <span class="bcp14">SHOULD NOT</span> use a phone number in a localpart, as the
 localpart for a user ID is unchangeable. In these cases, a GUID (scoped to the allocating server)
 is recommended so the associated human can change their phone number without losing chats.<a href="#section-3.3-10" class="pilcrow">¶</a></p>
-<p id="section-3.3-11">This document does not define how a user ID is acquired. It is expected that an identity specification
+<p id="section-3.3-11"><strong>TODO</strong>: Clarify that phone numbers aren't banned, but that takeover considerations need to be made.<a href="#section-3.3-11" class="pilcrow">¶</a></p>
+<p id="section-3.3-12">This document does not define how a user ID is acquired. It is expected that an identity specification
 under MIMI will handle resolving email addresses, phone numbers, names, and other common queries
-to user IDs.<a href="#section-3.3-11" class="pilcrow">¶</a></p>
-<p id="section-3.3-12">User IDs are sometimes informally referenced as "MXIDs", short for "Matrix User IDs".<a href="#section-3.3-12" class="pilcrow">¶</a></p>
+to user IDs.<a href="#section-3.3-12" class="pilcrow">¶</a></p>
+<p id="section-3.3-13">User IDs are sometimes informally referenced as "MXIDs", short for "Matrix User IDs".<a href="#section-3.3-13" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="int-device-id">
@@ -1866,23 +1869,25 @@ to have exactly 1 entry in this array, while other events <span class="bcp14">MA
 and consistency between servers. To determine the ID for an event, calculate the reference hash
 (<a href="#int-reference-hashes" class="auto internal xref">Section 9.2</a>) then encode it using URL-safe Unpadded Base64 (<a href="#int-unpadded-base64" class="auto internal xref">Section 10</a>)
 and prefix that with the event ID sigil, <code>$</code>. For example, <code>$nKHVqt3iyLA_HEE8lT1yUaaVjjBRR-fAqpN4t7opadc</code>.<a href="#section-3.5-6" class="pilcrow">¶</a></p>
-<p id="section-3.5-7">The ABNF <span>[<a href="#RFC5234" class="cite xref">RFC5234</a>]</span> for an event ID is:<a href="#section-3.5-7" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-3.5-8">
+<p id="section-3.5-7"><strong>TODO</strong>: Describe security benefits of using hashes-as-IDs here, in contrast to privacy concern of
+having a hash as the ID.<a href="#section-3.5-7" class="pilcrow">¶</a></p>
+<p id="section-3.5-8">The ABNF <span>[<a href="#RFC5234" class="cite xref">RFC5234</a>]</span> for an event ID is:<a href="#section-3.5-8" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.5-9">
 <pre>
 event_id = "$" reference_hash
 reference_hash = 1*urlsafe_unpadded_base64_char
 urlsafe_unpadded_base64_char = ALPHA / DIGIT / "-" / "_"
-</pre><a href="#section-3.5-8" class="pilcrow">¶</a>
+</pre><a href="#section-3.5-9" class="pilcrow">¶</a>
 </div>
-<p id="section-3.5-9">If both the sender and receiver are implementing the algorithms correctly, the event ID will be
+<p id="section-3.5-10">If both the sender and receiver are implementing the algorithms correctly, the event ID will be
 the same. When different, the receiver will have issues accepting the event (none of the <code>auth_events</code>
 will make sense, for example). The sender and receiver will need to review that their implementation
-matches the specification in this case.<a href="#section-3.5-9" class="pilcrow">¶</a></p>
-<p id="section-3.5-10">Events are treated as JSON <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span> within the protocol, but can be encoded and represented by
+matches the specification in this case.<a href="#section-3.5-10" class="pilcrow">¶</a></p>
+<p id="section-3.5-11">Events are treated as JSON <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span> within the protocol, but can be encoded and represented by
 any binary-compatible format. Additional overhead may be introduced when converting between formats,
-however.<a href="#section-3.5-10" class="pilcrow">¶</a></p>
-<p id="section-3.5-11">An example event is:<a href="#section-3.5-11" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-3.5-12">
+however.<a href="#section-3.5-11" class="pilcrow">¶</a></p>
+<p id="section-3.5-12">An example event is:<a href="#section-3.5-12" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-3.5-13">
 <pre>
 {
   "room_id": "!abc:example.org",
@@ -1911,12 +1916,12 @@ however.<a href="#section-3.5-10" class="pilcrow">¶</a></p>
   "auth_events": ["$first", "$second"],
   "prev_events": ["$parent"]
 }
-</pre><a href="#section-3.5-12" class="pilcrow">¶</a>
+</pre><a href="#section-3.5-13" class="pilcrow">¶</a>
 </div>
-<p id="section-3.5-13">An event/PDU <span class="bcp14">MUST NOT</span> exceed 65536 bytes when formatted using Canonical JSON (<a href="#int-canonical-json" class="auto internal xref">Section 7</a>).
-Note that this includes all <code>signatures</code> on the event.<a href="#section-3.5-13" class="pilcrow">¶</a></p>
-<p id="section-3.5-14">Fields have no size limit unless specified above, other than the maximum 65536 bytes for the whole
-event.<a href="#section-3.5-14" class="pilcrow">¶</a></p>
+<p id="section-3.5-14">An event/PDU <span class="bcp14">MUST NOT</span> exceed 65536 bytes when formatted using Canonical JSON (<a href="#int-canonical-json" class="auto internal xref">Section 7</a>).
+Note that this includes all <code>signatures</code> on the event.<a href="#section-3.5-14" class="pilcrow">¶</a></p>
+<p id="section-3.5-15">Fields have no size limit unless specified above, other than the maximum 65536 bytes for the whole
+event.<a href="#section-3.5-15" class="pilcrow">¶</a></p>
 <div id="int-lpdu">
 <section id="section-3.5.1">
           <h4 id="name-linearized-pdu">
@@ -2791,22 +2796,23 @@ fields of the event, including content hashes, and serves as the event's ID.<a h
         <h3 id="name-content-hash-calculation">
 <a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-content-hash-calculation" class="section-name selfRef">Content Hash Calculation</a>
         </h3>
-<ol start="1" type="1" class="normal type-1" id="section-9.1-1">
-<li id="section-9.1-1.1">
-            <p id="section-9.1-1.1.1">Remove any existing <code>signatures</code> field.<a href="#section-9.1-1.1.1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-9.1-1.1.2">
-<li id="section-9.1-1.1.2.1">If calculating an LPDU's (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>) content hash, remove any existing <code>hashes</code> field as well.<a href="#section-9.1-1.1.2.1" class="pilcrow">¶</a>
+<p id="section-9.1-1"><strong>TODO</strong>: Describe what this protects, and why it matters.<a href="#section-9.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-9.1-2">
+<li id="section-9.1-2.1">
+            <p id="section-9.1-2.1.1">Remove any existing <code>signatures</code> field.<a href="#section-9.1-2.1.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-9.1-2.1.2">
+<li id="section-9.1-2.1.2.1">If calculating an LPDU's (<a href="#int-lpdu" class="auto internal xref">Section 3.5.1</a>) content hash, remove any existing <code>hashes</code> field as well.<a href="#section-9.1-2.1.2.1" class="pilcrow">¶</a>
 </li>
-              <li id="section-9.1-1.1.2.2">If <em>not</em> calculating an LPDU's content hash, remove any existing fields under <code>hashes</code> except
-for <code>lpdu</code>.<a href="#section-9.1-1.1.2.2" class="pilcrow">¶</a>
+              <li id="section-9.1-2.1.2.2">If <em>not</em> calculating an LPDU's content hash, remove any existing fields under <code>hashes</code> except
+for <code>lpdu</code>.<a href="#section-9.1-2.1.2.2" class="pilcrow">¶</a>
 </li>
             </ol>
 </li>
-          <li id="section-9.1-1.2">Encode the object using canonical JSON.<a href="#section-9.1-1.2" class="pilcrow">¶</a>
+          <li id="section-9.1-2.2">Encode the object using canonical JSON.<a href="#section-9.1-2.2" class="pilcrow">¶</a>
 </li>
-          <li id="section-9.1-1.3">Hash the resulting bytes with SHA-256 <span>[<a href="#RFC6234" class="cite xref">RFC6234</a>]</span>.<a href="#section-9.1-1.3" class="pilcrow">¶</a>
+          <li id="section-9.1-2.3">Hash the resulting bytes with SHA-256 <span>[<a href="#RFC6234" class="cite xref">RFC6234</a>]</span>.<a href="#section-9.1-2.3" class="pilcrow">¶</a>
 </li>
-          <li id="section-9.1-1.4">Encode the hash using unpadded base64 (<a href="#int-unpadded-base64" class="auto internal xref">Section 10</a>).<a href="#section-9.1-1.4" class="pilcrow">¶</a>
+          <li id="section-9.1-2.4">Encode the hash using unpadded base64 (<a href="#int-unpadded-base64" class="auto internal xref">Section 10</a>).<a href="#section-9.1-2.4" class="pilcrow">¶</a>
 </li>
         </ol>
 </section>
@@ -2816,16 +2822,17 @@ for <code>lpdu</code>.<a href="#section-9.1-1.1.2.2" class="pilcrow">¶</a>
         <h3 id="name-reference-hash-calculation">
 <a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-reference-hash-calculation" class="section-name selfRef">Reference Hash Calculation</a>
         </h3>
-<ol start="1" type="1" class="normal type-1" id="section-9.2-1">
-<li id="section-9.2-1.1">Redact the event.<a href="#section-9.2-1.1" class="pilcrow">¶</a>
+<p id="section-9.2-1"><strong>TODO</strong>: Describe what this protects, and why it matters.<a href="#section-9.2-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-9.2-2">
+<li id="section-9.2-2.1">Redact the event.<a href="#section-9.2-2.1" class="pilcrow">¶</a>
 </li>
-          <li id="section-9.2-1.2">Remove <code>signatures</code> field.<a href="#section-9.2-1.2" class="pilcrow">¶</a>
+          <li id="section-9.2-2.2">Remove <code>signatures</code> field.<a href="#section-9.2-2.2" class="pilcrow">¶</a>
 </li>
-          <li id="section-9.2-1.3">Encode the object using canonical JSON.<a href="#section-9.2-1.3" class="pilcrow">¶</a>
+          <li id="section-9.2-2.3">Encode the object using canonical JSON.<a href="#section-9.2-2.3" class="pilcrow">¶</a>
 </li>
-          <li id="section-9.2-1.4">Hash the resulting bytes with SHA-256 <span>[<a href="#RFC6234" class="cite xref">RFC6234</a>]</span>.<a href="#section-9.2-1.4" class="pilcrow">¶</a>
+          <li id="section-9.2-2.4">Hash the resulting bytes with SHA-256 <span>[<a href="#RFC6234" class="cite xref">RFC6234</a>]</span>.<a href="#section-9.2-2.4" class="pilcrow">¶</a>
 </li>
-          <li id="section-9.2-1.5">Encode the hash using URL-safe unpadded base64 (<a href="#int-unpadded-base64" class="auto internal xref">Section 10</a>).<a href="#section-9.2-1.5" class="pilcrow">¶</a>
+          <li id="section-9.2-2.5">Encode the hash using URL-safe unpadded base64 (<a href="#int-unpadded-base64" class="auto internal xref">Section 10</a>).<a href="#section-9.2-2.5" class="pilcrow">¶</a>
 </li>
         </ol>
 </section>
