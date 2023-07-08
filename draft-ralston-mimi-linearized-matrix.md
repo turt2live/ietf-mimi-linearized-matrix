@@ -51,14 +51,6 @@ informative:
        - fullname: Travis Ralston
          organization: The Matrix.org Foundation C.I.C.
          email: travisr@matrix.org
-  MSC3820:
-    target: https://github.com/matrix-org/matrix-spec-proposals/pull/3820
-    title: "MSC3820: Room Version 11"
-    date: 2023-06-08
-    author:
-       - fullname: Travis Ralston
-         organization: The Matrix.org Foundation C.I.C.
-         email: travisr@matrix.org
   DMLS: # TODO: Actually link to this somewhere in the doc.
     target: https://gitlab.matrix.org/matrix-org/mls-ts/-/blob/48efb972075233c3a0f3e3ca01c4d4f888342205/decentralised.org
     title: "Decentralised MLS"
