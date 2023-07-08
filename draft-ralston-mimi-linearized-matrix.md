@@ -733,6 +733,8 @@ To calculate the required power level to send an event:
 
 # MLS Considerations {#int-mls-considerations}
 
+**TODO**: We should consider running {{?I-D.robert-mimi-delivery-service}} over LM instead.
+
 The MIMI working group is chartered to use Messaging Layer Security (MLS) {{!I-D.ietf-mls-protocol}}
 {{!I-D.ietf-mls-architecture}} for encryption in chats, and this document specifies no different.
 Each room has a single MLS Group associated with it, both identified by the room ID ({{int-room-id}}).
@@ -772,7 +774,7 @@ needed to interconnect Linearized Matrix and Matrix's existing room model. Howev
 to be successful, extensions to MLS are needed to support decentralization. One possible extension
 is "Decentralised MLS" {{DMLS}}.
 
-## Device Credentials
+## Device Credentials {#int-mls-credentials}
 
 Under Section 5.3 of {{!I-D.ietf-mls-protocol}}, each MLS group member (a device, {{int-device-id}})
 has a "credential" or signing key associated with it. These are published to each client's local server
@@ -867,8 +869,8 @@ validate that any membership changes match what is possible with the room member
 If this validation fails, the hub server MUST reject the request if it's shaped as an LPDU ({{int-lpdu}})
 and soft-fail ({{int-soft-failure}}) the event if it's a PDU ({{int-pdu}}).
 
-Welcome messages are sent to devices over to-device messaging ({{int-transport-to-device}}). The `type`
-for the message is `m.room.encrypted` [**TODO**: Rename to avoid confusion with room event?] and `content`
+Welcome messages are sent to devices over to-device messaging ({{int-transport-to-device}}). The `message_type`
+for the message is `m.room.encrypted` [**TODO**: Rename to avoid confusion with room event?] and `message`
 of:
 
 ~~~ json
@@ -1988,17 +1990,18 @@ Request body:
 
 ~~~ json
 {
-   "edus": [{/* TODO: Define EDUs */}],
+   "edus": [
+      {/* EDU */}
+   ],
    "pdus": [
       {/* Either an LPDU or PDU */}
    ]
 }
 ~~~
 
-**TODO**: Describe EDUs.
 
-`edus` are the Ephemeral Data Units to send. If no EDUs are being sent, this field MAY be excluded
-from the request body. There MUST NOT be more than 100 entries in `edus`.
+`edus` are the Ephemeral Data Units ({{int-transport-edus}}) to send. If no EDUs are being sent, this
+field MAY be excluded from the request body. There MUST NOT be more than 100 entries in `edus`.
 
 `pdus` are the events/PDUs ({{int-pdu}}) and LPDUs ({{int-lpdu}}) to send to the server. Whether
 it's an LPDU or PDU depends on the sending server's role in that room: if they are a non-hub server,
@@ -2886,21 +2889,221 @@ for referencing within an encrypted message.
 
 **TODO**: Spell out that content is images, videos, files, etc.
 
+## Ephemeral Data Units (EDUs) {#int-transport-edus}
+
+EDUs are sent out of band from rooms and are only persisted for exactly as long as they are needed.
+For example, once a to-device ({{int-transport-to-device}}) message is delivered to a client, the
+server may easily be able to delete its copy of the message.
+
+EDUs contain the following mandatory fields:
+
+~~~ json
+{
+   "type": "m.room.encrypted",
+   "sender": "@alice:example.org",
+   "content": {
+      /* type-specific content */
+   }
+}
+~~~
+
+The `type` is similar to an event type ({{int-pdu}}) and ultimately describes the schema for the
+`content`.
+
+`sender_id` is the user ID ({{int-user-id}}) which is sending the EDU. Typically, clients will not
+generate EDUs directly. Instead, the server will convert a client's request into an EDU for sending
+to a remote server, where that server then unpacks the EDU before delivering it to local devices.
+
+Because EDUs are not sent in the context of a room, even if an MLS `Welcome` message is being sent
+for a room, servers MUST send the EDUs directly to the target server with the send API ({{int-api-send-txn}}).
+
+In this document, EDUs are only used for to-device messages ({{int-transport-to-device}}) and device
+list changes ({{int-transport-devices}}), but could be used for read/delivery receipts, typing notifications,
+and more in future. This may necessitate routing EDUs through the hub rather than using full-mesh fanout.
+
+**TODO**: Address EDU fanout; Document the implied missing features (receipts, typing notifs).
+
 ## MLS {#int-transport-mls}
 
 **TODO**: This section. Talk about to-device messaging, device management/querying/key claiming, etc.
 
-### TODO: Device Info Publishing {#int-transport-devices}
+There are several endpoints required by this document's MLS implementation ({{int-mls-considerations}}),
+largely around device management for each device's signing key, claiming key packages for those devices,
+and sending messages (`Welcome` in particular) after using a key package.
 
-**TODO**: This section.
+### Device Info Publishing {#int-transport-devices}
 
-### TODO: To-Device Messaging {#int-transport-to-device}
+When a user creates a new encryption-capable device, or removes one, a "device list update" is sent
+to all servers the user shares a room with. The receiving servers then determine which local clients
+need to be made aware of the device list change and sends the information to them. This is primarily
+used by this document's MLS implementation ({{int-mls-considerations}}) to indicate to other devices
+that either a new possible device has come online or that another needs to be removed from some MLS
+groups due to being deleted.
 
-**TODO**: This section.
+Typically, a device is created by a user when they log in to a new session. Similarly, a device is
+deleted/removed when they log out of that client.
 
-### TODO: One Time Key Claiming {#int-transport-key-claim}
+The device list update takes the shape of an EDU ({{int-transport-edus}}), as such:
 
-**TODO**: This section. Don't serve expired keys. Use last resort key in an emergency.
+~~~ json
+{
+   "type": "m.device_list_update",
+   "sender_id": "@alice:example.org",
+   "content": {
+      "changed": [/* Device Objects */],
+      "removed": [/* Device IDs */]
+   }
+}
+~~~
+
+The device objects are the same as in the response for `/user/:userId/device/:deviceId` ({{int-api-get-device}}),
+indicating that either a new device was created or that information about a previous device has changed.
+
+**TODO**: Matrix's `m.device_list_update` EDU is *very* different from this, and relatively complicated.
+Do we actually need a `stream_id`, like in Matrix? Do we then need the `/devices` endpoint?
+
+#### `GET /_matrix/federation/v1/user/:userId/device/:deviceId` {#int-api-get-device}
+
+Retrieves information about a specific device for a user. This request does not go via a hub, instead
+going directly to the server which owns the `:userId`.
+
+**Implementation note**: Currently this endpoint doesn't actually exist. Use
+`PUT /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/user/:userId/device/:deviceId`
+when testing against other Linearized Matrix implementations. This string may be updated later to
+account for breaking changes.
+
+**TODO**: Remove implementation notes.
+
+**Rate-limited**: Yes.
+
+**Authentication required**: Yes.
+
+Path parameters:
+
+* `:userId` - the user ID ({{int-user-id}}) who owns the device.
+* `:deviceId` - the device ID ({{int-device-id}}) to get information about.
+
+Query parameters: None applicable.
+
+Request body: None applicable.
+
+`200 OK` response:
+
+~~~ json
+{
+   "device_id": "ABCDEF",
+   "user_id": "@alice:example.org",
+   "algorithms": [
+      "m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
+   ],
+   "keys": {
+      "m.mls.v1.credential.ed25519:ABCDEF": "<unpadded base64 BasicCredential>"
+   },
+   "signatures": {
+      "@alice:example.org": {
+         "m.mls.v1.credential.ed25519:ABCDEF": "<unpadded base64 signature>"
+      }
+   }
+}
+~~~
+
+Note that the response is the same object the device itself signed/created in {{int-mls-credentials}}.
+
+If the user ID does not belong the receiving server, a `404 Not Found` HTTP status code is returned
+with error code `M_NOT_FOUND` ({{int-transport-errors}}). The same applies if the user ID does not
+exist, or the user does not have the device ID requested.
+
+### To-Device Messaging {#int-transport-to-device}
+
+To-device messaging is an ability to send information directly to another device, typically to carry
+MLS `Welcome` messages and similar. They are sent as EDUs ({{int-transport-edus}}), one per receipient
+device and payload:
+
+~~~ json
+{
+   "type": "m.direct_to_device",
+   "sender": "@alice:example.org",
+   "content": {
+      "target": "@bob:example.org",
+      "target_device": "ABCD",
+      "message_type": "m.room.encrypted",
+      "message": {
+         /* message_type-specific schema */
+      }
+   }
+}
+~~~
+
+`target` and `target_device` denote the destination user ID ({{int-user-id}}) and device ID ({{int-device-id}})
+for that user. This EDU MUST be sent to the server denoted by the target user ID. If the target user
+doesn't exist or doesn't have a device with the ID described, the receiving server drops/ignores the
+EDU.
+
+See {{int-mls-add-remove}} for an example of a to-device message being used.
+
+### One Time Key Claiming {#int-transport-key-claim}
+
+To enable two devices to communicate, they need to claim a key package ({{int-mls-key-packages}})
+for the other device. These key packages are also called "one time keys". This is done through the
+following endpoint.
+
+#### `POST /_matrix/federation/v1/user/keys/claim`
+
+Claims one time keys for devices. This request does not go via a hub, instead going directly to the
+server which owns the given user IDs.
+
+**Rate-limited**: Yes.
+
+**Authentication required**: Yes.
+
+Path parameters: None applicable.
+
+Query parameters: None applicable.
+
+Request body:
+
+~~~ json
+{
+   "one_time_keys": {
+      "@alice:example.org": {
+         "ABCD": "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519"
+      }
+   }
+}
+~~~
+
+`one_time_keys` MUST be specified and is a map of user ID ({{int-user-id}}) to device ID ({{int-device-id}})
+to algorithm for the key package to claim. Currently the only expected algorithm is defined by {{int-mls-key-packages}}.
+
+Any user IDs which don't belong to the receiving server, or which don't exist, are ignored. The same
+applies for device IDs for which the user doesn't have.
+
+`200 OK` response:
+
+~~~ json
+{
+   "one_time_keys": {
+      "@alice:example.org": {
+         "ABCD": {
+            "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519":
+               "<unpadded base64 encoded key package>"
+         }
+      }
+   }
+}
+~~~
+
+Like the request body, `one_time_keys` MUST be specified (but MAY be empty) and is a map of requested
+user ID to requested device ID to algorithm name. The value for the algorithm name is dependent on the
+algorithm itself. For `m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519`, this is an unpadded
+base64 ({{int-unpadded-base64}}) string representing the key package itself.
+
+Servers MUST NOT reuse a device's one time key, unless that key permits it. For example, MLS's "last
+resort" key MAY be used multiple times, but SHOULD only be used if no other one time keys remain for
+the device. Servers MUST NOT use an expired key.
+
+Typically, the server will inform the device that a key was used so the device can upload additional
+keys. See {{int-mls-key-packages}} for further implementation-related concerns.
 
 ## TODO: Remainder of Transport
 
@@ -2908,10 +3111,10 @@ for referencing within an encrypted message.
 
 Topics:
 
-* EDUs (typing notifications, receipts, presence)
-* Device management & to-device messaging
+* More EDUs (typing notifications, receipts, presence)
 * Query APIs (alias resolution, profiles)
-* Encryption APIs
+* Other Encryption APIs??
+* Server ACLs? (this probably should become part of the auth rules)
 
 Notably/deliberately missing APIs are:
 

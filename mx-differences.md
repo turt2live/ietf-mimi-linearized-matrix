@@ -255,6 +255,40 @@ Not yet decided on how this works. It's possible we want to support situations w
 Rough theory is we can advertise that a server supports being a hub server (or is a DAG-capable server) somewhere,
 and participants can choose their favourite, creating small clusters of LM servers in the room.
 
+## EDU Changes
+
+* `m.device_list_update` has changed shape entirely:
+  ```json
+  {
+    "type": "m.device_list_update",
+    "sender_id": "@alice:example.org",
+    "content": {
+        "changed": [/* Device Objects */],
+        "removed": [/* Device IDs */]
+    }
+  }
+  ```
+
+  A "device object" is the response body for `/user/:userId/device/:deviceId`.
+
+* `m.direct_to_device` has lost some fields under `content`, and no longer carries multiple messages
+  per EDU.
+
+  ```json
+  {
+    "type": "m.direct_to_device",
+    "sender": "@alice:example.org",
+    "content": {
+        "target": "@bob:example.org",
+        "target_device": "ABCD",
+        "message_type": "m.room.encrypted",
+        "message": {
+          /* message_type-specific schema */
+        }
+    }
+  }
+  ```
+
 ## HTTP API Changes
 
 * http/2 and TLS 1.3 are the minimum baseline for transport.
@@ -363,6 +397,11 @@ and participants can choose their favourite, creating small clusters of LM serve
 
   **Note for future MSC**: This skips `v2`, and should be combined with the invite endpoint. make_knock
   should be part of a single make_membership endpoint.
+* `GET /_matrix/federation/v1/user/:userId/device/:deviceId` is an entirely new endpoint, inspired by the
+  existing device management and key query endpoints in Matrix already.
+
+  **Note**: This is implemented as `POST /_matrix/federation/unstable/org.matrix.i-d.ralston-mimi-linearized-matrix.02/user/:userId/device/:deviceId`
+  as an unstable prefix.
 
 Some APIs are not implemented at all in LM:
 
