@@ -739,8 +739,6 @@ Table of Contents
 
    *  m.room.canonical_alias (*TODO*: Link)
 
-   *  m.room.encryption (*TODO*: Link)
-
    Servers MAY include other event types/state keys.  The above set
    gives users enough context to determine if they'd like to knock/join
    the room, as features such as the name and avatar are generally key
@@ -933,11 +931,8 @@ Table of Contents
 
 3.5.3.6.  TODO: Other events
 
-   *TODO*: m.room.name, m.room.topic, m.room.avatar, m.room.encryption,
+   *TODO*: m.room.name, m.room.topic, m.room.avatar,
    m.room.canonical_alias
-
-   *TODO*: Drop m.room.encryption and pack it into the create event
-   instead?
 
 4.  MLS Considerations
 
@@ -1188,6 +1183,8 @@ Table of Contents
    *TODO*: Should we use the RatchetTree extension?  It might make the
    group state massive...
 
+   *TODO*: Which fields from this need to be protected by Section 8?
+
 4.5.2.  m.room.encrypted
 
    Represents an encrypted MLS application message.  The sender first
@@ -1206,6 +1203,8 @@ Table of Contents
 
    Clients SHOULD treat m.room.encrypted events which are improperly
    structured as undecryptable events.
+
+   *TODO*: Which fields from this need to be protected by Section 8?
 
 5.  Processing Events
 
