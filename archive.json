@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-07-06T00:17:07.070493+00:00",
+  "timestamp": "2023-07-09T00:18:52.320891+00:00",
   "repo": "turt2live/ietf-mimi-linearized-matrix",
   "labels": [
     {
@@ -170,7 +170,7 @@
     {
       "number": 3,
       "id": "PR_kwDOJM90Qc5UYM8K",
-      "title": "[WIP] MLS",
+      "title": "MLS",
       "url": "https://github.com/turt2live/ietf-mimi-linearized-matrix/pull/3",
       "state": "OPEN",
       "author": "turt2live",
@@ -179,18 +179,26 @@
       "labels": [],
       "body": "[Rendered: HTML](https://turt2live.github.io/ietf-mimi-linearized-matrix/travis/mls/draft-ralston-mimi-linearized-matrix.html)\r\n[Rendered: text](https://turt2live.github.io/ietf-mimi-linearized-matrix/travis/mls/draft-ralston-mimi-linearized-matrix.txt)",
       "createdAt": "2023-07-01T03:14:42Z",
-      "updatedAt": "2023-07-06T00:08:42Z",
+      "updatedAt": "2023-07-08T03:01:47Z",
       "baseRepository": "turt2live/ietf-mimi-linearized-matrix",
       "baseRefName": "main",
-      "baseRefOid": "b0bfecf5133b4e0e549e12a06615ccb55e692027",
+      "baseRefOid": "154b3f1d6ce4f8face4811b3abd9185fd8052cd2",
       "headRepository": "turt2live/ietf-mimi-linearized-matrix",
       "headRefName": "travis/mls",
-      "headRefOid": "ed4b1077a71f7ee8355cdb7015f28f86b3f9b954",
+      "headRefOid": "7d0c095b9e354de229a9428d5426009742b95691",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "body": "This is ready to be merged I think, though is waiting on some potential external review. Will land it before the submission deadline.",
+          "createdAt": "2023-07-08T03:01:47Z",
+          "updatedAt": "2023-07-08T03:01:47Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOJM90Qc5aNZer",
@@ -385,6 +393,46 @@
               "body": "I'm seeing `FramedContent` and `FramedContentAuthData` at https://github.com/mlswg/mls-protocol/blob/main/draft-ietf-mls-protocol.md#encoding-and-decoding-a-public-message and https://messaginglayersecurity.rocks/mls-protocol/draft-ietf-mls-protocol.html#name-encoding-and-decoding-a-pub\r\n\r\nPart of the public room state is in the `PublicMessage` part.  The `RatchetTree` may be included, if the group uses the `RatchetTree` extension.  We may or may not want to use the `RatchetTree` extension.  One downside with it is that's the part of the public group state that can get really big, and could necessitate storing in the media repo.",
               "createdAt": "2023-07-06T00:08:42Z",
               "updatedAt": "2023-07-06T00:08:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aVYdO",
+          "commit": {
+            "abbreviatedOid": "84680ff"
+          },
+          "author": "uhoreg",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-06T00:31:01Z",
+          "updatedAt": "2023-07-06T00:31:01Z",
+          "comments": [
+            {
+              "originalPosition": 105,
+              "body": "Yeah, probably just need to split `identity` into two fields.  Might also be able to drop the `SignatureScheme` since we don't have that enum any more in MLS.",
+              "createdAt": "2023-07-06T00:31:01Z",
+              "updatedAt": "2023-07-06T00:31:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aVZYK",
+          "commit": {
+            "abbreviatedOid": "ed4b107"
+          },
+          "author": "uhoreg",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-06T00:36:55Z",
+          "updatedAt": "2023-07-06T00:36:55Z",
+          "comments": [
+            {
+              "originalPosition": 201,
+              "body": "Yeah, if the client is supposed to validate the full history, then I suppose it's needed.  I haven't really thought much about that.",
+              "createdAt": "2023-07-06T00:36:55Z",
+              "updatedAt": "2023-07-06T00:36:55Z"
             }
           ]
         }
