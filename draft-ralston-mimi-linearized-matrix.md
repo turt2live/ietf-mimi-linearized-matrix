@@ -136,7 +136,7 @@ this document; it is out of scope for the MIMI working group.
 
 {::boilerplate bcp14-tagged}
 
-This document uses {{!I-D.ralston-mimi-terminology}} where possible.
+This document uses {{!I-D.ralston-mimi-terminology}} for the majority of terminology.
 
 This document additionally defines:
 
