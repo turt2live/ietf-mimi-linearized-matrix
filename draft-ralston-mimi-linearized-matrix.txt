@@ -1804,6 +1804,8 @@ Table of Contents
    m.room.create if no hub state event is present.  Auth rules would
    govern what makes for a legal m.room.hub event.
 
+   *TODO*: [I-D.kohbrok-mimi-portability] may be of help here.
+
 12.  Transport
 
    This document specifies a wire transport which uses JSON [RFC8259]
@@ -1816,6 +1818,8 @@ Table of Contents
    testing interoperability of the access control semantics.  A better
    option might be gRPC, which might change how events are structured
    but keep the overall semantics the same.
+   [I-D.rosenberg-mimi-protocol] might have ideas here as well for REST
+   APIs.
 
 12.1.  TLS Certificates
 
@@ -3975,6 +3979,12 @@ Table of Contents
               /blob/48efb972075233c3a0f3e3ca01c4d4f888342205/
               decentralised.org>.
 
+   [I-D.kohbrok-mimi-portability]
+              Kohbrok, K. and R. Robert, "MIMI Portability", Work in
+              Progress, Internet-Draft, draft-kohbrok-mimi-portability-
+              00, 10 July 2023, <https://datatracker.ietf.org/doc/html/
+              draft-kohbrok-mimi-portability-00>.
+
    [I-D.mahy-mimi-group-chat]
               Mahy, R., "Group Chat Framework for More Instant Messaging
               Interoperability (MIMI)", Work in Progress, Internet-
@@ -3988,6 +3998,14 @@ Table of Contents
               service-03, 10 July 2023,
               <https://datatracker.ietf.org/doc/html/draft-robert-mimi-
               delivery-service-03>.
+
+   [I-D.rosenberg-mimi-protocol]
+              Rosenberg, J., Jennings, C. F., and S. Nandakumar, "More
+              Instant Messaging Interop (MIMI) Transport Protocol", Work
+              in Progress, Internet-Draft, draft-rosenberg-mimi-
+              protocol-00, 13 March 2023,
+              <https://datatracker.ietf.org/doc/html/draft-rosenberg-
+              mimi-protocol-00>.
 
    [MSC3995]  Ralston, T., "MSC3995: [WIP] Linearized Matrix", 12 April
               2023, <https://github.com/matrix-org/matrix-spec-

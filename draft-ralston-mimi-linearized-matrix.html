@@ -3150,6 +3150,7 @@ area are: who signs the transfer event? who <em>sends</em> the transfer event? h
 <p id="section-11.1-2"><strong>TODO</strong>: Likely to be done with an <code>m.room.hub</code> state event in the room, where the "current hub" is
 either the sender of <code>m.room.hub</code> or <code>m.room.create</code> if no hub state event is present. Auth rules
 would govern what makes for a legal <code>m.room.hub</code> event.<a href="#section-11.1-2" class="pilcrow">¶</a></p>
+<p id="section-11.1-3"><strong>TODO</strong>: <span>[<a href="#I-D.kohbrok-mimi-portability" class="cite xref">I-D.kohbrok-mimi-portability</a>]</span> may be of help here.<a href="#section-11.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -3164,7 +3165,8 @@ would govern what makes for a legal <code>m.room.hub</code> event.<a href="#sect
 <p id="section-12-2"><strong>TODO</strong>: This transport doesn't scale, and doesn't use RESTful endpoints. This example transport is
 heavily inspired by Matrix's existing Server-Server API, largely acting as a starting point for testing
 interoperability of the access control semantics. A better option might be gRPC, which might change how
-events are structured but keep the overall semantics the same.<a href="#section-12-2" class="pilcrow">¶</a></p>
+events are structured but keep the overall semantics the same. <span>[<a href="#I-D.rosenberg-mimi-protocol" class="cite xref">I-D.rosenberg-mimi-protocol</a>]</span> might
+have ideas here as well for REST APIs.<a href="#section-12-2" class="pilcrow">¶</a></p>
 <div id="int-tls">
 <section id="section-12.1">
         <h3 id="name-tls-certificates">
@@ -5365,6 +5367,10 @@ the sending device and the event which gets emitted.<a href="#section-15-4" clas
         <dd>
 <span class="refAuthor">Chathi, H.</span>, <span class="refTitle">"Decentralised MLS"</span>, <time datetime="2023-05-29" class="refDate">29 May 2023</time>, <span>&lt;<a href="https://gitlab.matrix.org/matrix-org/mls-ts/-/blob/48efb972075233c3a0f3e3ca01c4d4f888342205/decentralised.org">https://gitlab.matrix.org/matrix-org/mls-ts/-/blob/48efb972075233c3a0f3e3ca01c4d4f888342205/decentralised.org</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="I-D.kohbrok-mimi-portability">[I-D.kohbrok-mimi-portability]</dt>
+        <dd>
+<span class="refAuthor">Kohbrok, K.</span> and <span class="refAuthor">R. Robert</span>, <span class="refTitle">"MIMI Portability"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-kohbrok-mimi-portability-00</span>, <time datetime="2023-07-10" class="refDate">10 July 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-kohbrok-mimi-portability-00">https://datatracker.ietf.org/doc/html/draft-kohbrok-mimi-portability-00</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="I-D.mahy-mimi-group-chat">[I-D.mahy-mimi-group-chat]</dt>
         <dd>
 <span class="refAuthor">Mahy, R.</span>, <span class="refTitle">"Group Chat Framework for More Instant Messaging Interoperability (MIMI)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-mahy-mimi-group-chat-00</span>, <time datetime="2023-07-10" class="refDate">10 July 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-mahy-mimi-group-chat-00">https://datatracker.ietf.org/doc/html/draft-mahy-mimi-group-chat-00</a>&gt;</span>. </dd>
@@ -5372,6 +5378,10 @@ the sending device and the event which gets emitted.<a href="#section-15-4" clas
 <dt id="I-D.robert-mimi-delivery-service">[I-D.robert-mimi-delivery-service]</dt>
         <dd>
 <span class="refAuthor">Robert, R.</span> and <span class="refAuthor">K. Kohbrok</span>, <span class="refTitle">"MIMI Delivery Service"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-robert-mimi-delivery-service-03</span>, <time datetime="2023-07-10" class="refDate">10 July 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-robert-mimi-delivery-service-03">https://datatracker.ietf.org/doc/html/draft-robert-mimi-delivery-service-03</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="I-D.rosenberg-mimi-protocol">[I-D.rosenberg-mimi-protocol]</dt>
+        <dd>
+<span class="refAuthor">Rosenberg, J.</span>, <span class="refAuthor">Jennings, C. F.</span>, and <span class="refAuthor">S. Nandakumar</span>, <span class="refTitle">"More Instant Messaging Interop (MIMI) Transport Protocol"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-rosenberg-mimi-protocol-00</span>, <time datetime="2023-03-13" class="refDate">13 March 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-rosenberg-mimi-protocol-00">https://datatracker.ietf.org/doc/html/draft-rosenberg-mimi-protocol-00</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="MSC3995">[MSC3995]</dt>
         <dd>
