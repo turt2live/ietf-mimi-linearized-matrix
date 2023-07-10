@@ -12,7 +12,7 @@
 between messaging providers, using Matrix's ( matrix.org ) decentralized room
 model. LM simplifies the Directed Acyclic Graph (DAG) persistence of Matrix while maintaining
 compatibility with non-linearized servers within a room. It does this by using a doubly-linked list
-with hub and spoke fanout. 
+of events/messages per room with hub and spoke fanout. 
        LM's extensibility enables a wide range of transport protocol and end-to-end encryption possibilities.
 This document uses Matrix's room access control semantics supported by Messaging Layer Security (MLS),
 transported via HTTPS and JSON. The details of which server-to-server transport to use and what a is
@@ -1107,7 +1107,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 between messaging providers, using Matrix's (<a href="https://matrix.org">matrix.org</a>) decentralized room
 model. LM simplifies the Directed Acyclic Graph (DAG) persistence of Matrix while maintaining
 compatibility with non-linearized servers within a room. It does this by using a doubly-linked list
-with hub and spoke fanout.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+of events/messages per room with hub and spoke fanout.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <p id="section-abstract-2">LM's extensibility enables a wide range of transport protocol and end-to-end encryption possibilities.
 This document uses Matrix's room access control semantics supported by Messaging Layer Security (MLS),
 transported via HTTPS and JSON. The details of which server-to-server transport to use and what a is
@@ -2339,7 +2339,7 @@ for <code>invite</code>).<a href="#section-3.5.3.4.1-5.2" class="pilcrow">¶</a>
 <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-mls-considerations" class="section-name selfRef">MLS Considerations</a>
       </h2>
 <p id="section-4-1"><strong>TODO</strong>: We should consider running <span>[<a href="#I-D.robert-mimi-delivery-service" class="cite xref">I-D.robert-mimi-delivery-service</a>]</span> over LM instead.
-Using something like <span>[<a href="#I-D.mahy-mimi-group-chat" class="cite xref">I-D.mahy-mimi-group-chat</a>]</span> would be good for a purely client-side
+Using something like <span>[<a href="#I-D.mahy-mimi-group-chat" class="cite xref">I-D.mahy-mimi-group-chat</a>]</span> would be good for more of a client-side
 representation of the LM room model.<a href="#section-4-1" class="pilcrow">¶</a></p>
 <p id="section-4-2">The MIMI working group is chartered to use Messaging Layer Security (MLS) <span>[<a href="#I-D.ietf-mls-protocol" class="cite xref">I-D.ietf-mls-protocol</a>]</span>
         <span>[<a href="#I-D.ietf-mls-architecture" class="cite xref">I-D.ietf-mls-architecture</a>]</span> for encryption in chats, and this document specifies no different.
