@@ -51,14 +51,6 @@ informative:
        - fullname: Travis Ralston
          organization: The Matrix.org Foundation C.I.C.
          email: travisr@matrix.org
-  MSC3820:
-    target: https://github.com/matrix-org/matrix-spec-proposals/pull/3820
-    title: "MSC3820: Room Version 11"
-    date: 2023-06-08
-    author:
-       - fullname: Travis Ralston
-         organization: The Matrix.org Foundation C.I.C.
-         email: travisr@matrix.org
   DMLS:
     target: https://gitlab.matrix.org/matrix-org/mls-ts/-/blob/48efb972075233c3a0f3e3ca01c4d4f888342205/decentralised.org
     title: "Decentralised MLS"
@@ -73,30 +65,74 @@ informative:
 
 --- abstract
 
-This document specifies Linearized Matrix for use in messaging interoperability.
+This document specifies Linearized Matrix (LM) - an extensible protocol for interoperability between
+messaging providers through usage of Matrix's ([matrix.org](https://matrix.org)) decentralized room
+model. LM simplifies Matrix's Directed Acyclic Graph (DAG) persistence to a doubly linked list with
+hub-and-spoke fanout while still being fully capable of supporting non-linearized servers in a room.
+
+LM's extensibility enables a wide range of transport protocol and end-to-end encryption possibilities.
+This document describes Matrix's room access control semantics supported by Messaging Layer Security
+(MLS) and shared between servers via HTTPS and JSON. Both the details for what is put over MLS and
+the server-server transport used are designed to be replaced.
+
+LM's threat model avoids placing trust in a central owning server for each conversation, but does define
+a hub server which becomes responsible for maintaining linearized room history on behalf of other servers
+in the room. The lack of trust in an owning server enables transparent interconnection between Matrix
+and Linearized Matrix servers within the same room.
 
 --- middle
 
 # Introduction {#int-intro}
 
-Alongside messaging, Matrix operates as an openly federated communications protocol for
-VoIP, IoT, and more. The existing Matrix network uses fully decentralized access control
-within rooms (conversations) and is highly extensible in its structure. These features
-are not critically important to a strict focus on messaging interoperability, however.
+Linearized Matrix is based upon Matrix ([matrix.org](https://matrix.org)) - an existing openly-specified
+and interoperable decentralized communications protocol. Matrix uses a Directed Acyclic Graph (DAG)
+to persist rooms, synchronizing the DAG between servers, while Linearized Matrix primarily uses an
+append-only doubly linked list. A hub server is present in each room to persist the linked list and
+to be responsible for linearization of events (user/application messages as well as room configuration
+changes) from other servers.
 
-This document specifies "Linearized Matrix": a modified room model based upon Matrix's
-existing room model. This document does *not* explore how to interconnect Linearized
-Matrix with the existing Matrix room model - interested readers may wish to review
-{{MSC3995}} within the Matrix Specification process.
+The hub server in a room does *not* act as an owner for the room. All rooms support both a DAG and
+doubly linked list for their structure simultaneously. The precise details of the DAG and linked list
+interconnection are not covered by this document due to largely being out of scope for the More Instant
+Messaging Interoperability (MIMI) working group. Interested readers may wish to review {{MSC3995}}
+within the Matrix specification process for full details, however where applicable this document does
+cover the mandatory components.
 
-At a high level, a central server is designated as the "hub" server, responsible for
-ensuring events in a given room are provided to all other participants equally. Servers
-communicate with each other over HTTPS and JSON, using the specified API endpoints.
+Splitting the room model between these two representations allows for a variable threat model. A messaging
+provider which prefers to trust no other provider/server to deliver its messages would choose to use
+the DAG representation at the (significant) cost of implementation complexity. Meanwhile, Linearized
+Matrix places trust in a hub server to deliver messages but does not trust that server to not modify
+those events by adding additional verifiable hashes and signatures to each event.
 
-**TODO**: Improve introduction. The draft should be covered in better detail, and describe
-why it's designed the way it is. Clarify the interconnection component more deliberately.
+The room model and rules which govern whether events are accepted into a room are Linearized Matrix's
+primary exports. This document specifies a server-centric approach where access control is performed
+on one or more servers, though with some changes it can become client-centric as well. This document
+additionally minimally specifies a transport for (re-)synchronizing the doubly linked list to other
+servers. The transport itself is expected to be replaced by a more efficient and scalable solution
+in a future iteration of this document - it exists to test the access control semantics currently.
 
-**TODO**: Update the abstract too.
+Similarly, this document specifies how Messaging Layer Security (MLS) *could* run over a Linearized
+Matrix room. MLS is used for user messages while room configuration information, called state events,
+are handled in plain text in this iteration of the document. Room and MLS group membership are synchronized
+by clients and verified by the server to ensure users not in the room are unable to gain access to
+encrypted messages. The specific details for how to run MLS over Linearized Matrix are expected to
+change in future iterations of this document.
+
+A key component of interoperability is consistent access control semantics. Having a single server
+"own" a room allows for arbitrary measures to be put in place by the owning provider, diminishing
+the user experience on providers which do not (or can not) support those measures. With decentralization,
+all participating servers *must* use the same consistent set of access controls in order to continue
+their participation in that room by nature.  Linearized Matrix uses such a decentralized room model
+but critically keeps the room model itself linear for ease of implementation.
+
+Linearized Matrix additionally supports transferring the hub to a different server in the room. This
+enables two major features: servers leaving a room are not required to handle events for that
+room, and access control semantics are forced to be consistent because the hub could change at any
+time. Additionally, by allowing hub transfers it becomes possible for a (non-linearized) Matrix server
+to participate in the room and take hub status. When it becomes the hub, it can be responsible for
+linearizing the room's DAG on behalf of other Linearized Matrix servers in the room. The exact
+DAG linearization algorithm is not specified in this document as it is not in scope for the MIMI working
+group.
 
 # Conventions and Definitions
 
@@ -163,6 +199,9 @@ This leads to two distinct roles:
 
 * **Participant server**: any non-hub server. This server MAY persist conversation history
   or rely on the hub server instead.
+
+**TODO**: Describe how much history each server needs to store, somewhere. ie: minimum state events,
+HEAD for the room, etc. Maybe the hub can drop events it doesn't need anymore too.
 
 **OPEN QUESTION**: Should we support having multiple hubs for increased trust between
 participant and hub? (participant can pick the hub it wants to use rather than being
@@ -361,6 +400,8 @@ Identity systems and messaging providers SHOULD NOT use a phone number in a loca
 localpart for a user ID is unchangeable. In these cases, a GUID (scoped to the allocating server)
 is recommended so the associated human can change their phone number without losing chats.
 
+**TODO**: Clarify that phone numbers aren't banned, but that takeover considerations need to be made.
+
 This document does not define how a user ID is acquired. It is expected that an identity specification
 under MIMI will handle resolving email addresses, phone numbers, names, and other common queries
 to user IDs.
@@ -452,6 +493,9 @@ Note that an event ID is not specified on the schema. Event IDs are calculated t
 and consistency between servers. To determine the ID for an event, calculate the reference hash
 ({{int-reference-hashes}}) then encode it using URL-safe Unpadded Base64 ({{int-unpadded-base64}})
 and prefix that with the event ID sigil, `$`. For example, `$nKHVqt3iyLA_HEE8lT1yUaaVjjBRR-fAqpN4t7opadc`.
+
+**TODO**: Describe security benefits of using hashes-as-IDs here, in contrast to privacy concern of
+having a hash as the ID.
 
 The ABNF {{!RFC5234}} for an event ID is:
 
@@ -1332,6 +1376,8 @@ fields of the event, including content hashes, and serves as the event's ID.
 
 ## Content Hash Calculation {#int-content-hashes}
 
+**TODO**: Describe what this protects, and why it matters.
+
 1. Remove any existing `signatures` field.
    1. If calculating an LPDU's ({{int-lpdu}}) content hash, remove any existing `hashes` field as well.
    2. If *not* calculating an LPDU's content hash, remove any existing fields under `hashes` except
@@ -1341,6 +1387,8 @@ fields of the event, including content hashes, and serves as the event's ID.
 4. Encode the hash using unpadded base64 ({{int-unpadded-base64}}).
 
 ## Reference Hash Calculation {#int-reference-hashes}
+
+**TODO**: Describe what this protects, and why it matters.
 
 1. Redact the event.
 2. Remove `signatures` field.
