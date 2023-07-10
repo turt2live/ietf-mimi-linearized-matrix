@@ -69,7 +69,7 @@ This document specifies Linearized Matrix (LM). LM is an extensible protocol for
 between messaging providers, using Matrix's ([matrix.org](https://matrix.org)) decentralized room
 model. LM simplifies the Directed Acyclic Graph (DAG) persistence of Matrix while maintaining
 compatibility with non-linearized servers within a room. It does this by using a doubly-linked list
-with hub and spoke fanout.
+of events/messages per room with hub and spoke fanout.
 
 LM's extensibility enables a wide range of transport protocol and end-to-end encryption possibilities.
 This document uses Matrix's room access control semantics supported by Messaging Layer Security (MLS),
@@ -772,7 +772,7 @@ To calculate the required power level to send an event:
 # MLS Considerations {#int-mls-considerations}
 
 **TODO**: We should consider running {{?I-D.robert-mimi-delivery-service}} over LM instead.
-Using something like {{?I-D.mahy-mimi-group-chat}} would be good for a purely client-side
+Using something like {{?I-D.mahy-mimi-group-chat}} would be good for more of a client-side
 representation of the LM room model.
 
 The MIMI working group is chartered to use Messaging Layer Security (MLS) {{!I-D.ietf-mls-protocol}}
