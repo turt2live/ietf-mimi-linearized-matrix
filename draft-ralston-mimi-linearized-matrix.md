@@ -137,6 +137,14 @@ this document; it is out of scope for the MIMI working group.
 
 This document uses {{!I-D.ralston-mimi-terminology}} where possible.
 
+This document additionally defines:
+
+**Rejection**: An event which is "rejected" is not relayed to any local clients and is not appended
+to the room in any way.
+
+**Soft Failure**: An event which is "soft-failed" SHOULD NOT be relayed to any local clients, nor be
+used as in `auth_events` if possible. The event is otherwise appended to the room as per usual.
+
 Further terms are introduced in-context within this document.
 
 **TODO**: We should move/copy those definitions up here anyways.
@@ -699,7 +707,7 @@ The `content` for a membership event MAY additionally have a `reason` field cont
 (and usually human-supplied) description for why the membership change happened. For example, the reason
 why a user was kicked/banned or why they are requesting an invite by knocking.
 
-#### `m.room.power_levels`
+#### `m.room.power_levels` {#int-ev-power-levels}
 
 Defines what given users can and can't do, as well as which event types they are able to send.
 The enforcement of these power levels is determined by the event authorization rules ({{int-auth-rules}}).
@@ -731,32 +739,6 @@ the `m.room.create` state event) has a default power level of 100.
 
 These conditions are checked as part of the event authorization rules ({{int-auth-rules}}).
 
-##### Calculating Power Levels {#int-calc-power-levels}
-
-All power levels are calculated with reference to the `content` of an `m.room.power_levels`
-state event.
-
-To calculate a user's current power level:
-
-1. If `users` is present, use the power level for the user ID, if present.
-2. If `users` is not present, or the user ID is not present in `users`, use `users_default`.
-3. If `users_default` is not present, use `0`.
-
-To calculate the required power level to do an action:
-
-1. If the action (`kick`, `ban`, `invite`, or `redact`) is present, use that power level.
-2. If not present, use the default for the action (`50` for `kick`, `ban`, and `redact`, `0`
-   for `invite`).
-
-To calculate the required power level to send an event:
-
-1. If `events` is present, use the power level for the event `type`, if present.
-2. If `events` is not present, or the event `type` is not present in `events`:
-   1. If `state_key` is present (including empty), use `state_default`.
-      1. If `state_default` is not specified, use `50`.
-   2. If `state_key` is not present, use `events_default`.
-      1. If `events_default` is not specified, use `0`.
-
 #### `m.room.history_visibility`
 
 **TODO**: Describe.
@@ -764,6 +746,8 @@ To calculate the required power level to send an event:
 ##### Calculating Event Visibility {#int-calc-event-visibility}
 
 **TODO**: Describe. (when can a server see an event?). Mention that `m.mls.commit` is exempt.
+
+**TODO**: This section feels like it's in the wrong place. Bring it closer to on-receive-event sections.
 
 #### TODO: Other events
 
@@ -907,7 +891,7 @@ validate that any membership changes match what is possible with the room member
      the group.
 
 If this validation fails, the hub server MUST reject the request if it's shaped as an LPDU ({{int-lpdu}})
-and soft-fail ({{int-soft-failure}}) the event if it's a PDU ({{int-pdu}}).
+and soft-fail the event if it's a PDU ({{int-pdu}}).
 
 Welcome messages are sent to devices over to-device messaging ({{int-transport-to-device}}). The `message_type`
 for the message is `m.room.encrypted` [**TODO**: Rename to avoid confusion with room event?] and `message`
@@ -953,6 +937,8 @@ version SHOULD be generated based upon the key package itself rather than using 
 such as a hash or the public key of the key package.
 
 ## Room Event Types
+
+**TODO**: Should these be defined with the other event types rather than here?
 
 This document describes the following event types for use with MLS-encrypted rooms. The section headers
 are the event `type`. See {{int-pdu}} for more information on events.
@@ -1023,6 +1009,9 @@ stored as a redacted copy.
 
 ## Receiving Events/PDUs {#int-receiving-events}
 
+**TODO**: This section conflates sending and receiving a bit more than it should. Split sending
+out to its own section.
+
 When a hub receives an LPDU from a participant it MUST add the missing fields to create a fully
 formed PDU then MUST send that PDU back out to all participants, including the original sender.
 
@@ -1055,53 +1044,7 @@ manner. If the hub is not acting appropriately (for example, by sending the part
 event which never should have been accepted), the participant server MAY choose to warn its
 local users that the room history may have been tampered with.
 
-4. Ensure the event is not referencing rejected ({{int-rejection}}) events. If it is, it is
-   rejected itself.
-
-   **TODO**: This doesn't make sense in Linearized Matrix. The hub already doesn't reference
-   rejected events, so why bother saying it can't twice? This matters more on the non-linearized
-   matrix side (not covered by this document).
-
-5. Ensure the event passes the authorization rules ({{int-auth-rules}}) for the state identified
-   by the event's `auth_events`. If it fails, it is rejected ({{int-rejection}}).
-
-   **TODO**: Like above, this doesn't make sense in this document.
-
-6. Ensures the event passes the authorization rules ({{int-auth-rules}}) for the state of the
-   room immediately before where the event would be inserted. If it fails, it is rejected
-   ({{int-rejection}}).
-
-   **TODO**: Even more like above, this step really shouldn't be here. It's only for the
-   non-linearized matrix interconnection stuff. We may need to adjust the rejection/soft-fail
-   logic.
-
-7. Ensures the event passes the authorization rules ({{int-auth-rules}}) for the current
-   state of the room (which may very well be the same as the step above). If it fails, it
-   is soft-failed ({{int-soft-failure}}).
-
-   **TODO**: Like the above three, does this need to be here?
-
-8. The constraints described by {{int-mls-add-remove}} validated, if the room is encrypted.
-
-## Rejection {#int-rejection}
-
-**TODO**: Unless we keep steps 4 through 7 above, this section can probably go.
-
-Events which are rejected are not relayed to any local clients and are not appended to the
-room in any way. Events which reference rejected events through `prev_events` or `auth_events`
-are rejected themselves.
-
-Servers which utilize persistence (hub servers) SHOULD persist rejections to make this check
-faster.
-
-## Soft Failure {#int-soft-failure}
-
-**TODO**: Unless we keep steps 4 through 7 above, this section can probably go.
-
-When an event is "soft-failed" it should not be relayed to any local clients nor be used
-in `auth_events`. The event is otherwise handled as per usual.
-
-**TODO**: With a linearized DAG, do we have a choice to not use the event in auth_events?
+1. The constraints described by {{int-mls-add-remove}} validated, if the room is encrypted.
 
 ## Authorization Rules {#int-auth-rules}
 
@@ -1124,135 +1067,167 @@ of an `m.room.create` event which has no `auth_events`.
 
 **TODO**: Talk about restricted room joins here?
 
+### Calculating Power Levels {#int-calc-power-levels}
+
+A requirement of the authorization rules is being able to determine the current/future "power level"
+for a user. All power levels are calculated with reference to the `content` of an `m.room.power_levels`
+state event ({{int-ev-power-levels}}).
+
+To calculate a user's current power level:
+
+1. If `users` is present, use the power level for the user ID, if present.
+2. If `users` is not present, or the user ID is not present in `users`, use `users_default`.
+3. If `users_default` is not present, use `0`.
+
+To calculate the required power level to do an action:
+
+1. If the action (`kick`, `ban`, `invite`, or `redact`) is present, use that power level.
+2. If not present, use the default for the action (`50` for `kick`, `ban`, and `redact`, `0`
+   for `invite`).
+
+To calculate the required power level to send an event:
+
+1. If `events` is present, use the power level for the event `type`, if present.
+2. If `events` is not present, or the event `type` is not present in `events`:
+   1. If `state_key` is present (including empty), use `state_default`.
+      1. If `state_default` is not specified, use `50`.
+   2. If `state_key` is not present, use `events_default`.
+      1. If `events_default` is not specified, use `0`.
+
 ### Auth Rules Algorithm
 
-With consideration for default/calculated power levels ({{int-calc-power-levels}}), the
-ordered rules which affect authorization of a given event are as follows.
-
-See {{int-rejection}} for a description of "reject".
+With consideration for default/calculated power levels ({{int-calc-power-levels}}), each event MUST
+pass the following rules. "Current state" (and "current membership", etc) are the state of the room
+*before* the event being checked is applied.
 
 **TODO**: should we reference `m.federate`?
 
 1. Events must be signed ({{int-checking-signatures}}) by the server denoted by the `sender`
    field. Note that this may be an LPDU if the `hub_server` is specified and not the same server.
+   If the event is improperly signed, reject the event.
 
-2. If `hub_server` is present, events must be signed ({{int-checking-signatures}}) by that server.
+2. If `hub_server` is present on the event, the event must be signed ({{int-checking-signatures}})
+   by that server. If it is improperly signed, reject the event.
 
-3. If `type` is `m.room.create`:
+3. If the event's `type` is `m.room.create`:
 
-   1. If it has any `prev_events`, reject.
-   2. If the domain of the `room_id` is not the same domain as the `sender`, reject.
-   3. If `content.room_version` is not `I.1`, reject.
-   4. Otherwise, allow.
+   1. If it has any `prev_events`, reject the event.
+   2. If the domain of the `room_id` is not the same domain as the `sender`, reject the event.
+   3. If `content.room_version` is not `I.1`, reject the event.
+   4. Otherwise, allow the event.
 
 4. Considering the event's `auth_events`:
 
-   1. If there are duplicate entries for a given `type` and `state_key` pair, reject.
+   **TODO**: Does this check make sense for Linearized Matrix? We already removed what was #3 because
+   it talked about rejecting events which reference rejected events.
+
+   1. If there are duplicate entries for a given `type` and `state_key` pair, reject the event.
    2. If there are entries whose `type` and `state_key` do not match those specified by the
-      auth events selection algorithm ({{int-auth-selection}}), reject.
-   3. If there are entries where the referenced event was rejected during receipt ({{int-rejection}}),
-      reject.
-   4. If there is no `m.room.create` event among the entries, reject.
+      auth events selection algorithm ({{int-auth-selection}}), reject the event.
+   3. If there is no `m.room.create` event among the entries, reject.
 
-5. If `type` is `m.room.member`:
+5. If the event's `type` is `m.room.member`:
 
-   1. If there is no `state_key` property, or no `membership` in `content`, reject.
+   1. If there is no `state_key` property, or no `membership` in `content`, reject the event.
 
-   2. If `membership` is `join`:
+   2. If the event `content`'s `membership` field is `join`:
 
       1. If the previous event is an `m.room.create` event and the `state_key` is the
-         creator, allow.
-      2. If `sender` does not match `state_key`, reject.
-      3. If the `sender` is banned, reject.
-      4. If the `join_rule` for `m.room.join_rules` is `invite` or `knock`, then allow if
+         creator, allow the event.
+      2. If `sender` does not match `state_key`, reject the event.
+      3. If the `sender` is banned, reject the event.
+      4. If the `join_rule` for `m.room.join_rules` is `invite` or `knock`, then allow the event if
          the current membership state is `invite` or `join`.
-      5. If the `join_rule` for `m.room.join_rules` is `public`, allow.
-      6. Otherwise, reject.
+      5. If the `join_rule` for `m.room.join_rules` is `public`, allow the event.
+      6. Otherwise, reject the event.
 
-   3. If `membership` is `invite`:
+   3. If the event `content`'s `membership` field is `invite`:
 
-      1. If the `sender`'s current membership state is not `join`, reject.
-      2. If the target user's (`state_key`) membership is `join` or `ban`, reject.
+      1. If the `sender`'s current membership state is not `join`, reject the event.
+      2. If the target user's (`state_key`) membership is `join` or `ban`, reject the event.
       3. If the `sender`'s power level is greater than or equal to the power level needed
-         to send invites, allow.
-      4. Otherwise, reject.
+         to send invites, allow the event.
+      4. Otherwise, reject the event.
 
-   4. If `membership` is `leave`:
+   4. If the event `content`'s `membership` field is `leave`:
 
-      1. If the `sender` matches the `state_key`, allow if and only if that user's current
+      1. If the `sender` matches the `state_key`, allow the event if and only if that user's current
          membership state is `knock`, `join`, or `invite`.
-      2. If the `sender`'s current membership state is not `join`, reject.
+      2. If the `sender`'s current membership state is not `join`, reject the event.
       3. If the target user's (`state_key`) current membership state is `ban`, and the
-         `sender`'s power level is less than the power level needed to ban other users, reject.
+         `sender`'s power level is less than the power level needed to ban other users, reject the event.
       4. If the `sender`'s power level is greater than or equal to the power level needed to
          kick users, and the target user's (`state_key`) power level is less than the `sender`'s,
-         allow.
-      5. Otherwise, reject.
+         allow the event.
+      5. Otherwise, reject the event.
 
-   5. If `membership` is `ban`:
+   5. If the event `content`'s `membership` field is `ban`:
 
-      1. If the `sender`'s current membership state is not `join`, reject.
+      1. If the `sender`'s current membership state is not `join`, reject the event.
       2. If the `sender`'s power level is greater than or equal to the power level needed
          to ban users, and the target user's (`state_key`) power level is less than the
-         `sender`'s power level, allow.
-      3. Otherwise, reject.
+         `sender`'s power level, allow the event.
+      3. Otherwise, reject the event.
 
-   6. If `membership` is `knock`:
+   6. If the event `content`'s `membership` field is `knock`:
 
-      1. If the `join_rule` for `m.room.join_rules` is anything other than `knock`, reject.
-      2. If the `sender` does not match the `state_key`, reject.
-      3. If the `sender`'s current membership state is not `ban` or `join`, allow.
-      4. Otherwise, reject.
+      1. If the `join_rule` for `m.room.join_rules` is anything other than `knock`, reject the event.
+      2. If the `sender` does not match the `state_key`, reject the event.
+      3. If the `sender`'s current membership state is not `ban` or `join`, allow the event.
+      4. Otherwise, reject the event.
 
-   7. Otherwise, the `membership` is unknown. Reject.
+   7. Otherwise, the `membership` is unknown. reject the event.
 
-6. If the `sender`'s current membership state is not `join`, reject.
+6. If the `sender`'s current membership state is not `join`, reject the event.
 
-7. If the event `type`'s required power level is greater than the `sender`'s power level,
-   reject.
+7. If the event `type`'s required power level to send it is greater than the `sender`'s power level,
+   reject the event.
 
 8. If the event has a `state_key` which starts with an `@` and does not match the `sender`,
-   reject.
+   reject the event.
 
-9. If `type` is `m.room.power_levels`:
+   **TODO**: Do we care? This is theoretically to allow for owned state events, but in practice nothing
+   which uses this concept makes it this far into the auth rules (membership events are validated above).
+
+9. If the event's `type` is `m.room.power_levels`:
 
    1. If any of the fields `users_default`, `events_default`, `state_default`, `ban`, `redact`,
-      `kick`, or `invite` in `content` are present and not an integer, reject.
+      `kick`, or `invite` in `content` are present and not an integer, reject the event.
 
    2. If `events` in `content` is present and not an object with values that are integers,
-      reject.
+      reject the event.
 
    3. If the `users` in `content` is present and not an object with valid user IDs as keys and
-      integers as values, reject.
+      integers as values, reject the event.
 
-   4. If there is no previous `m.room.power_levels` event in the room, allow.
+   4. If there is no previous `m.room.power_levels` event in the room, allow the event.
 
    5. For the fields `users_default`, `events_default`, `state_default`, `ban`, `redact`, `kick`,
       and `invite`, check if they were added, changed, or removed. For each found alteration:
 
-      1. If the current value is higher than the `sender`'s current power level, reject.
-      2. If the new value is higher than the `sender`'s current power level, reject.
+      1. If the current value is higher than the `sender`'s current power level, reject the event.
+      2. If the new value is higher than the `sender`'s current power level, reject the event.
 
    6. For each entry being changed in or removed from `events`:
 
-      1. If the current value is higher than the `sender`'s current power level, reject.
+      1. If the current value is higher than the `sender`'s current power level, reject the event.
 
    7. For each entry being added to or changed in `events`:
 
-      1. If the new value is greater than the `sender`'s current power level, reject.
+      1. If the new value is greater than the `sender`'s current power level, reject the event.
 
    8. For each entry being changed in or removed from `users`, other than the `sender`'s own
       entry:
 
-      1. If the current value is higher than the `sender`'s current power level, reject.
+      1. If the current value is higher than the `sender`'s current power level, reject the event.
 
    9. For each entry being added to or changed in `users`:
 
-      1. If the new value is greater than the `sender`'s current power level, reject.
+      1. If the new value is greater than the `sender`'s current power level, reject the event.
 
-   10. Otherwise, allow.
+   10. Otherwise, allow the event.
 
-10. Otherwise, allow.
+10. Otherwise, allow the event.
 
 There are some consequences to these rules:
 
