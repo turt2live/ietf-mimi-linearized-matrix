@@ -137,13 +137,6 @@ this document; it is out of scope for the MIMI working group.
 
 This document uses {{!I-D.ralston-mimi-terminology}} where possible.
 
-This document additionally uses the following definitions:
-
-* **Room**: Synonymous with "conversation" from I-D.ralston-mimi-terminology.
-* **Room Member**: Synonymous with "conversation member" from I-D.ralston-mimi-terminology.
-* **State Event**: Synonymous with "conversation property" from I-D.ralston-mimi-terminology.
-  A state event is a subclass of an event.
-
 Further terms are introduced in-context within this document.
 
 **TODO**: We should move/copy those definitions up here anyways.
@@ -178,8 +171,8 @@ For a given conversation/room:
                                       '------------'
 ~~~
 
-In this diagram, events are objects which carry information about the room as well as messages
-between users within that room. See {{int-pdu}} for schema and further definition.
+In this diagram, events ({{int-pdu}}) are objects which carry information about the room as well as messages
+between users within that room.
 
 Server A is acting as a hub for the other two servers in the diagram. Servers B and C do
 not converse directly when sending events to the room: those events are instead sent to the
@@ -197,12 +190,14 @@ This leads to two distinct roles:
 * **Participant server**: any non-hub server. This server MAY persist conversation history
   or rely on the hub server instead.
 
-**TODO**: Describe how much history each server needs to store, somewhere. ie: minimum state events,
-HEAD for the room, etc. Maybe the hub can drop events it doesn't need anymore too.
-
 **OPEN QUESTION**: Should we support having multiple hubs for increased trust between
 participant and hub? (participant can pick the hub it wants to use rather than being
 forced to use a single hub)
+
+**OPEN QUESTION**: Should we instead require that each server persist events they create, with the hub
+being responsible for purely distribution/fetching? It'd be in the hub's best interest to store all
+history, but equally if it can rebuild the room by reaching out to origin servers then it might be
+fine enough (it'd only be storing event IDs rather than whole events).
 
 ## Server Names {#int-server-names}
 
@@ -210,28 +205,20 @@ Each messaging provider is referred to as a "server" and has a "domain name" or 
 to uniquely identify it. This server name is then used to namespace user IDs, room IDs/aliases,
 etc.
 
-A server name MUST be compliant with {{Section 2.1 of RFC1123}} and, when an IPv6 address,
-encoded per {{Section 2.2 of RFC4291}} surrounded by square brackets (`[]`). Improper server
-names MUST be considered "uncontactable" by a server.
+A server name MUST be compliant with {{Section 2.1 of RFC1123}}. Improper server names MUST be
+considered "uncontactable" by a server.
 
-A server SHOULD NOT use a literal IPv4 or IPv6 address as a server name. Doing so reduces the
-ability for the server to move to another internet address later, and IP addresses are generally
-difficult to acquire certificates for (required in {{int-transport}}). Additionally, servers
-SHOULD NOT use an explicit port in their server name for similar portability reasons.
-
-**TODO**: We should probably disallow literal IP addresses.
+A server MUST NOT use a literal IPv4 or IPv6 address as a server name. Doing so reduces the ability
+for the server to move to another internet address later, and IP addresses are generally difficult
+to acquire a certificate for (required in {{int-transport}}). Additionally, servers SHOULD NOT use
+an explicit port in their server name for similar portability reasons.
 
 The approximate ABNF {{!RFC5234}} grammar for a server name is:
 
 ~~~
 server_name = hostname [ ":" port ]
 port        = 1*5DIGIT
-hostname    = IPv4address / "[" IPv6address "]" / dns-name
-IPv4address = 1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT
-IPv6address = 2*45IPv6char
-IPv6char    = DIGIT / %x41-46 / %x61-66 / ":" / "."
-                  ; 0-9, A-F, a-f, :, .
-dns-name    = 1*255dns-char
+hostname    = 1*255dns-char
 dns-char    = DIGIT / ALPHA / "-" / "."
 ~~~
 
@@ -244,10 +231,6 @@ Examples:
 
 * `example.org` (DNS host name)
 * `example.org:5678` (DNS host name with explicit port)
-* `127.0.0.1` (literal IPv4 address)
-* `127.0.0.1:5678` (literal IPv4 address with explicit port)
-* `[2001:DB8:0:0:8:800:200C:417A]` (literal IPv6 address)
-* `[2001:DB8:0:0:8:800:200C:417A]:5678` (literal IPv6 address with explicit port)
 
 ## Rooms {#int-room-id}
 
@@ -393,11 +376,12 @@ Examples:
 `server_name` denotes the domain name ({{int-server-names}}) which allocated the ID, or would allocate
 the ID if the user doesn't exist yet.
 
-Identity systems and messaging providers SHOULD NOT use a phone number in a localpart, as the
-localpart for a user ID is unchangeable. In these cases, a GUID (scoped to the allocating server)
-is recommended so the associated human can change their phone number without losing chats.
-
-**TODO**: Clarify that phone numbers aren't banned, but that takeover considerations need to be made.
+Identity systems and messaging providers SHOULD NOT use a phone number in a localpart. Using a phone
+number would mean that when a human operator's changes their phone number then they'd lose access to
+their existing chats and potentially gain access to any chats the new number is participating in.
+Providers which use phone numbers SHOULD ensure the new user ID is not in chats belonging to a different
+logical user. To prevent this case, a GUID (scoped to the allocating server) or an account ID is
+recommended as a localpart, allowing users to change their phone number without losing chats.
 
 This document does not define how a user ID is acquired. It is expected that an identity specification
 under MIMI will handle resolving email addresses, phone numbers, names, and other common queries
@@ -491,8 +475,24 @@ and consistency between servers. To determine the ID for an event, calculate the
 ({{int-reference-hashes}}) then encode it using URL-safe Unpadded Base64 ({{int-unpadded-base64}})
 and prefix that with the event ID sigil, `$`. For example, `$nKHVqt3iyLA_HEE8lT1yUaaVjjBRR-fAqpN4t7opadc`.
 
-**TODO**: Describe security benefits of using hashes-as-IDs here, in contrast to privacy concern of
-having a hash as the ID.
+Using a reference hash in the event ID prevents other servers from changing what that event ID represents.
+If an event ID was just a UUID (or similar), any server along the send or receive path could swap the
+actual event payload out for a different event. The hashes and signatures in this case do nothing to
+protect the actual event, as a malicious server can simply generate legal hashes/signatures as part of
+their modification. If we add a namespace condition where the event ID *must* reference the same server
+name as the `sender` (`$uuid:example.org`) then the sending server is free to re-assign the event ID
+to a different payload during the sending of that event, though all other servers along the send/receive
+path cannot change the event. This is particularly problematic if the event's sender is the hub for
+the room: the hub can send one copy of an event to half the room, and a very different copy to the other
+half while still maintaining the same event ID for both halves. To fix this, a hash of the event itself
+would need to become part of the event ID such that any modification or reassignment of the event ID
+is made obvious to receipient servers. This could be a tuple of `(uuid, hash)`, though for simplicity
+this document uses just the reference hash on its own.
+
+With event IDs containing hashes of the events it's theoretically possible for a sufficiently motivated
+person to build a database of event IDs. With that database, they could eventually determine enough
+information to identify parts of the event payload itself. There is not enough anchoring information
+on an event (or sent over the transport) for this to be efficient or effective, however.
 
 The ABNF {{!RFC5234}} for an event ID is:
 
@@ -772,6 +772,8 @@ To calculate the required power level to send an event:
 # MLS Considerations {#int-mls-considerations}
 
 **TODO**: We should consider running {{?I-D.robert-mimi-delivery-service}} over LM instead.
+Using something like {{?I-D.mahy-mimi-group-chat}} would be good for a purely client-side
+representation of the LM room model.
 
 The MIMI working group is chartered to use Messaging Layer Security (MLS) {{!I-D.ietf-mls-protocol}}
 {{!I-D.ietf-mls-architecture}} for encryption in chats, and this document specifies no different.
@@ -1428,10 +1430,10 @@ MUST support a minimum of HTTP/2 {{!RFC9113}} and TLS 1.3 {{!RFC8446}}.
 
 **TODO**: This transport doesn't scale, and doesn't use RESTful endpoints. It really should be replaced
 with something that works better. This draft defines a protocol that can run over nearly any transport
-or server-server API. A better option might be something which uses gRPC for example, which might change
+or server-server API. A better option might be something that uses gRPC for example, which might change
 how events are structured, but the semantics remain the same. This draft's transport is heavily inspired
 by Matrix's existing server-server API, and exists largely as a starting point for implementation
-validation work - it is not really meant to live on indefinitely.
+validation work - it is not really meant to exist indefinitely.
 
 ## TLS Certificates {#int-tls}
 
@@ -1572,14 +1574,7 @@ for example.
 Per {{int-server-names}}, a server name consists of `<hostname>[:<port>]`. The steps to convert that
 server name to an IP address and port are:
 
-1. If `<hostname>` is an IP literal, then that IP address is to be used together with the given port
-   number, or 8448 if no port is given.
-
-   TLS certificate: `<hostname>` (always without port)
-
-   Host header: `<hostname>` or `<hostname>:<port>` if a port was specified
-
-2. If `<hostname>` is not an IP literal, and an explicit `<port>` is present, resolve `<hostname>` to
+1. If `<hostname>` has an explicit `<port>` is present, resolve `<hostname>` to
    an IP address using CNAME {{!RFC1034}} {{!RFC2181}}, AAAA {{!RFC3596}}, or A {{!RFC1035}} DNS
    records. Requests are made to the resolved IP address and port number.
 
@@ -1587,19 +1582,12 @@ server name to an IP address and port are:
 
    Host header: `<hostname>:<port>`
 
-3. If `<hostname>` is not an IP literal, a regular (non-Matrix) HTTPS request is made to
-   `https://<hostname>/.well-known/matrix/server`, expecting the schema defined by {{int-wellknown}}.
-   If the response is invalid (bad/not JSON, missing properties, non-200 response, etc), skip to Step 4.
-   If the response is valid, the `m.server` property is parsed as `<delegated_hostname>[:<delegated_port>]`.
+2. A regular (non-Matrix) HTTPS request is made to `https://<hostname>/.well-known/matrix/server`,
+   expecting the schema defined by {{int-wellknown}}. If the response is invalid (bad/not JSON, missing
+   properties, non-200 response, etc), skip to Step 4. If the response is valid, the `m.server` property
+   is parsed as `<delegated_hostname>[:<delegated_port>]`.
 
-   1. If `<delegated_hostname>` is an IP literal, then that IP address is to be used together with the
-      given port number, or 8448 if no port is given.
-
-      TLS certificate: `<delegated_hostname>` (always without port)
-
-      Host header: `<delegated_hostname>` or `<delegated_hostname>:<delegated_port>` if a port was specified
-
-   2. If `<delegated_hostname>` is not an IP literal, and `<delegated_port>` is present, resolve
+   1. If `<delegated_hostname>` has an explicit `<delegated_port>` is present, resolve
       `<delegated_hostname>` to an IP address using CNAME, AAAA, or A DNS records. Requests are made to the
       resolved IP address and port number.
 
@@ -1607,10 +1595,9 @@ server name to an IP address and port are:
 
       Host header: `<delegated_hostname>:<delegated_port>`
 
-   3. If `<delegated_hostname>` is not an IP literal and no `<delegated_port>` is present, an SRV DNS
-      record is resolved for `_matrix._tcp.<delegated_hostname>`. This may result in another hostname
-      and port to be resolved using AAAA or A DNS records. Requests are made to the resolved IP address
-      and port number.
+   3. An SRV DNS record is resolved for `_matrix._tcp.<delegated_hostname>`. This may result in another
+      hostname and port to be resolved using AAAA or A DNS records. Requests are made to the resolved IP
+      address and port number.
 
       TLS certificate: `<delegated_hostname>`
 
