@@ -1411,7 +1411,8 @@ MUST support a minimum of HTTP/2 {{!RFC9113}} and TLS 1.3 {{!RFC8446}}.
 **TODO**: This transport doesn't scale, and doesn't use RESTful endpoints. This example transport is
 heavily inspired by Matrix's existing Server-Server API, largely acting as a starting point for testing
 interoperability of the access control semantics. A better option might be gRPC, which might change how
-events are structured but keep the overall semantics the same.
+events are structured but keep the overall semantics the same. {{?I-D.rosenberg-mimi-protocol}} might
+have ideas here as well for REST APIs.
 
 ## TLS Certificates {#int-tls}
 
