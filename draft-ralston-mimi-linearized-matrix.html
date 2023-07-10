@@ -2054,11 +2054,25 @@ the most recent (in terms of event ordering, not timestamp) state tuple.<a href=
 [
    /* in all events, irrelevant fields are not shown for brevity */
 
-   /* 0 */ {"type": "m.room.create", "state_key": ""},
-   /* 1 */ {"type": "m.room.member", "state_key": "@alice:example.org"},
-   /* 2 */ {"type": "m.room.encrypted"},
-   /* 3 */ {"type": "m.room.member", "state_key": "@bob:example.org"}
-   /* 4 */ {"type": "m.room.member", "state_key": "@alice:example.org"}
+   /* 0 */ {
+      "type": "m.room.create", "state_key": ""
+   },
+
+   /* 1 */ {
+      "type": "m.room.member", "state_key": "@alice:example.org"
+   },
+
+   /* 2 */ {
+      "type": "m.room.encrypted"
+   },
+
+   /* 3 */ {
+      "type": "m.room.member", "state_key": "@bob:example.org"
+   },
+
+   /* 4 */ {
+      "type": "m.room.member", "state_key": "@alice:example.org"
+   }
 ]
 </pre><a href="#section-3.5.2-3" class="pilcrow">¶</a>
 </div>
@@ -3893,7 +3907,8 @@ append the PDU fields first - the server can skip some extra work this way.<a hr
          "error": "Invalid event format"
       },
       "$eventid": {
-         "error": "@alice:example.org cannot send m.room.power_levels"
+         "error":
+            "@alice:example.org cannot send m.room.power_levels"
       }
    }
 }
@@ -5113,12 +5128,12 @@ server which owns the given user IDs.<a href="#section-12.10.3.1-1" class="pilcr
 <div class="lang-json sourcecode" id="section-12.10.3.1-7">
 <pre>
 {
-   "one_time_keys": {
-      "@alice:example.org": {
-         "ABCD":
-            "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519"
-      }
-   }
+  "one_time_keys": {
+    "@alice:example.org": {
+      "ABCD":
+        "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519"
+    }
+  }
 }
 </pre><a href="#section-12.10.3.1-7" class="pilcrow">¶</a>
 </div>
@@ -5130,14 +5145,14 @@ applies for device IDs for which the user doesn't have.<a href="#section-12.10.3
 <div class="lang-json sourcecode" id="section-12.10.3.1-11">
 <pre>
 {
-   "one_time_keys": {
-      "@alice:example.org": {
-         "ABCD": {
-            "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519":
-               "&lt;unpadded base64 encoded key package&gt;"
-         }
+  "one_time_keys": {
+    "@alice:example.org": {
+      "ABCD": {
+        "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519":
+          "&lt;unpadded base64 encoded key package&gt;"
       }
-   }
+    }
+  }
 }
 </pre><a href="#section-12.10.3.1-11" class="pilcrow">¶</a>
 </div>
@@ -5312,10 +5327,6 @@ the sending device and the event which gets emitted.<a href="#section-15-4" clas
 <dt id="RFC3629">[RFC3629]</dt>
         <dd>
 <span class="refAuthor">Yergeau, F.</span>, <span class="refTitle">"UTF-8, a transformation format of ISO 10646"</span>, <span class="seriesInfo">STD 63</span>, <span class="seriesInfo">RFC 3629</span>, <span class="seriesInfo">DOI 10.17487/RFC3629</span>, <time datetime="2003-11" class="refDate">November 2003</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3629">https://www.rfc-editor.org/rfc/rfc3629</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC4291">[RFC4291]</dt>
-        <dd>
-<span class="refAuthor">Hinden, R.</span> and <span class="refAuthor">S. Deering</span>, <span class="refTitle">"IP Version 6 Addressing Architecture"</span>, <span class="seriesInfo">RFC 4291</span>, <span class="seriesInfo">DOI 10.17487/RFC4291</span>, <time datetime="2006-02" class="refDate">February 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4291">https://www.rfc-editor.org/rfc/rfc4291</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC4648">[RFC4648]</dt>
         <dd>
