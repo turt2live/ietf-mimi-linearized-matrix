@@ -85,19 +85,51 @@ same room.
 
 # Introduction {#int-intro}
 
-Linearized Matrix is based upon Matrix ([matrix.org](https://matrix.org)) - an existing openly-specified and interoperable decentralized communications protocol. Matrix uses a Directed Acyclic Graph (DAG) to persist rooms, synchronizing the DAG between servers, while Linearized Matrix primarily uses an append-only doubly linked list. A hub server is present in each room to persist the linked list and to be responsible for linearization of events (user/application messages as well as room configuration changes) from other servers.
+Linearized Matrix derives from Matrix ([matrix.org](https://matrix.org)). Matrix is an interoperable
+decentralized communications protocol with an open specification. Matrix uses a Directed Acyclic Graph
+(DAG) to persist rooms, synchronizing the DAG between servers. Linearized Matrix uses an append-only
+doubly-linked list. A hub server is present in each room to persist the linked list, and to handle
+linearization of events (user/application messages, as well as room configuration changes) from other
+servers.
 
-The hub server in a room does *not* act as an owner for the room. All rooms support both a DAG and doubly linked list for their structure simultaneously. The precise details of the DAG and linked list interconnection are not covered by this document due to largely being out of scope for the More Instant Messaging Interoperability (MIMI) working group. Interested readers may wish to review {{MSC3995}} within the Matrix specification process for full details, however where applicable this document does cover the mandatory components.
+The hub server in a room does not act as an owner for the room. All rooms support the doubly-linked
+list and a DAG at the same time. The precise details of DAG and linked list interconnection are not
+covered by this document; they are out of scope for the More Instant Messaging Interoperability (MIMI)
+working group. Full details are available within the Matrix specification process as {{MSC3995}}. Where
+applicable, this document covers the mandatory components.
 
-Splitting the room model between these two representations allows for a variable threat model. A messaging provider which prefers to trust no other provider/server to deliver its messages would choose to use the DAG representation at the (significant) cost of implementation complexity. Meanwhile, Linearized Matrix places trust in a hub server to deliver messages but does not trust that server to not modify those events by adding additional verifiable hashes and signatures to each event.
+As rooms support these two representations, this permits a variable threat model. Messaging providers
+who want to deliver all their messages/don't trust other servers to deliver their messages would choose
+the DAG representation, at the cost of implementation complexity. Providers using the Linearized Matrix
+representation place trust in the hub server to deliver the messages. Those providers attach verifiable
+hashes and signatures to each event as a safeguard against the hub server modifying the events.
 
-The room model and rules which govern whether events are accepted into a room are Linearized Matrix's primary exports. This document specifies a server-centric approach where access control is performed on one or more servers, though with some changes it can become client-centric as well. This document additionally minimally specifies a transport for (re-)synchronizing the doubly linked list to other servers. The transport itself is expected to be replaced by a more efficient and scalable solution in a future iteration of this document - it exists to test the access control semantics currently.
+The primary exports of Linearized Matrix are the room model and the rules which govern how a room
+accepts events. This document specifies a server-centric approach, where one or more servers perform
+access control. With some changes, it can become client-centric too. This document also specifies a
+transport for synchronizing the doubly-linked list to other servers. More efficient and scalable
+transport methods should replace this example.
 
-Similarly, this document specifies how Messaging Layer Security (MLS) *could* run over a Linearized Matrix room. MLS is used for user messages while room configuration information, called state events, are handled in plain text in this iteration of the document. Room and MLS group membership are synchronized by clients and verified by the server to ensure users not in the room are unable to gain access to encrypted messages. The specific details for how to run MLS over Linearized Matrix are expected to change in future iterations of this document.
+In a similar fashion, this document specifies how Messaging Layer Security (MLS) could run over a
+Linearized Matrix room. User messages use MLS, while state events (room configuration information)
+are plain-text in this iteration of the document. Clients synchronize room and MLS group membership,
+while servers verify those memberships. This ensures that users who are not in the room are unable to
+gain access to encrypted messages.
 
-A key component of interoperability is consistent access control semantics. Having a single server "own" a room allows for arbitrary measures to be put in place by the owning provider, diminishing the user experience on providers which do not (or can not) support those measures. With decentralization, all participating servers *must* use the same consistent set of access controls in order to continue their participation in that room by nature.  Linearized Matrix uses such a decentralized room model but critically keeps the room model itself linear for ease of implementation.
+A key component for interoperability is consistent access control semantics. Where a single server
+'owns' a room, it can establish arbitrary measures. For example, an owning provider might decide that
+a different kind of password is required to join a room. This diminishes the user experience on providers
+who do not (or can not) support those custom measures. With decentralization, all participating servers
+must use the same consistent set of access controls. Linearized Matrix uses a decentralized room model
+for this reason, with linear room history for ease of implementation.
 
-Linearized Matrix additionally supports transferring the hub to a different server in the room. This enables two major features: servers leaving a room are not required to handle events for that room, and access control semantics are forced to be consistent because the hub could change at any time. Additionally, by allowing hub transfers it becomes possible for a (non-linearized) Matrix server to participate in the room and take hub status. When it becomes the hub, it can be responsible for linearizing the room's DAG on behalf of other Linearized Matrix servers in the room. The exact DAG linearization algorithm is not specified in this document as it is not in scope for the MIMI working group.
+Linearized Matrix also supports transferring a hub to a different server in the room. This enables
+two major features: a hub server that wishes to leave the room can do so, as it is no longer responsible
+for handling events for the room, and because the hub could change at any time, access control semantics
+must remain consistent. As a bonus, hub transfers make it possible for a (non-linearized) Matrix server
+to take hub status. When it becomes the hub, it takes responsibility for linearizing the room's DAG
+for other Linearized Matrix servers in the room. The DAG linearization algorithm is not specified in
+this document; it is out of scope for the MIMI working group.
 
 # Conventions and Definitions
 
