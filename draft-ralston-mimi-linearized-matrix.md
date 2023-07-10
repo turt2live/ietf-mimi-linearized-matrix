@@ -3225,5 +3225,11 @@ The `.well-known/matrix` namespace is already registered for use by The Matrix.o
 # Acknowledgments
 {:numbered="false"}
 
-Thank you to the Matrix Spec Core Team (SCT), and in particular Richard van der Hoff, for
-exploring how Matrix rooms could be represented as a linear structure, leading to this document.
+Thanks to the Matrix Spec Core Team (SCT) for exploring methods of linearizing Matrix's DAG room model,
+especially Richard van der Hoff and Erik Johnston. Additional thanks to the Matrix core team as a whole
+for general review and input on this document, especially Patrick Cloke and Jim Mackenzie.
+
+Matrix's crypto team graciously allowed their work-in-progress MLS considerations to be incorporated
+in this document. Thanks to Hubert Chathi for reviewing the MLS work for plausibility.
+
+Thanks are also extended to the wider MIMI working group for continous review and input on this document.
