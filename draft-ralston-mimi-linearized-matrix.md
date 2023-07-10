@@ -38,7 +38,6 @@ author:
 
 normative:
   RFC6125:
-  RFC4291:
   RFC4648:
   RFC1123:
 
@@ -592,11 +591,25 @@ For example, consider the following (simplified) room history:
 [
    /* in all events, irrelevant fields are not shown for brevity */
 
-   /* 0 */ {"type": "m.room.create", "state_key": ""},
-   /* 1 */ {"type": "m.room.member", "state_key": "@alice:example.org"},
-   /* 2 */ {"type": "m.room.encrypted"},
-   /* 3 */ {"type": "m.room.member", "state_key": "@bob:example.org"}
-   /* 4 */ {"type": "m.room.member", "state_key": "@alice:example.org"}
+   /* 0 */ {
+      "type": "m.room.create", "state_key": ""
+   },
+
+   /* 1 */ {
+      "type": "m.room.member", "state_key": "@alice:example.org"
+   },
+
+   /* 2 */ {
+      "type": "m.room.encrypted"
+   },
+
+   /* 3 */ {
+      "type": "m.room.member", "state_key": "@bob:example.org"
+   },
+
+   /* 4 */ {
+      "type": "m.room.member", "state_key": "@alice:example.org"
+   }
 ]
 ~~~
 
@@ -2059,7 +2072,8 @@ append the PDU fields first - the server can skip some extra work this way.
          "error": "Invalid event format"
       },
       "$eventid": {
-         "error": "@alice:example.org cannot send m.room.power_levels"
+         "error":
+            "@alice:example.org cannot send m.room.power_levels"
       }
    }
 }
@@ -3087,12 +3101,12 @@ Request body:
 
 ~~~ json
 {
-   "one_time_keys": {
-      "@alice:example.org": {
-         "ABCD":
-            "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519"
-      }
-   }
+  "one_time_keys": {
+    "@alice:example.org": {
+      "ABCD":
+        "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519"
+    }
+  }
 }
 ~~~
 
@@ -3106,14 +3120,14 @@ applies for device IDs for which the user doesn't have.
 
 ~~~ json
 {
-   "one_time_keys": {
-      "@alice:example.org": {
-         "ABCD": {
-            "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519":
-               "<unpadded base64 encoded key package>"
-         }
+  "one_time_keys": {
+    "@alice:example.org": {
+      "ABCD": {
+        "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519":
+          "<unpadded base64 encoded key package>"
       }
-   }
+    }
+  }
 }
 ~~~
 
