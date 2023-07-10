@@ -423,3 +423,5 @@ Expect LM servers to return error responses for these "unknown" endpoints.
   - This is only enforced for v2 rooms - servers and clients wishing to support v1 rooms should be more tolerant.
   + This is only enforced for room versions implied by the I-D - servers and clients wishing to support other room versions should be more tolerant.
   ```
+* Device IDs have had their grammar clarified and are otherwise compatible.
+* Server names are no longer allowed to be IPv4 or IPv6 addresses.
