@@ -17,6 +17,7 @@ keyword:
  - interoperability
  - messaging
  - mimi
+ - decentralized
 venue:
   group: "More Instant Messaging Interoperability"
   type: "Working Group"
