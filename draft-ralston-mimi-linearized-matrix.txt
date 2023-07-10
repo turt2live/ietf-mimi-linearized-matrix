@@ -99,6 +99,13 @@ Table of Contents
        3.5.2.  State Events
        3.5.3.  Event Types
    4.  MLS Considerations
+     4.1.  Device Credentials
+     4.2.  Group Creation
+     4.3.  Updating Group State
+     4.4.  Key Packages
+     4.5.  Room Event Types
+       4.5.1.  m.mls.commit
+       4.5.2.  m.room.encrypted
    5.  Processing Events
      5.1.  Receiving Events/PDUs
      5.2.  Rejection
@@ -144,8 +151,13 @@ Table of Contents
        12.7.3.  Joins
        12.7.4.  Knocks
      12.8.  Content Repository
-     12.9.  TODO: Remainder of Transport
-       12.9.1.  Open Questions
+     12.9.  Ephemeral Data Units (EDUs)
+     12.10. MLS
+       12.10.1.  Device Info Publishing
+       12.10.2.  To-Device Messaging
+       12.10.3.  One Time Key Claiming
+     12.11. TODO: Remainder of Transport
+       12.11.1.  Open Questions
    13. User Privacy
    14. Spam Prevention
    15. Security Considerations
@@ -557,8 +569,11 @@ Table of Contents
    devices are intended to be members of the MLS group and thus have
    their own key package material associated with them.
 
-   *TODO*: Do we need to define grammar and such for device IDs, or is
-   that covered by MLS already?
+   Because device IDs are used as "key versions" in a key ID
+   (Section 6), they have a compatible ABNF [RFC5234] grammar:
+
+   device_id = 1*key_version_char
+   device_id_char = ALPHA / DIGIT / "_"
 
 3.5.  Events
 
@@ -800,8 +815,6 @@ Table of Contents
 
    *  m.room.canonical_alias (*TODO*: Link)
 
-   *  m.room.encryption (*TODO*: Link)
-
    Servers MAY include other event types/state keys.  The above set
    gives users enough context to determine if they'd like to knock/join
    the room, as features such as the name and avatar are generally key
@@ -989,29 +1002,285 @@ Table of Contents
 
 3.5.3.5.1.  Calculating Event Visibility
 
-   *TODO*: Describe. (when can a server see an event?)
+   *TODO*: Describe. (when can a server see an event?).  Mention that
+   m.mls.commit is exempt.
 
 3.5.3.6.  TODO: Other events
 
-   *TODO*: m.room.name, m.room.topic, m.room.avatar, m.room.encryption,
+   *TODO*: m.room.name, m.room.topic, m.room.avatar,
    m.room.canonical_alias
-
-   *TODO*: Drop m.room.encryption and pack it into the create event
-   instead?
 
 4.  MLS Considerations
 
-   MIMI has a chartered requirement to use Messaging Layer Security
+   *TODO*: We should consider running [I-D.robert-mimi-delivery-service]
+   over LM instead.
+
+   The MIMI working group is chartered to use Messaging Layer Security
    (MLS) [I-D.ietf-mls-protocol] [I-D.ietf-mls-architecture] for
-   encryption, and MLS requires that all group members (devices) know of
-   all other devices.
+   encryption in chats, and this document specifies no different.  Each
+   room has a single MLS Group associated with it, both identified by
+   the room ID (Section 3.2).
 
-   Each room has a single MLS Group associated with it, starting with
-   the m.room.create event.
+   Rooms additionally track membership at a per-user level while MLS
+   tracks group membership at a per-device level.  With this
+   consideration, commits to the MLS Group MUST use PublicMessage,
+   giving the hub server an ability to inspect MLS group membership
+   changes for illegal joins and leaves.
 
-   *TODO*: Details on how key material is stored/shared within the room.
+   Encryption can only be enabled at the time the room is created.  This
+   prevents the room having encryption disabled or downgraded without an
+   entirely new room being created.  The exact ciphersuite and other
+   algorithmic details are contained in the content for the
+   m.room.create event (Section 3.5.3.1):
 
-   *TODO*: What does m.room.encrypted (user message) look like here?
+   {
+      "encryption": {
+         "algorithm": "m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
+      }
+   }
+
+   algorithm denotes which specific algorithm clients MUST use for
+   sending and receiving encrypted events in the room.  If a received
+   event is encrypted using a different algorith, it MUST be treated as
+   undecryptable (even if the client has sufficient key information to
+   decrypt it).
+
+   m.mls.v1. as a prefix describes the behaviour for encrypted clients,
+   with the remainder of the algorithm string covering the exact
+   ciphersuite.  This document uses the same mandatory ciphersuite as
+   MLS: MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519.  Thus, this is
+   encoded as m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519.  Other
+   ciphersuites can be represented similarly, though are considered to
+   be entirely new encryption algorithms for the purposes of this
+   document.
+
+   Custom or non-standard encryption algorithms are possible with this
+   approach, however out of scope for MIMI.  If such an algorithm is
+   used, it SHOULD be prefixed using reverse domain name notation.  For
+   example, org.example.my-encryption.
+
+   Mentioned in the introduction (Section 1), this document does not
+   explore the details for what is needed to interconnect Linearized
+   Matrix and Matrix's existing room model.  However, for
+   interconnection to be successful, extensions to MLS are needed to
+   support decentralization.  One possible extension is "Decentralised
+   MLS" [DMLS].
+
+4.1.  Device Credentials
+
+   Under Section 5.3 of [I-D.ietf-mls-protocol], each MLS group member
+   (a device, Section 3.4) has a "credential" or signing key associated
+   with it.  These are published to each client's local server and
+   available over federation (Section 12.10).
+
+   This document relies upon out-of-band verification and therefore uses
+   basic credentials.  The format for the credential is:
+
+   struct {
+       opaque user_id<V>;
+       opaque device_id<V>;
+       opaque signature_key<V>;
+   } BasicCredential;
+
+   user_id is as described by Section 3.3, and device_id is as described
+   by Section 3.4. signature_key is from MLS.
+
+   The device then constructs the following object, signs it using each
+   of the listed keys, and publishes it through its local server
+   (Section 12.10.1):
+
+   {
+      "device_id": "ABCDEF",
+      "user_id": "@alice:example.org",
+      "algorithms": [
+         "m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
+      ],
+      "keys": {
+         "m.mls.v1.credential.ed25519:ABCDEF": "<unpadded base64 BasicCredential>"
+      },
+      "signatures": {
+         "@alice:example.org": {
+            "m.mls.v1.credential.ed25519:ABCDEF": "<unpadded base64 signature>"
+         }
+      }
+   }
+
+   device_id is the client's device ID (Section 3.4). user_id is the
+   user ID (Section 3.3) to which the device ID belongs. algorithms are
+   the encryption algorithms the device supports, and SHOULD contain at
+   least m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519.
+
+   When a device supports m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519,
+   it MUST specify its basic credential with the
+   m.mls.v1.credential.ed25519 key algorithm.
+
+   keys is an object containing each algorithm-specific key (or keys)
+   for the device.  The fields for the object form a key ID, with the
+   device ID representing the "key version", as per Section 6.
+
+   All top-level fields in the object above MUST be supplied.
+
+   For each of the device's keys, a valid signature MUST be produced.
+   If there is a missing signature from any of the keys, or from the
+   user_id, the device information is considered invalid.  Invalid
+   devices MUST NOT be members of the MLS group, and are removed if
+   already members prior to the device information becoming invalid.
+
+4.2.  Group Creation
+
+   After the m.room.create event and other initial state events for the
+   room are sent, the room creator MUST establish the appropriate MLS
+   group.  This is sent as an m.mls.commit event (Section 4.5.1).
+   Afterwards, the remaining devices are added as normal (Section 4.3).
+
+   Ideally, the m.room.create event would also contain the initial
+   public group state, however doing so would mean either tracking an
+   independent MLS group ID or allowing the client to specify the room
+   ID.  While servers MAY allow the client to specify the room ID,
+   servers usually have better context for which localparts (see
+   Section 3.2) are already claimed by other rooms.  Having independent
+   group IDs and room IDs can lead to confusion and a similar sort of
+   namespacing issue (a room creator can create a conflicting group ID).
+   Instead, the server (usually) creates the room on behalf of the
+   client, allowing the client to then send the initial public group
+   state to the room for other MLS members.
+
+4.3.  Updating Group State
+
+   This document does not provide a way to send proposals to the MLS
+   group, meaning all commits MUST only contain proposals which are sent
+   by the same member (see Section 12 of [I-D.ietf-mls-protocol]).
+
+   All commits are encoded as m.mls.commit events (Section 4.5.1) and
+   are sent to the room.  These commits are additionally encoded using
+   PublicMessage, giving servers visibility on the contents of the
+   commits.  Upon receiving the event (see Section 5.1), the hub server
+   MUST additionally validate that any membership changes match what is
+   possible with the room membership:
+
+   *  Devices can only be added to the group if they belong to a user
+      which is joined to the room, or if the room is "world readable"
+      (Section 3.5.3.5.1).  It is generally not enough to be invited,
+      knocking, etc on the room - the user ID must usually be in the
+      join state.
+
+   *  Devices can be removed in two ways:
+
+      -  A device can remove another device if they both belong to the
+         same user ID.
+
+      -  A device can be removed by anyone if the user ID to which it
+         belongs is no longer in the join state.  This condition is
+         required to satisy a case in MLS where a device cannot self-
+         remove itself from the group.
+
+   If this validation fails, the hub server MUST reject the request if
+   it's shaped as an LPDU (Section 3.5.1) and soft-fail (Section 5.3)
+   the event if it's a PDU (Section 3.5).
+
+   Welcome messages are sent to devices over to-device messaging
+   (Section 12.10.2).  The message_type for the message is
+   m.room.encrypted [*TODO*: Rename to avoid confusion with room event?]
+   and message of:
+
+   {
+      "algorithm": "m.mls.v1.welcome.[ciphersuite]",
+      "ciphertext": "<unpadded base64 encoded welcome message>",
+      "commit_event_id": "<event ID of the m.mls.commit event>"
+   }
+
+   algorithm is the ciphersuite, dhkemx25519-aes128gcm-sha256-ed25519,
+   prefixed with m.mls.v1.welcome.
+
+   The remaining fields are as described in the example.  See Section 10
+   for "unpadded base64".
+
+   All fields MUST be supplied.  Note that the sender's user ID and
+   device ID are made available over the to-device messaging endpoints
+   (Section 12.10.2).
+
+   In all cases, a device remembers the event ID (either from the
+   m.mls.commit event or commit_event_id from a to-device message) after
+   decryption to associate it with the MLS epoch.  The device can then
+   do a reverse lookup of epoch to event ID to MLS group state.  Note
+   that a client _always_ has access to m.mls.commit events, even when
+   hidden by history visibility (Section 3.5.3.5.1).
+
+   *TODO*: Is it correct to say all commits are visible as "shared"?
+
+   *TODO*: We may need to store the group state in the media repo if it
+   gets to be too big, or otherwise allow oversized events.
+
+   *TODO*: The server also likely needs to prevent devices being added
+   to the group which don't support the ciphersuite/algorithm.
+
+4.4.  Key Packages
+
+   Clients "claim" another device's key package through their server
+   (Section 12.10.3).  Clients will typically generate several key
+   packages and upload them to their server, making them available even
+   if the client goes offline.
+
+   The algorithm for a key package is m.mls.v1.key_package.dhkemx25519-
+   aes128gcm-sha256-ed25519 and is combined with a device-generated key
+   version, forming a key ID described by Section 6.  The key version
+   SHOULD be generated based upon the key package itself rather than
+   using an unrelated string, such as a hash or the public key of the
+   key package.
+
+4.5.  Room Event Types
+
+   This document describes the following event types for use with MLS-
+   encrypted rooms.  The section headers are the event type.  See
+   Section 3.5 for more information on events.
+
+   These event types are non-state events, also called "room events".
+
+4.5.1.  m.mls.commit
+
+   Represents an MLS commit, which may be rejected by the hub server.
+
+   content for the event MUST contain at least the following example:
+
+   {
+      "message": "<unpadded base64 encoded PublicMessage>",
+      "public_group_state": "<unpadded base64 encoded public group state>"
+   }
+
+   As mentioned, message is a PublicMessage from MLS. public_group_state
+   is to enable external joins.
+
+   An optional field, prev_commit_event_id, SHOULD be specified when a
+   parent commit exists.  This is to enable clients to find the commit
+   they have keys for upon joining the room, as the most recent one may
+   not be decryptable to them.  The client can then work forwards from
+   where they can decrypt the message.
+
+   *TODO*: Should we use the RatchetTree extension?  It might make the
+   group state massive...
+
+   *TODO*: Which fields from this need to be protected by Section 8?
+
+4.5.2.  m.room.encrypted
+
+   Represents an encrypted MLS application message.  The sender first
+   encrypts the message per the content format then MUST send an event
+   with content matching:
+
+   {
+      "algorithm": "m.mls.v1.[ciphersuite]",
+      "ciphertext": "<unpadded base64 encoded MLS ciphertext>",
+      "commit_event_id": "<event ID of applicable m.mls.commit event>"
+   }
+
+   Within this document, algorithm will be m.mls.v1.dhkemx25519-
+   aes128gcm-sha256-ed25519.  The other fields are as described in the
+   example.
+
+   Clients SHOULD treat m.room.encrypted events which are improperly
+   structured as undecryptable events.
+
+   *TODO*: Which fields from this need to be protected by Section 8?
 
 5.  Processing Events
 
@@ -1105,6 +1374,9 @@ Table of Contents
        (Section 5.3).
 
        *TODO*: Like the above three, does this need to be here?
+
+   5.  The constraints described by Section 4.3 validated, if the room
+       is encrypted.
 
 5.2.  Rejection
 
@@ -1563,6 +1835,16 @@ Table of Contents
    This document specifies a wire transport which uses JSON [RFC8259]
    over HTTPS [RFC9110].  Servers MUST support a minimum of HTTP/2
    [RFC9113] and TLS 1.3 [RFC8446].
+
+   *TODO*: This transport doesn't scale, and doesn't use RESTful
+   endpoints.  It really should be replaced with something that works
+   better.  This draft defines a protocol that can run over nearly any
+   transport or server-server API.  A better option might be something
+   which uses gRPC for example, which might change how events are
+   structured, but the semantics remain the same.  This draft's
+   transport is heavily inspired by Matrix's existing server-server API,
+   and exists largely as a starting point for implementation validation
+   work - it is not really meant to live on indefinitely.
 
 12.1.  TLS Certificates
 
@@ -2283,17 +2565,17 @@ Table of Contents
    Request body:
 
    {
-      "edus": [{/* TODO: Define EDUs */}],
+      "edus": [
+         {/* EDU */}
+      ],
       "pdus": [
          {/* Either an LPDU or PDU */}
       ]
    }
 
-   *TODO*: Describe EDUs.
-
-   edus are the Ephemeral Data Units to send.  If no EDUs are being
-   sent, this field MAY be excluded from the request body.  There MUST
-   NOT be more than 100 entries in edus.
+   edus are the Ephemeral Data Units (Section 12.9) to send.  If no EDUs
+   are being sent, this field MAY be excluded from the request body.
+   There MUST NOT be more than 100 entries in edus.
 
    pdus are the events/PDUs (Section 3.5) and LPDUs (Section 3.5.1) to
    send to the server.  Whether it's an LPDU or PDU depends on the
@@ -3286,19 +3568,254 @@ Table of Contents
 
    *TODO*: Spell out that content is images, videos, files, etc.
 
-12.9.  TODO: Remainder of Transport
+12.9.  Ephemeral Data Units (EDUs)
+
+   EDUs are sent out of band from rooms and are only persisted for
+   exactly as long as they are needed.  For example, once a to-device
+   (Section 12.10.2) message is delivered to a client, the server may
+   easily be able to delete its copy of the message.
+
+   EDUs contain the following mandatory fields:
+
+   {
+      "type": "m.room.encrypted",
+      "sender": "@alice:example.org",
+      "content": {
+         /* type-specific content */
+      }
+   }
+
+   The type is similar to an event type (Section 3.5) and ultimately
+   describes the schema for the content.
+
+   sender_id is the user ID (Section 3.3) which is sending the EDU.
+   Typically, clients will not generate EDUs directly.  Instead, the
+   server will convert a client's request into an EDU for sending to a
+   remote server, where that server then unpacks the EDU before
+   delivering it to local devices.
+
+   Because EDUs are not sent in the context of a room, even if an MLS
+   Welcome message is being sent for a room, servers MUST send the EDUs
+   directly to the target server with the send API (Section 12.5.1).
+
+   In this document, EDUs are only used for to-device messages
+   (Section 12.10.2) and device list changes (Section 12.10.1), but
+   could be used for read/delivery receipts, typing notifications, and
+   more in future.  This may necessitate routing EDUs through the hub
+   rather than using full-mesh fanout.
+
+   *TODO*: Address EDU fanout; Document the implied missing features
+   (receipts, typing notifs).
+
+12.10.  MLS
+
+   *TODO*: This section.  Talk about to-device messaging, device
+   management/querying/key claiming, etc.
+
+   There are several endpoints required by this document's MLS
+   implementation (Section 4), largely around device management for each
+   device's signing key, claiming key packages for those devices, and
+   sending messages (Welcome in particular) after using a key package.
+
+12.10.1.  Device Info Publishing
+
+   When a user creates a new encryption-capable device, or removes one,
+   a "device list update" is sent to all servers the user shares a room
+   with.  The receiving servers then determine which local clients need
+   to be made aware of the device list change and sends the information
+   to them.  This is primarily used by this document's MLS
+   implementation (Section 4) to indicate to other devices that either a
+   new possible device has come online or that another needs to be
+   removed from some MLS groups due to being deleted.
+
+   Typically, a device is created by a user when they log in to a new
+   session.  Similarly, a device is deleted/removed when they log out of
+   that client.
+
+   The device list update takes the shape of an EDU (Section 12.9), as
+   such:
+
+   {
+      "type": "m.device_list_update",
+      "sender_id": "@alice:example.org",
+      "content": {
+         "changed": [/* Device Objects */],
+         "removed": [/* Device IDs */]
+      }
+   }
+
+   The device objects are the same as in the response for /user/:userId/
+   device/:deviceId (Section 12.10.1.1), indicating that either a new
+   device was created or that information about a previous device has
+   changed.
+
+   *TODO*: Matrix's m.device_list_update EDU is _very_ different from
+   this, and relatively complicated.  Do we actually need a stream_id,
+   like in Matrix?  Do we then need the /devices endpoint?
+
+12.10.1.1.  GET /_matrix/federation/v1/user/:userId/device/:deviceId
+
+   Retrieves information about a specific device for a user.  This
+   request does not go via a hub, instead going directly to the server
+   which owns the :userId.
+
+   *Implementation note*: Currently this endpoint doesn't actually
+   exist.  Use PUT /_matrix/federation/unstable/org.matrix.i-d.ralston-
+   mimi-linearized-matrix.02/user/:userId/device/:deviceId when testing
+   against other Linearized Matrix implementations.  This string may be
+   updated later to account for breaking changes.
+
+   *TODO*: Remove implementation notes.
+
+   *Rate-limited*: Yes.
+
+   *Authentication required*: Yes.
+
+   Path parameters:
+
+   *  :userId - the user ID (Section 3.3) who owns the device.
+
+   *  :deviceId - the device ID (Section 3.4) to get information about.
+
+   Query parameters: None applicable.
+
+   Request body: None applicable.
+
+   200 OK response:
+
+   {
+      "device_id": "ABCDEF",
+      "user_id": "@alice:example.org",
+      "algorithms": [
+         "m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
+      ],
+      "keys": {
+         "m.mls.v1.credential.ed25519:ABCDEF": "<unpadded base64 BasicCredential>"
+      },
+      "signatures": {
+         "@alice:example.org": {
+            "m.mls.v1.credential.ed25519:ABCDEF": "<unpadded base64 signature>"
+         }
+      }
+   }
+
+   Note that the response is the same object the device itself signed/
+   created in Section 4.1.
+
+   If the user ID does not belong the receiving server, a 404 Not Found
+   HTTP status code is returned with error code M_NOT_FOUND
+   (Section 12.2.2).  The same applies if the user ID does not exist, or
+   the user does not have the device ID requested.
+
+12.10.2.  To-Device Messaging
+
+   To-device messaging is an ability to send information directly to
+   another device, typically to carry MLS Welcome messages and similar.
+   They are sent as EDUs (Section 12.9), one per receipient device and
+   payload:
+
+   {
+      "type": "m.direct_to_device",
+      "sender": "@alice:example.org",
+      "content": {
+         "target": "@bob:example.org",
+         "target_device": "ABCD",
+         "message_type": "m.room.encrypted",
+         "message": {
+            /* message_type-specific schema */
+         }
+      }
+   }
+
+   target and target_device denote the destination user ID (Section 3.3)
+   and device ID (Section 3.4) for that user.  This EDU MUST be sent to
+   the server denoted by the target user ID.  If the target user doesn't
+   exist or doesn't have a device with the ID described, the receiving
+   server drops/ignores the EDU.
+
+   See Section 4.3 for an example of a to-device message being used.
+
+12.10.3.  One Time Key Claiming
+
+   To enable two devices to communicate, they need to claim a key
+   package (Section 4.4) for the other device.  These key packages are
+   also called "one time keys".  This is done through the following
+   endpoint.
+
+12.10.3.1.  POST /_matrix/federation/v1/user/keys/claim
+
+   Claims one time keys for devices.  This request does not go via a
+   hub, instead going directly to the server which owns the given user
+   IDs.
+
+   *Rate-limited*: Yes.
+
+   *Authentication required*: Yes.
+
+   Path parameters: None applicable.
+
+   Query parameters: None applicable.
+
+   Request body:
+
+   {
+      "one_time_keys": {
+         "@alice:example.org": {
+            "ABCD": "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519"
+         }
+      }
+   }
+
+   one_time_keys MUST be specified and is a map of user ID (Section 3.3)
+   to device ID (Section 3.4) to algorithm for the key package to claim.
+   Currently the only expected algorithm is defined by Section 4.4.
+
+   Any user IDs which don't belong to the receiving server, or which
+   don't exist, are ignored.  The same applies for device IDs for which
+   the user doesn't have.
+
+   200 OK response:
+
+   {
+      "one_time_keys": {
+         "@alice:example.org": {
+            "ABCD": {
+               "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519":
+                  "<unpadded base64 encoded key package>"
+            }
+         }
+      }
+   }
+
+   Like the request body, one_time_keys MUST be specified (but MAY be
+   empty) and is a map of requested user ID to requested device ID to
+   algorithm name.  The value for the algorithm name is dependent on the
+   algorithm itself.  For m.mls.v1.key_package.dhkemx25519-aes128gcm-
+   sha256-ed25519, this is an unpadded base64 (Section 10) string
+   representing the key package itself.
+
+   Servers MUST NOT reuse a device's one time key, unless that key
+   permits it.  For example, MLS's "last resort" key MAY be used
+   multiple times, but SHOULD only be used if no other one time keys
+   remain for the device.  Servers MUST NOT use an expired key.
+
+   Typically, the server will inform the device that a key was used so
+   the device can upload additional keys.  See Section 4.4 for further
+   implementation-related concerns.
+
+12.11.  TODO: Remainder of Transport
 
    *TODO*: This section.
 
    Topics:
 
-   *  EDUs (typing notifications, receipts, presence)
-
-   *  Device management & to-device messaging
+   *  More EDUs (typing notifications, receipts, presence)
 
    *  Query APIs (alias resolution, profiles)
 
-   *  Encryption APIs
+   *  Other Encryption APIs??
+
+   *  Server ACLs? (this probably should become part of the auth rules)
 
    Notably/deliberately missing APIs are:
 
@@ -3314,7 +3831,7 @@ Table of Contents
 
    *  OpenID API
 
-12.9.1.  Open Questions
+12.11.1.  Open Questions
 
    *  Should we include /_matrix/federation/v1/version in here?  It's
       used by federation testers, but not really anything else.
@@ -3505,6 +4022,13 @@ Table of Contents
               <https://gitlab.matrix.org/matrix-org/mls-ts/-
               /blob/48efb972075233c3a0f3e3ca01c4d4f888342205/
               decentralised.org>.
+
+   [I-D.robert-mimi-delivery-service]
+              Robert, R. and K. Kohbrok, "MIMI Delivery Service", Work
+              in Progress, Internet-Draft, draft-robert-mimi-delivery-
+              service-02, 17 May 2023,
+              <https://datatracker.ietf.org/doc/html/draft-robert-mimi-
+              delivery-service-02>.
 
    [MSC3995]  Ralston, T., "MSC3995: [WIP] Linearized Matrix", 12 April
               2023, <https://github.com/matrix-org/matrix-spec-
