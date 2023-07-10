@@ -1401,6 +1401,8 @@ area are: who signs the transfer event? who *sends* the transfer event? how does
 either the sender of `m.room.hub` or `m.room.create` if no hub state event is present. Auth rules
 would govern what makes for a legal `m.room.hub` event.
 
+**TODO**: {{?I-D.kohbrok-mimi-portability}} may be of help here.
+
 # Transport {#int-transport}
 
 This document specifies a wire transport which uses JSON {{!RFC8259}} over HTTPS {{!RFC9110}}. Servers
