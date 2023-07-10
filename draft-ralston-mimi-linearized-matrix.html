@@ -8,18 +8,19 @@
 <meta content="Travis Ralston" name="author">
 <meta content="Matthew Hodgson" name="author">
 <meta content="
-       This document specifies Linearized Matrix (LM) - an extensible protocol for interoperability between
-messaging providers through usage of Matrix's ( matrix.org ) decentralized room
-model. LM simplifies Matrix's Directed Acyclic Graph (DAG) persistence to a doubly linked list with
-hub-and-spoke fanout while still being fully capable of supporting non-linearized servers in a room. 
+       This document specifies Linearized Matrix (LM). LM is an extensible protocol for interoperability
+between messaging providers, using Matrix's ( matrix.org ) decentralized room
+model. LM simplifies the Directed Acyclic Graph (DAG) persistence of Matrix while maintaining
+compatibility with non-linearized servers within a room. It does this by using a doubly-linked list
+with hub and spoke fanout. 
        LM's extensibility enables a wide range of transport protocol and end-to-end encryption possibilities.
-This document describes Matrix's room access control semantics supported by Messaging Layer Security
-(MLS) and shared between servers via HTTPS and JSON. Both the details for what is put over MLS and
-the server-server transport used are designed to be replaced. 
-       LM's threat model avoids placing trust in a central owning server for each conversation, but does define
-a hub server which becomes responsible for maintaining linearized room history on behalf of other servers
-in the room. The lack of trust in an owning server enables transparent interconnection between Matrix
-and Linearized Matrix servers within the same room. 
+This document uses Matrix's room access control semantics supported by Messaging Layer Security (MLS),
+transported via HTTPS and JSON. The details of which server-to-server transport to use and what a is
+put over MLS are replaceable. 
+       The threat model of LM does not place trust in a central owning server for each conversation. Instead,
+it defines a hub server which handles maintaining linearized room history for other servers in the
+room. This model permits transparent interconnection between LM servers and Matrix servers, in the
+same room. 
     " name="description">
 <meta content="xml2rfc 3.17.4" name="generator">
 <meta content="matrix" name="keyword">
@@ -1102,18 +1103,19 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <h1 id="title">Linearized Matrix</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
-<p id="section-abstract-1">This document specifies Linearized Matrix (LM) - an extensible protocol for interoperability between
-messaging providers through usage of Matrix's (<a href="https://matrix.org">matrix.org</a>) decentralized room
-model. LM simplifies Matrix's Directed Acyclic Graph (DAG) persistence to a doubly linked list with
-hub-and-spoke fanout while still being fully capable of supporting non-linearized servers in a room.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-1">This document specifies Linearized Matrix (LM). LM is an extensible protocol for interoperability
+between messaging providers, using Matrix's (<a href="https://matrix.org">matrix.org</a>) decentralized room
+model. LM simplifies the Directed Acyclic Graph (DAG) persistence of Matrix while maintaining
+compatibility with non-linearized servers within a room. It does this by using a doubly-linked list
+with hub and spoke fanout.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <p id="section-abstract-2">LM's extensibility enables a wide range of transport protocol and end-to-end encryption possibilities.
-This document describes Matrix's room access control semantics supported by Messaging Layer Security
-(MLS) and shared between servers via HTTPS and JSON. Both the details for what is put over MLS and
-the server-server transport used are designed to be replaced.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
-<p id="section-abstract-3">LM's threat model avoids placing trust in a central owning server for each conversation, but does define
-a hub server which becomes responsible for maintaining linearized room history on behalf of other servers
-in the room. The lack of trust in an owning server enables transparent interconnection between Matrix
-and Linearized Matrix servers within the same room.<a href="#section-abstract-3" class="pilcrow">¶</a></p>
+This document uses Matrix's room access control semantics supported by Messaging Layer Security (MLS),
+transported via HTTPS and JSON. The details of which server-to-server transport to use and what a is
+put over MLS are replaceable.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+<p id="section-abstract-3">The threat model of LM does not place trust in a central owning server for each conversation. Instead,
+it defines a hub server which handles maintaining linearized room history for other servers in the
+room. This model permits transparent interconnection between LM servers and Matrix servers, in the
+same room.<a href="#section-abstract-3" class="pilcrow">¶</a></p>
 </section>
 <section class="note rfcEditorRemove" id="section-note.1">
       <h2 id="name-about-this-document">
@@ -1471,49 +1473,45 @@ and Linearized Matrix servers within the same room.<a href="#section-abstract-3"
       <h2 id="name-introduction">
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
-<p id="section-1-1">Linearized Matrix is based upon Matrix (<a href="https://matrix.org">matrix.org</a>) - an existing openly-specified
-and interoperable decentralized communications protocol. Matrix uses a Directed Acyclic Graph (DAG)
-to persist rooms, synchronizing the DAG between servers, while Linearized Matrix primarily uses an
-append-only doubly linked list. A hub server is present in each room to persist the linked list and
-to be responsible for linearization of events (user/application messages as well as room configuration
-changes) from other servers.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">The hub server in a room does <em>not</em> act as an owner for the room. All rooms support both a DAG and
-doubly linked list for their structure simultaneously. The precise details of the DAG and linked list
-interconnection are not covered by this document due to largely being out of scope for the More Instant
-Messaging Interoperability (MIMI) working group. Interested readers may wish to review <span>[<a href="#MSC3995" class="cite xref">MSC3995</a>]</span>
-within the Matrix specification process for full details, however where applicable this document does
-cover the mandatory components.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">Splitting the room model between these two representations allows for a variable threat model. A messaging
-provider which prefers to trust no other provider/server to deliver its messages would choose to use
-the DAG representation at the (significant) cost of implementation complexity. Meanwhile, Linearized
-Matrix places trust in a hub server to deliver messages but does not trust that server to not modify
-those events by adding additional verifiable hashes and signatures to each event.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">The room model and rules which govern whether events are accepted into a room are Linearized Matrix's
-primary exports. This document specifies a server-centric approach where access control is performed
-on one or more servers, though with some changes it can become client-centric as well. This document
-additionally minimally specifies a transport for (re-)synchronizing the doubly linked list to other
-servers. The transport itself is expected to be replaced by a more efficient and scalable solution
-in a future iteration of this document - it exists to test the access control semantics currently.<a href="#section-1-4" class="pilcrow">¶</a></p>
-<p id="section-1-5">Similarly, this document specifies how Messaging Layer Security (MLS) <em>could</em> run over a Linearized
-Matrix room. MLS is used for user messages while room configuration information, called state events,
-are handled in plain text in this iteration of the document. Room and MLS group membership are synchronized
-by clients and verified by the server to ensure users not in the room are unable to gain access to
-encrypted messages. The specific details for how to run MLS over Linearized Matrix are expected to
-change in future iterations of this document.<a href="#section-1-5" class="pilcrow">¶</a></p>
-<p id="section-1-6">A key component of interoperability is consistent access control semantics. Having a single server
-"own" a room allows for arbitrary measures to be put in place by the owning provider, diminishing
-the user experience on providers which do not (or can not) support those measures. With decentralization,
-all participating servers <em>must</em> use the same consistent set of access controls in order to continue
-their participation in that room by nature.  Linearized Matrix uses such a decentralized room model
-but critically keeps the room model itself linear for ease of implementation.<a href="#section-1-6" class="pilcrow">¶</a></p>
-<p id="section-1-7">Linearized Matrix additionally supports transferring the hub to a different server in the room. This
-enables two major features: servers leaving a room are not required to handle events for that
-room, and access control semantics are forced to be consistent because the hub could change at any
-time. Additionally, by allowing hub transfers it becomes possible for a (non-linearized) Matrix server
-to participate in the room and take hub status. When it becomes the hub, it can be responsible for
-linearizing the room's DAG on behalf of other Linearized Matrix servers in the room. The exact
-DAG linearization algorithm is not specified in this document as it is not in scope for the MIMI working
-group.<a href="#section-1-7" class="pilcrow">¶</a></p>
+<p id="section-1-1">Linearized Matrix derives from Matrix (<a href="https://matrix.org">matrix.org</a>). Matrix is an interoperable
+decentralized communications protocol with an open specification. Matrix uses a Directed Acyclic Graph
+(DAG) to persist rooms, synchronizing the DAG between servers. Linearized Matrix uses an append-only
+doubly-linked list. A hub server is present in each room to persist the linked list, and to handle
+linearization of events (user/application messages, as well as room configuration changes) from other
+servers.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">The hub server in a room does not act as an owner for the room. All rooms support the doubly-linked
+list and a DAG at the same time. The precise details of DAG and linked list interconnection are not
+covered by this document; they are out of scope for the More Instant Messaging Interoperability (MIMI)
+working group. Full details are available within the Matrix specification process as <span>[<a href="#MSC3995" class="cite xref">MSC3995</a>]</span>. Where
+applicable, this document covers the mandatory components.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">As rooms support these two representations, this permits a variable threat model. Messaging providers
+who want to deliver all their messages/don't trust other servers to deliver their messages would choose
+the DAG representation, at the cost of implementation complexity. Providers using the Linearized Matrix
+representation place trust in the hub server to deliver the messages. Those providers attach verifiable
+hashes and signatures to each event as a safeguard against the hub server modifying the events.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">The primary exports of Linearized Matrix are the room model and the rules which govern how a room
+accepts events. This document specifies a server-centric approach, where one or more servers perform
+access control. With some changes, it can become client-centric too. This document also specifies a
+transport for synchronizing the doubly-linked list to other servers. More efficient and scalable
+transport methods should replace this example.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">In a similar fashion, this document specifies how Messaging Layer Security (MLS) could run over a
+Linearized Matrix room. User messages use MLS, while state events (room configuration information)
+are plain-text in this iteration of the document. Clients synchronize room and MLS group membership,
+while servers verify those memberships. This ensures that users who are not in the room are unable to
+gain access to encrypted messages.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">A key component for interoperability is consistent access control semantics. Where a single server
+'owns' a room, it can establish arbitrary measures. For example, an owning provider might decide that
+a different kind of password is required to join a room. This diminishes the user experience on providers
+who do not (or can not) support those custom measures. With decentralization, all participating servers
+must use the same consistent set of access controls. Linearized Matrix uses a decentralized room model
+for this reason, with linear room history for ease of implementation.<a href="#section-1-6" class="pilcrow">¶</a></p>
+<p id="section-1-7">Linearized Matrix also supports transferring a hub to a different server in the room. This enables
+two major features: a hub server that wishes to leave the room can do so, as it is no longer responsible
+for handling events for the room, and because the hub could change at any time, access control semantics
+must remain consistent. As a bonus, hub transfers make it possible for a (non-linearized) Matrix server
+to take hub status. When it becomes the hub, it takes responsibility for linearizing the room's DAG
+for other Linearized Matrix servers in the room. The DAG linearization algorithm is not specified in
+this document; it is out of scope for the MIMI working group.<a href="#section-1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1526,21 +1524,8 @@ group.<a href="#section-1-7" class="pilcrow">¶</a></p>
 described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
 appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
 <p id="section-2-2">This document uses <span>[<a href="#I-D.ralston-mimi-terminology" class="cite xref">I-D.ralston-mimi-terminology</a>]</span> where possible.<a href="#section-2-2" class="pilcrow">¶</a></p>
-<p id="section-2-3">This document additionally uses the following definitions:<a href="#section-2-3" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-2-4.1">
-          <strong>Room</strong>: Synonymous with "conversation" from I-D.ralston-mimi-terminology.<a href="#section-2-4.1" class="pilcrow">¶</a>
-</li>
-        <li class="normal" id="section-2-4.2">
-          <strong>Room Member</strong>: Synonymous with "conversation member" from I-D.ralston-mimi-terminology.<a href="#section-2-4.2" class="pilcrow">¶</a>
-</li>
-        <li class="normal" id="section-2-4.3">
-          <strong>State Event</strong>: Synonymous with "conversation property" from I-D.ralston-mimi-terminology.
-A state event is a subclass of an event.<a href="#section-2-4.3" class="pilcrow">¶</a>
-</li>
-      </ul>
-<p id="section-2-5">Further terms are introduced in-context within this document.<a href="#section-2-5" class="pilcrow">¶</a></p>
-<p id="section-2-6"><strong>TODO</strong>: We should move/copy those definitions up here anyways.<a href="#section-2-6" class="pilcrow">¶</a></p>
+<p id="section-2-3">Further terms are introduced in-context within this document.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<p id="section-2-4"><strong>TODO</strong>: We should move/copy those definitions up here anyways.<a href="#section-2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="architecture">
@@ -1633,8 +1618,8 @@ A state event is a subclass of an event.<a href="#section-2-4.3" class="pilcrow"
           </svg><a href="#section-3-2.1" class="pilcrow">¶</a>
 </div>
 </div>
-<p id="section-3-3">In this diagram, events are objects which carry information about the room as well as messages
-between users within that room. See <a href="#int-pdu" class="auto internal xref">Section 3.5</a> for schema and further definition.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-3">In this diagram, events (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) are objects which carry information about the room as well as messages
+between users within that room.<a href="#section-3-3" class="pilcrow">¶</a></p>
 <p id="section-3-4">Server A is acting as a hub for the other two servers in the diagram. Servers B and C do
 not converse directly when sending events to the room: those events are instead sent to the
 hub which then distributes them back out to all participating servers. Servers communicate
@@ -1652,11 +1637,13 @@ other servers in the room.<a href="#section-3-7.1" class="pilcrow">¶</a>
 or rely on the hub server instead.<a href="#section-3-7.2" class="pilcrow">¶</a>
 </li>
       </ul>
-<p id="section-3-8"><strong>TODO</strong>: Describe how much history each server needs to store, somewhere. ie: minimum state events,
-HEAD for the room, etc. Maybe the hub can drop events it doesn't need anymore too.<a href="#section-3-8" class="pilcrow">¶</a></p>
-<p id="section-3-9"><strong>OPEN QUESTION</strong>: Should we support having multiple hubs for increased trust between
+<p id="section-3-8"><strong>OPEN QUESTION</strong>: Should we support having multiple hubs for increased trust between
 participant and hub? (participant can pick the hub it wants to use rather than being
-forced to use a single hub)<a href="#section-3-9" class="pilcrow">¶</a></p>
+forced to use a single hub)<a href="#section-3-8" class="pilcrow">¶</a></p>
+<p id="section-3-9"><strong>OPEN QUESTION</strong>: Should we instead require that each server persist events they create, with the hub
+being responsible for purely distribution/fetching? It'd be in the hub's best interest to store all
+history, but equally if it can rebuild the room by reaching out to origin servers then it might be
+fine enough (it'd only be storing event IDs rather than whole events).<a href="#section-3-9" class="pilcrow">¶</a></p>
 <div id="int-server-names">
 <section id="section-3.1">
         <h3 id="name-server-names">
@@ -1665,51 +1652,32 @@ forced to use a single hub)<a href="#section-3-9" class="pilcrow">¶</a></p>
 <p id="section-3.1-1">Each messaging provider is referred to as a "server" and has a "domain name" or "server name"
 to uniquely identify it. This server name is then used to namespace user IDs, room IDs/aliases,
 etc.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
-<p id="section-3.1-2">A server name <span class="bcp14">MUST</span> be compliant with <span><a href="https://rfc-editor.org/rfc/rfc1123#section-2.1" class="relref">Section 2.1</a> of [<a href="#RFC1123" class="cite xref">RFC1123</a>]</span> and, when an IPv6 address,
-encoded per <span><a href="https://rfc-editor.org/rfc/rfc4291#section-2.2" class="relref">Section 2.2</a> of [<a href="#RFC4291" class="cite xref">RFC4291</a>]</span> surrounded by square brackets (<code>[]</code>). Improper server
-names <span class="bcp14">MUST</span> be considered "uncontactable" by a server.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
-<p id="section-3.1-3">A server <span class="bcp14">SHOULD NOT</span> use a literal IPv4 or IPv6 address as a server name. Doing so reduces the
-ability for the server to move to another internet address later, and IP addresses are generally
-difficult to acquire certificates for (required in <a href="#int-transport" class="auto internal xref">Section 12</a>). Additionally, servers
-<span class="bcp14">SHOULD NOT</span> use an explicit port in their server name for similar portability reasons.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
-<p id="section-3.1-4"><strong>TODO</strong>: We should probably disallow literal IP addresses.<a href="#section-3.1-4" class="pilcrow">¶</a></p>
-<p id="section-3.1-5">The approximate ABNF <span>[<a href="#RFC5234" class="cite xref">RFC5234</a>]</span> grammar for a server name is:<a href="#section-3.1-5" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-3.1-6">
+<p id="section-3.1-2">A server name <span class="bcp14">MUST</span> be compliant with <span><a href="https://rfc-editor.org/rfc/rfc1123#section-2.1" class="relref">Section 2.1</a> of [<a href="#RFC1123" class="cite xref">RFC1123</a>]</span>. Improper server names <span class="bcp14">MUST</span> be
+considered "uncontactable" by a server.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
+<p id="section-3.1-3">A server <span class="bcp14">MUST NOT</span> use a literal IPv4 or IPv6 address as a server name. Doing so reduces the ability
+for the server to move to another internet address later, and IP addresses are generally difficult
+to acquire a certificate for (required in <a href="#int-transport" class="auto internal xref">Section 12</a>). Additionally, servers <span class="bcp14">SHOULD NOT</span> use
+an explicit port in their server name for similar portability reasons.<a href="#section-3.1-3" class="pilcrow">¶</a></p>
+<p id="section-3.1-4">The approximate ABNF <span>[<a href="#RFC5234" class="cite xref">RFC5234</a>]</span> grammar for a server name is:<a href="#section-3.1-4" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.1-5">
 <pre>
 server_name = hostname [ ":" port ]
 port        = 1*5DIGIT
-hostname    = IPv4address / "[" IPv6address "]" / dns-name
-IPv4address = 1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT
-IPv6address = 2*45IPv6char
-IPv6char    = DIGIT / %x41-46 / %x61-66 / ":" / "."
-                  ; 0-9, A-F, a-f, :, .
-dns-name    = 1*255dns-char
+hostname    = 1*255dns-char
 dns-char    = DIGIT / ALPHA / "-" / "."
-</pre><a href="#section-3.1-6" class="pilcrow">¶</a>
+</pre><a href="#section-3.1-5" class="pilcrow">¶</a>
 </div>
-<p id="section-3.1-7">Server names <span class="bcp14">MUST</span> be treated as case sensitive (<code>eXaMpLe.OrG</code>, <code>example.org</code>, and <code>EXAMPLE.ORG</code>
+<p id="section-3.1-6">Server names <span class="bcp14">MUST</span> be treated as case sensitive (<code>eXaMpLe.OrG</code>, <code>example.org</code>, and <code>EXAMPLE.ORG</code>
 are 3 different servers). Server names <span class="bcp14">SHOULD</span> be lower case (<code>example.org</code>) and <span class="bcp14">SHOULD NOT</span> exceed
 230 characters for ease of use. The 230 characters specifically gives room for a suitably long
-localpart while being within the 255 allowable characters from <span><a href="https://rfc-editor.org/rfc/rfc1123#section-2.1" class="relref">Section 2.1</a> of [<a href="#RFC1123" class="cite xref">RFC1123</a>]</span>.<a href="#section-3.1-7" class="pilcrow">¶</a></p>
-<p id="section-3.1-8">Examples:<a href="#section-3.1-8" class="pilcrow">¶</a></p>
+localpart while being within the 255 allowable characters from <span><a href="https://rfc-editor.org/rfc/rfc1123#section-2.1" class="relref">Section 2.1</a> of [<a href="#RFC1123" class="cite xref">RFC1123</a>]</span>.<a href="#section-3.1-6" class="pilcrow">¶</a></p>
+<p id="section-3.1-7">Examples:<a href="#section-3.1-7" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-3.1-9.1">
-            <code>example.org</code> (DNS host name)<a href="#section-3.1-9.1" class="pilcrow">¶</a>
+<li class="normal" id="section-3.1-8.1">
+            <code>example.org</code> (DNS host name)<a href="#section-3.1-8.1" class="pilcrow">¶</a>
 </li>
-          <li class="normal" id="section-3.1-9.2">
-            <code>example.org:5678</code> (DNS host name with explicit port)<a href="#section-3.1-9.2" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-3.1-9.3">
-            <code>127.0.0.1</code> (literal IPv4 address)<a href="#section-3.1-9.3" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-3.1-9.4">
-            <code>127.0.0.1:5678</code> (literal IPv4 address with explicit port)<a href="#section-3.1-9.4" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-3.1-9.5">
-            <code>[2001:DB8:0:0:8:800:200C:417A]</code> (literal IPv6 address)<a href="#section-3.1-9.5" class="pilcrow">¶</a>
-</li>
-          <li class="normal" id="section-3.1-9.6">
-            <code>[2001:DB8:0:0:8:800:200C:417A]:5678</code> (literal IPv6 address with explicit port)<a href="#section-3.1-9.6" class="pilcrow">¶</a>
+          <li class="normal" id="section-3.1-8.2">
+            <code>example.org:5678</code> (DNS host name with explicit port)<a href="#section-3.1-8.2" class="pilcrow">¶</a>
 </li>
         </ul>
 </section>
@@ -1859,14 +1827,16 @@ user_id_char = DIGIT
 <p id="section-3.3-8"><code>user_id_localpart</code> <span class="bcp14">SHOULD</span> be human-readable and notably <span class="bcp14">MUST NOT</span> contain uppercase letters.<a href="#section-3.3-8" class="pilcrow">¶</a></p>
 <p id="section-3.3-9"><code>server_name</code> denotes the domain name (<a href="#int-server-names" class="auto internal xref">Section 3.1</a>) which allocated the ID, or would allocate
 the ID if the user doesn't exist yet.<a href="#section-3.3-9" class="pilcrow">¶</a></p>
-<p id="section-3.3-10">Identity systems and messaging providers <span class="bcp14">SHOULD NOT</span> use a phone number in a localpart, as the
-localpart for a user ID is unchangeable. In these cases, a GUID (scoped to the allocating server)
-is recommended so the associated human can change their phone number without losing chats.<a href="#section-3.3-10" class="pilcrow">¶</a></p>
-<p id="section-3.3-11"><strong>TODO</strong>: Clarify that phone numbers aren't banned, but that takeover considerations need to be made.<a href="#section-3.3-11" class="pilcrow">¶</a></p>
-<p id="section-3.3-12">This document does not define how a user ID is acquired. It is expected that an identity specification
+<p id="section-3.3-10">Identity systems and messaging providers <span class="bcp14">SHOULD NOT</span> use a phone number in a localpart. Using a phone
+number would mean that when a human operator's changes their phone number then they'd lose access to
+their existing chats and potentially gain access to any chats the new number is participating in.
+Providers which use phone numbers <span class="bcp14">SHOULD</span> ensure the new user ID is not in chats belonging to a different
+logical user. To prevent this case, a GUID (scoped to the allocating server) or an account ID is
+recommended as a localpart, allowing users to change their phone number without losing chats.<a href="#section-3.3-10" class="pilcrow">¶</a></p>
+<p id="section-3.3-11">This document does not define how a user ID is acquired. It is expected that an identity specification
 under MIMI will handle resolving email addresses, phone numbers, names, and other common queries
-to user IDs.<a href="#section-3.3-12" class="pilcrow">¶</a></p>
-<p id="section-3.3-13">User IDs are sometimes informally referenced as "MXIDs", short for "Matrix User IDs".<a href="#section-3.3-13" class="pilcrow">¶</a></p>
+to user IDs.<a href="#section-3.3-11" class="pilcrow">¶</a></p>
+<p id="section-3.3-12">User IDs are sometimes informally referenced as "MXIDs", short for "Matrix User IDs".<a href="#section-3.3-12" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="int-device-id">
@@ -1969,25 +1939,40 @@ to have exactly 1 entry in this array, while other events <span class="bcp14">MA
 and consistency between servers. To determine the ID for an event, calculate the reference hash
 (<a href="#int-reference-hashes" class="auto internal xref">Section 9.2</a>) then encode it using URL-safe Unpadded Base64 (<a href="#int-unpadded-base64" class="auto internal xref">Section 10</a>)
 and prefix that with the event ID sigil, <code>$</code>. For example, <code>$nKHVqt3iyLA_HEE8lT1yUaaVjjBRR-fAqpN4t7opadc</code>.<a href="#section-3.5-6" class="pilcrow">¶</a></p>
-<p id="section-3.5-7"><strong>TODO</strong>: Describe security benefits of using hashes-as-IDs here, in contrast to privacy concern of
-having a hash as the ID.<a href="#section-3.5-7" class="pilcrow">¶</a></p>
-<p id="section-3.5-8">The ABNF <span>[<a href="#RFC5234" class="cite xref">RFC5234</a>]</span> for an event ID is:<a href="#section-3.5-8" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-3.5-9">
+<p id="section-3.5-7">Using a reference hash in the event ID prevents other servers from changing what that event ID represents.
+If an event ID was just a UUID (or similar), any server along the send or receive path could swap the
+actual event payload out for a different event. The hashes and signatures in this case do nothing to
+protect the actual event, as a malicious server can simply generate legal hashes/signatures as part of
+their modification. If we add a namespace condition where the event ID <em>must</em> reference the same server
+name as the <code>sender</code> (<code>$uuid:example.org</code>) then the sending server is free to re-assign the event ID
+to a different payload during the sending of that event, though all other servers along the send/receive
+path cannot change the event. This is particularly problematic if the event's sender is the hub for
+the room: the hub can send one copy of an event to half the room, and a very different copy to the other
+half while still maintaining the same event ID for both halves. To fix this, a hash of the event itself
+would need to become part of the event ID such that any modification or reassignment of the event ID
+is made obvious to receipient servers. This could be a tuple of <code>(uuid, hash)</code>, though for simplicity
+this document uses just the reference hash on its own.<a href="#section-3.5-7" class="pilcrow">¶</a></p>
+<p id="section-3.5-8">With event IDs containing hashes of the events it's theoretically possible for a sufficiently motivated
+person to build a database of event IDs. With that database, they could eventually determine enough
+information to identify parts of the event payload itself. There is not enough anchoring information
+on an event (or sent over the transport) for this to be efficient or effective, however.<a href="#section-3.5-8" class="pilcrow">¶</a></p>
+<p id="section-3.5-9">The ABNF <span>[<a href="#RFC5234" class="cite xref">RFC5234</a>]</span> for an event ID is:<a href="#section-3.5-9" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-3.5-10">
 <pre>
 event_id = "$" reference_hash
 reference_hash = 1*urlsafe_unpadded_base64_char
 urlsafe_unpadded_base64_char = ALPHA / DIGIT / "-" / "_"
-</pre><a href="#section-3.5-9" class="pilcrow">¶</a>
+</pre><a href="#section-3.5-10" class="pilcrow">¶</a>
 </div>
-<p id="section-3.5-10">If both the sender and receiver are implementing the algorithms correctly, the event ID will be
+<p id="section-3.5-11">If both the sender and receiver are implementing the algorithms correctly, the event ID will be
 the same. When different, the receiver will have issues accepting the event (none of the <code>auth_events</code>
 will make sense, for example). The sender and receiver will need to review that their implementation
-matches the specification in this case.<a href="#section-3.5-10" class="pilcrow">¶</a></p>
-<p id="section-3.5-11">Events are treated as JSON <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span> within the protocol, but can be encoded and represented by
+matches the specification in this case.<a href="#section-3.5-11" class="pilcrow">¶</a></p>
+<p id="section-3.5-12">Events are treated as JSON <span>[<a href="#RFC8259" class="cite xref">RFC8259</a>]</span> within the protocol, but can be encoded and represented by
 any binary-compatible format. Additional overhead may be introduced when converting between formats,
-however.<a href="#section-3.5-11" class="pilcrow">¶</a></p>
-<p id="section-3.5-12">An example event is:<a href="#section-3.5-12" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-3.5-13">
+however.<a href="#section-3.5-12" class="pilcrow">¶</a></p>
+<p id="section-3.5-13">An example event is:<a href="#section-3.5-13" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-3.5-14">
 <pre>
 {
   "room_id": "!abc:example.org",
@@ -2016,12 +2001,12 @@ however.<a href="#section-3.5-11" class="pilcrow">¶</a></p>
   "auth_events": ["$first", "$second"],
   "prev_events": ["$parent"]
 }
-</pre><a href="#section-3.5-13" class="pilcrow">¶</a>
+</pre><a href="#section-3.5-14" class="pilcrow">¶</a>
 </div>
-<p id="section-3.5-14">An event/PDU <span class="bcp14">MUST NOT</span> exceed 65536 bytes when formatted using Canonical JSON (<a href="#int-canonical-json" class="auto internal xref">Section 7</a>).
-Note that this includes all <code>signatures</code> on the event.<a href="#section-3.5-14" class="pilcrow">¶</a></p>
-<p id="section-3.5-15">Fields have no size limit unless specified above, other than the maximum 65536 bytes for the whole
-event.<a href="#section-3.5-15" class="pilcrow">¶</a></p>
+<p id="section-3.5-15">An event/PDU <span class="bcp14">MUST NOT</span> exceed 65536 bytes when formatted using Canonical JSON (<a href="#int-canonical-json" class="auto internal xref">Section 7</a>).
+Note that this includes all <code>signatures</code> on the event.<a href="#section-3.5-15" class="pilcrow">¶</a></p>
+<p id="section-3.5-16">Fields have no size limit unless specified above, other than the maximum 65536 bytes for the whole
+event.<a href="#section-3.5-16" class="pilcrow">¶</a></p>
 <div id="int-lpdu">
 <section id="section-3.5.1">
           <h4 id="name-linearized-pdu">
@@ -2353,7 +2338,9 @@ for <code>invite</code>).<a href="#section-3.5.3.4.1-5.2" class="pilcrow">¶</a>
       <h2 id="name-mls-considerations">
 <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-mls-considerations" class="section-name selfRef">MLS Considerations</a>
       </h2>
-<p id="section-4-1"><strong>TODO</strong>: We should consider running <span>[<a href="#I-D.robert-mimi-delivery-service" class="cite xref">I-D.robert-mimi-delivery-service</a>]</span> over LM instead.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-1"><strong>TODO</strong>: We should consider running <span>[<a href="#I-D.robert-mimi-delivery-service" class="cite xref">I-D.robert-mimi-delivery-service</a>]</span> over LM instead.
+Using something like <span>[<a href="#I-D.mahy-mimi-group-chat" class="cite xref">I-D.mahy-mimi-group-chat</a>]</span> would be good for a purely client-side
+representation of the LM room model.<a href="#section-4-1" class="pilcrow">¶</a></p>
 <p id="section-4-2">The MIMI working group is chartered to use Messaging Layer Security (MLS) <span>[<a href="#I-D.ietf-mls-protocol" class="cite xref">I-D.ietf-mls-protocol</a>]</span>
         <span>[<a href="#I-D.ietf-mls-architecture" class="cite xref">I-D.ietf-mls-architecture</a>]</span> for encryption in chats, and this document specifies no different.
 Each room has a single MLS Group associated with it, both identified by the room ID (<a href="#int-room-id" class="auto internal xref">Section 3.2</a>).<a href="#section-4-2" class="pilcrow">¶</a></p>
@@ -3212,10 +3199,10 @@ area are: who signs the transfer event? who <em>sends</em> the transfer event? h
 <span class="bcp14">MUST</span> support a minimum of HTTP/2 <span>[<a href="#RFC9113" class="cite xref">RFC9113</a>]</span> and TLS 1.3 <span>[<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>.<a href="#section-12-1" class="pilcrow">¶</a></p>
 <p id="section-12-2"><strong>TODO</strong>: This transport doesn't scale, and doesn't use RESTful endpoints. It really should be replaced
 with something that works better. This draft defines a protocol that can run over nearly any transport
-or server-server API. A better option might be something which uses gRPC for example, which might change
+or server-server API. A better option might be something that uses gRPC for example, which might change
 how events are structured, but the semantics remain the same. This draft's transport is heavily inspired
 by Matrix's existing server-server API, and exists largely as a starting point for implementation
-validation work - it is not really meant to live on indefinitely.<a href="#section-12-2" class="pilcrow">¶</a></p>
+validation work - it is not really meant to exist indefinitely.<a href="#section-12-2" class="pilcrow">¶</a></p>
 <div id="int-tls">
 <section id="section-12.1">
         <h3 id="name-tls-certificates">
@@ -3399,82 +3386,65 @@ for example.<a href="#section-12.3-5" class="pilcrow">¶</a></p>
 server name to an IP address and port are:<a href="#section-12.3-6" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-12.3-7">
 <li id="section-12.3-7.1">
-            <p id="section-12.3-7.1.1">If <code>&lt;hostname&gt;</code> is an IP literal, then that IP address is to be used together with the given port
-number, or 8448 if no port is given.<a href="#section-12.3-7.1.1" class="pilcrow">¶</a></p>
+            <p id="section-12.3-7.1.1">If <code>&lt;hostname&gt;</code> has an explicit <code>&lt;port&gt;</code> is present, resolve <code>&lt;hostname&gt;</code> to
+an IP address using CNAME <span>[<a href="#RFC1034" class="cite xref">RFC1034</a>]</span> <span>[<a href="#RFC2181" class="cite xref">RFC2181</a>]</span>, AAAA <span>[<a href="#RFC3596" class="cite xref">RFC3596</a>]</span>, or A <span>[<a href="#RFC1035" class="cite xref">RFC1035</a>]</span> DNS
+records. Requests are made to the resolved IP address and port number.<a href="#section-12.3-7.1.1" class="pilcrow">¶</a></p>
 <p id="section-12.3-7.1.2">
 TLS certificate: <code>&lt;hostname&gt;</code> (always without port)<a href="#section-12.3-7.1.2" class="pilcrow">¶</a></p>
 <p id="section-12.3-7.1.3">
-Host header: <code>&lt;hostname&gt;</code> or <code>&lt;hostname&gt;:&lt;port&gt;</code> if a port was specified<a href="#section-12.3-7.1.3" class="pilcrow">¶</a></p>
+Host header: <code>&lt;hostname&gt;:&lt;port&gt;</code><a href="#section-12.3-7.1.3" class="pilcrow">¶</a></p>
 </li>
           <li id="section-12.3-7.2">
-            <p id="section-12.3-7.2.1">If <code>&lt;hostname&gt;</code> is not an IP literal, and an explicit <code>&lt;port&gt;</code> is present, resolve <code>&lt;hostname&gt;</code> to
-an IP address using CNAME <span>[<a href="#RFC1034" class="cite xref">RFC1034</a>]</span> <span>[<a href="#RFC2181" class="cite xref">RFC2181</a>]</span>, AAAA <span>[<a href="#RFC3596" class="cite xref">RFC3596</a>]</span>, or A <span>[<a href="#RFC1035" class="cite xref">RFC1035</a>]</span> DNS
-records. Requests are made to the resolved IP address and port number.<a href="#section-12.3-7.2.1" class="pilcrow">¶</a></p>
-<p id="section-12.3-7.2.2">
-TLS certificate: <code>&lt;hostname&gt;</code> (always without port)<a href="#section-12.3-7.2.2" class="pilcrow">¶</a></p>
-<p id="section-12.3-7.2.3">
-Host header: <code>&lt;hostname&gt;:&lt;port&gt;</code><a href="#section-12.3-7.2.3" class="pilcrow">¶</a></p>
-</li>
-          <li id="section-12.3-7.3">
-            <p id="section-12.3-7.3.1">If <code>&lt;hostname&gt;</code> is not an IP literal, a regular (non-Matrix) HTTPS request is made to
-<code>https://&lt;hostname&gt;/.well-known/matrix/server</code>, expecting the schema defined by <a href="#int-wellknown" class="auto internal xref">Section 12.3.1</a>.
-If the response is invalid (bad/not JSON, missing properties, non-200 response, etc), skip to Step 4.
-If the response is valid, the <code>m.server</code> property is parsed as <code>&lt;delegated_hostname&gt;[:&lt;delegated_port&gt;]</code>.<a href="#section-12.3-7.3.1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-12.3-7.3.2">
-<li id="section-12.3-7.3.2.1">
-                <p id="section-12.3-7.3.2.1.1">If <code>&lt;delegated_hostname&gt;</code> is an IP literal, then that IP address is to be used together with the
-given port number, or 8448 if no port is given.<a href="#section-12.3-7.3.2.1.1" class="pilcrow">¶</a></p>
-<p id="section-12.3-7.3.2.1.2">
-TLS certificate: <code>&lt;delegated_hostname&gt;</code> (always without port)<a href="#section-12.3-7.3.2.1.2" class="pilcrow">¶</a></p>
-<p id="section-12.3-7.3.2.1.3">
-Host header: <code>&lt;delegated_hostname&gt;</code> or <code>&lt;delegated_hostname&gt;:&lt;delegated_port&gt;</code> if a port was specified<a href="#section-12.3-7.3.2.1.3" class="pilcrow">¶</a></p>
-</li>
-              <li id="section-12.3-7.3.2.2">
-                <p id="section-12.3-7.3.2.2.1">If <code>&lt;delegated_hostname&gt;</code> is not an IP literal, and <code>&lt;delegated_port&gt;</code> is present, resolve
+            <p id="section-12.3-7.2.1">A regular (non-Matrix) HTTPS request is made to <code>https://&lt;hostname&gt;/.well-known/matrix/server</code>,
+expecting the schema defined by <a href="#int-wellknown" class="auto internal xref">Section 12.3.1</a>. If the response is invalid (bad/not JSON, missing
+properties, non-200 response, etc), skip to Step 4. If the response is valid, the <code>m.server</code> property
+is parsed as <code>&lt;delegated_hostname&gt;[:&lt;delegated_port&gt;]</code>.<a href="#section-12.3-7.2.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-12.3-7.2.2">
+<li id="section-12.3-7.2.2.1">
+                <p id="section-12.3-7.2.2.1.1">If <code>&lt;delegated_hostname&gt;</code> has an explicit <code>&lt;delegated_port&gt;</code> is present, resolve
 <code>&lt;delegated_hostname&gt;</code> to an IP address using CNAME, AAAA, or A DNS records. Requests are made to the
-resolved IP address and port number.<a href="#section-12.3-7.3.2.2.1" class="pilcrow">¶</a></p>
-<p id="section-12.3-7.3.2.2.2">
-TLS certificate: <code>&lt;delegated_hostname&gt;</code> (always without port)<a href="#section-12.3-7.3.2.2.2" class="pilcrow">¶</a></p>
-<p id="section-12.3-7.3.2.2.3">
-Host header: <code>&lt;delegated_hostname&gt;:&lt;delegated_port&gt;</code><a href="#section-12.3-7.3.2.2.3" class="pilcrow">¶</a></p>
+resolved IP address and port number.<a href="#section-12.3-7.2.2.1.1" class="pilcrow">¶</a></p>
+<p id="section-12.3-7.2.2.1.2">
+TLS certificate: <code>&lt;delegated_hostname&gt;</code> (always without port)<a href="#section-12.3-7.2.2.1.2" class="pilcrow">¶</a></p>
+<p id="section-12.3-7.2.2.1.3">
+Host header: <code>&lt;delegated_hostname&gt;:&lt;delegated_port&gt;</code><a href="#section-12.3-7.2.2.1.3" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-12.3-7.3.2.3">
-                <p id="section-12.3-7.3.2.3.1">If <code>&lt;delegated_hostname&gt;</code> is not an IP literal and no <code>&lt;delegated_port&gt;</code> is present, an SRV DNS
-record is resolved for <code>_matrix._tcp.&lt;delegated_hostname&gt;</code>. This may result in another hostname
-and port to be resolved using AAAA or A DNS records. Requests are made to the resolved IP address
-and port number.<a href="#section-12.3-7.3.2.3.1" class="pilcrow">¶</a></p>
-<p id="section-12.3-7.3.2.3.2">
-TLS certificate: <code>&lt;delegated_hostname&gt;</code><a href="#section-12.3-7.3.2.3.2" class="pilcrow">¶</a></p>
-<p id="section-12.3-7.3.2.3.3">
-Host header: <code>&lt;delegated_hostname&gt;</code> (without port)<a href="#section-12.3-7.3.2.3.3" class="pilcrow">¶</a></p>
+              <li id="section-12.3-7.2.2.2">
+                <p id="section-12.3-7.2.2.2.1">An SRV DNS record is resolved for <code>_matrix._tcp.&lt;delegated_hostname&gt;</code>. This may result in another
+hostname and port to be resolved using AAAA or A DNS records. Requests are made to the resolved IP
+address and port number.<a href="#section-12.3-7.2.2.2.1" class="pilcrow">¶</a></p>
+<p id="section-12.3-7.2.2.2.2">
+TLS certificate: <code>&lt;delegated_hostname&gt;</code><a href="#section-12.3-7.2.2.2.2" class="pilcrow">¶</a></p>
+<p id="section-12.3-7.2.2.2.3">
+Host header: <code>&lt;delegated_hostname&gt;</code> (without port)<a href="#section-12.3-7.2.2.2.3" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-12.3-7.3.2.4">
-                <p id="section-12.3-7.3.2.4.1">If no SRV record is found, an IP address is resolved for <code>&lt;delegated_hostname&gt;</code> is resolved using
-CNAME, AAAA, or A DNS records. Requests are made to the resolved IP address with port number 8448.<a href="#section-12.3-7.3.2.4.1" class="pilcrow">¶</a></p>
-<p id="section-12.3-7.3.2.4.2">
-TLS certificate: <code>&lt;delegated_hostname&gt;</code><a href="#section-12.3-7.3.2.4.2" class="pilcrow">¶</a></p>
-<p id="section-12.3-7.3.2.4.3">
-Host header: <code>&lt;delegated_hostname&gt;</code> (without port)<a href="#section-12.3-7.3.2.4.3" class="pilcrow">¶</a></p>
+              <li id="section-12.3-7.2.2.3">
+                <p id="section-12.3-7.2.2.3.1">If no SRV record is found, an IP address is resolved for <code>&lt;delegated_hostname&gt;</code> is resolved using
+CNAME, AAAA, or A DNS records. Requests are made to the resolved IP address with port number 8448.<a href="#section-12.3-7.2.2.3.1" class="pilcrow">¶</a></p>
+<p id="section-12.3-7.2.2.3.2">
+TLS certificate: <code>&lt;delegated_hostname&gt;</code><a href="#section-12.3-7.2.2.3.2" class="pilcrow">¶</a></p>
+<p id="section-12.3-7.2.2.3.3">
+Host header: <code>&lt;delegated_hostname&gt;</code> (without port)<a href="#section-12.3-7.2.2.3.3" class="pilcrow">¶</a></p>
 </li>
             </ol>
 </li>
-          <li id="section-12.3-7.4">
-            <p id="section-12.3-7.4.1">If the <code>.well-known</code> call from Step 3 resulted in an invalid response, an SRV DNS record is resolved
+          <li id="section-12.3-7.3">
+            <p id="section-12.3-7.3.1">If the <code>.well-known</code> call from Step 3 resulted in an invalid response, an SRV DNS record is resolved
 for <code>_matrix._tcp.&lt;hostname&gt;</code>. This may result in another hostname and port to be resolved using AAAA
-or A DNS records. Requests are made to the resolved IP address and port number.<a href="#section-12.3-7.4.1" class="pilcrow">¶</a></p>
+or A DNS records. Requests are made to the resolved IP address and port number.<a href="#section-12.3-7.3.1" class="pilcrow">¶</a></p>
+<p id="section-12.3-7.3.2">
+TLS certificate: <code>&lt;hostname&gt;</code> (always without port)<a href="#section-12.3-7.3.2" class="pilcrow">¶</a></p>
+<p id="section-12.3-7.3.3">
+Host header: <code>&lt;hostname&gt;</code> (without port)<a href="#section-12.3-7.3.3" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-12.3-7.4">
+            <p id="section-12.3-7.4.1">If the <code>.well-known</code> call from Step 3 resulted in an invalid response, and the SRV record from Step 4
+was not found, and IP address is resolved using CNAME, AAAA, or A DNS records. Requests are made to the
+resolved IP address and port 8448.<a href="#section-12.3-7.4.1" class="pilcrow">¶</a></p>
 <p id="section-12.3-7.4.2">
 TLS certificate: <code>&lt;hostname&gt;</code> (always without port)<a href="#section-12.3-7.4.2" class="pilcrow">¶</a></p>
 <p id="section-12.3-7.4.3">
 Host header: <code>&lt;hostname&gt;</code> (without port)<a href="#section-12.3-7.4.3" class="pilcrow">¶</a></p>
-</li>
-          <li id="section-12.3-7.5">
-            <p id="section-12.3-7.5.1">If the <code>.well-known</code> call from Step 3 resulted in an invalid response, and the SRV record from Step 4
-was not found, and IP address is resolved using CNAME, AAAA, or A DNS records. Requests are made to the
-resolved IP address and port 8448.<a href="#section-12.3-7.5.1" class="pilcrow">¶</a></p>
-<p id="section-12.3-7.5.2">
-TLS certificate: <code>&lt;hostname&gt;</code> (always without port)<a href="#section-12.3-7.5.2" class="pilcrow">¶</a></p>
-<p id="section-12.3-7.5.3">
-Host header: <code>&lt;hostname&gt;</code> (without port)<a href="#section-12.3-7.5.3" class="pilcrow">¶</a></p>
 </li>
         </ol>
 <p id="section-12.3-8">We require <code>&lt;[delegated_]hostname&gt;</code> rather than <code>&lt;srv_hostname&gt;</code> in Steps 3.3 and 4 for the following reasons:<a href="#section-12.3-8" class="pilcrow">¶</a></p>
@@ -5340,7 +5310,7 @@ the sending device and the event which gets emitted.<a href="#section-15-4" clas
 <dd class="break"></dd>
 <dt id="I-D.ralston-mimi-terminology">[I-D.ralston-mimi-terminology]</dt>
         <dd>
-<span class="refAuthor">Ralston, T.</span>, <span class="refTitle">"MIMI Terminology"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ralston-mimi-terminology-01</span>, <time datetime="2023-06-09" class="refDate">9 June 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ralston-mimi-terminology-01">https://datatracker.ietf.org/doc/html/draft-ralston-mimi-terminology-01</a>&gt;</span>. </dd>
+<span class="refAuthor">Ralston, T.</span>, <span class="refTitle">"MIMI Terminology"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ralston-mimi-terminology-02</span>, <time datetime="2023-07-10" class="refDate">10 July 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ralston-mimi-terminology-02">https://datatracker.ietf.org/doc/html/draft-ralston-mimi-terminology-02</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC1034">[RFC1034]</dt>
         <dd>
@@ -5433,6 +5403,10 @@ the sending device and the event which gets emitted.<a href="#section-15-4" clas
         <dd>
 <span class="refAuthor">Chathi, H.</span>, <span class="refTitle">"Decentralised MLS"</span>, <time datetime="2023-05-29" class="refDate">29 May 2023</time>, <span>&lt;<a href="https://gitlab.matrix.org/matrix-org/mls-ts/-/blob/48efb972075233c3a0f3e3ca01c4d4f888342205/decentralised.org">https://gitlab.matrix.org/matrix-org/mls-ts/-/blob/48efb972075233c3a0f3e3ca01c4d4f888342205/decentralised.org</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="I-D.mahy-mimi-group-chat">[I-D.mahy-mimi-group-chat]</dt>
+        <dd>
+<span class="refAuthor">Mahy, R.</span>, <span class="refTitle">"Group Chat Framework for More Instant Messaging Interoperability (MIMI)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-mahy-mimi-group-chat-00</span>, <time datetime="2023-07-10" class="refDate">10 July 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-mahy-mimi-group-chat-00">https://datatracker.ietf.org/doc/html/draft-mahy-mimi-group-chat-00</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="I-D.robert-mimi-delivery-service">[I-D.robert-mimi-delivery-service]</dt>
         <dd>
 <span class="refAuthor">Robert, R.</span> and <span class="refAuthor">K. Kohbrok</span>, <span class="refTitle">"MIMI Delivery Service"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-robert-mimi-delivery-service-02</span>, <time datetime="2023-05-17" class="refDate">17 May 2023</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-robert-mimi-delivery-service-02">https://datatracker.ietf.org/doc/html/draft-robert-mimi-delivery-service-02</a>&gt;</span>. </dd>
@@ -5465,8 +5439,12 @@ the sending device and the event which gets emitted.<a href="#section-15-4" clas
       <h2 id="name-acknowledgments">
 <a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
       </h2>
-<p id="appendix-A-1">Thank you to the Matrix Spec Core Team (SCT), and in particular Richard van der Hoff, for
-exploring how Matrix rooms could be represented as a linear structure, leading to this document.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-1">Thanks to the Matrix Spec Core Team (SCT) for exploring methods of linearizing Matrix's DAG room model,
+especially Richard van der Hoff and Erik Johnston. Additional thanks to the Matrix core team as a whole
+for general review and input on this document, especially Patrick Cloke and Jim Mackenzie.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">Matrix's crypto team graciously allowed their work-in-progress MLS considerations to be incorporated
+in this document. Thanks to Hubert Chathi for reviewing the MLS work for plausibility.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<p id="appendix-A-3">Thanks are also extended to the wider MIMI working group for continous review and input on this document.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authors-addresses">

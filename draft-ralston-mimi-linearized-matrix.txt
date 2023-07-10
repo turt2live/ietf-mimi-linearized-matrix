@@ -13,27 +13,26 @@ Expires: 11 January 2024                                    10 July 2023
 
 Abstract
 
-   This document specifies Linearized Matrix (LM) - an extensible
-   protocol for interoperability between messaging providers through
-   usage of Matrix's (matrix.org (https://matrix.org)) decentralized
-   room model.  LM simplifies Matrix's Directed Acyclic Graph (DAG)
-   persistence to a doubly linked list with hub-and-spoke fanout while
-   still being fully capable of supporting non-linearized servers in a
-   room.
+   This document specifies Linearized Matrix (LM).  LM is an extensible
+   protocol for interoperability between messaging providers, using
+   Matrix's (matrix.org (https://matrix.org)) decentralized room model.
+   LM simplifies the Directed Acyclic Graph (DAG) persistence of Matrix
+   while maintaining compatibility with non-linearized servers within a
+   room.  It does this by using a doubly-linked list with hub and spoke
+   fanout.
 
    LM's extensibility enables a wide range of transport protocol and
-   end-to-end encryption possibilities.  This document describes
-   Matrix's room access control semantics supported by Messaging Layer
-   Security (MLS) and shared between servers via HTTPS and JSON.  Both
-   the details for what is put over MLS and the server-server transport
-   used are designed to be replaced.
+   end-to-end encryption possibilities.  This document uses Matrix's
+   room access control semantics supported by Messaging Layer Security
+   (MLS), transported via HTTPS and JSON.  The details of which server-
+   to-server transport to use and what a is put over MLS are
+   replaceable.
 
-   LM's threat model avoids placing trust in a central owning server for
-   each conversation, but does define a hub server which becomes
-   responsible for maintaining linearized room history on behalf of
-   other servers in the room.  The lack of trust in an owning server
-   enables transparent interconnection between Matrix and Linearized
-   Matrix servers within the same room.
+   The threat model of LM does not place trust in a central owning
+   server for each conversation.  Instead, it defines a hub server which
+   handles maintaining linearized room history for other servers in the
+   room.  This model permits transparent interconnection between LM
+   servers and Matrix servers, in the same room.
 
 About This Document
 
@@ -170,76 +169,69 @@ Table of Contents
 
 1.  Introduction
 
-   Linearized Matrix is based upon Matrix (matrix.org
-   (https://matrix.org)) - an existing openly-specified and
-   interoperable decentralized communications protocol.  Matrix uses a
+   Linearized Matrix derives from Matrix (matrix.org
+   (https://matrix.org)).  Matrix is an interoperable decentralized
+   communications protocol with an open specification.  Matrix uses a
    Directed Acyclic Graph (DAG) to persist rooms, synchronizing the DAG
-   between servers, while Linearized Matrix primarily uses an append-
-   only doubly linked list.  A hub server is present in each room to
-   persist the linked list and to be responsible for linearization of
-   events (user/application messages as well as room configuration
-   changes) from other servers.
+   between servers.  Linearized Matrix uses an append-only doubly-linked
+   list.  A hub server is present in each room to persist the linked
+   list, and to handle linearization of events (user/application
+   messages, as well as room configuration changes) from other servers.
 
-   The hub server in a room does _not_ act as an owner for the room.
-   All rooms support both a DAG and doubly linked list for their
-   structure simultaneously.  The precise details of the DAG and linked
-   list interconnection are not covered by this document due to largely
-   being out of scope for the More Instant Messaging Interoperability
-   (MIMI) working group.  Interested readers may wish to review
-   [MSC3995] within the Matrix specification process for full details,
-   however where applicable this document does cover the mandatory
-   components.
+   The hub server in a room does not act as an owner for the room.  All
+   rooms support the doubly-linked list and a DAG at the same time.  The
+   precise details of DAG and linked list interconnection are not
+   covered by this document; they are out of scope for the More Instant
+   Messaging Interoperability (MIMI) working group.  Full details are
+   available within the Matrix specification process as [MSC3995].
+   Where applicable, this document covers the mandatory components.
 
-   Splitting the room model between these two representations allows for
-   a variable threat model.  A messaging provider which prefers to trust
-   no other provider/server to deliver its messages would choose to use
-   the DAG representation at the (significant) cost of implementation
-   complexity.  Meanwhile, Linearized Matrix places trust in a hub
-   server to deliver messages but does not trust that server to not
-   modify those events by adding additional verifiable hashes and
-   signatures to each event.
+   As rooms support these two representations, this permits a variable
+   threat model.  Messaging providers who want to deliver all their
+   messages/don't trust other servers to deliver their messages would
+   choose the DAG representation, at the cost of implementation
+   complexity.  Providers using the Linearized Matrix representation
+   place trust in the hub server to deliver the messages.  Those
+   providers attach verifiable hashes and signatures to each event as a
+   safeguard against the hub server modifying the events.
 
-   The room model and rules which govern whether events are accepted
-   into a room are Linearized Matrix's primary exports.  This document
-   specifies a server-centric approach where access control is performed
-   on one or more servers, though with some changes it can become
-   client-centric as well.  This document additionally minimally
-   specifies a transport for (re-)synchronizing the doubly linked list
-   to other servers.  The transport itself is expected to be replaced by
-   a more efficient and scalable solution in a future iteration of this
-   document - it exists to test the access control semantics currently.
+   The primary exports of Linearized Matrix are the room model and the
+   rules which govern how a room accepts events.  This document
+   specifies a server-centric approach, where one or more servers
+   perform access control.  With some changes, it can become client-
+   centric too.  This document also specifies a transport for
+   synchronizing the doubly-linked list to other servers.  More
+   efficient and scalable transport methods should replace this example.
 
-   Similarly, this document specifies how Messaging Layer Security (MLS)
-   _could_ run over a Linearized Matrix room.  MLS is used for user
-   messages while room configuration information, called state events,
-   are handled in plain text in this iteration of the document.  Room
-   and MLS group membership are synchronized by clients and verified by
-   the server to ensure users not in the room are unable to gain access
-   to encrypted messages.  The specific details for how to run MLS over
-   Linearized Matrix are expected to change in future iterations of this
-   document.
+   In a similar fashion, this document specifies how Messaging Layer
+   Security (MLS) could run over a Linearized Matrix room.  User
+   messages use MLS, while state events (room configuration information)
+   are plain-text in this iteration of the document.  Clients
+   synchronize room and MLS group membership, while servers verify those
+   memberships.  This ensures that users who are not in the room are
+   unable to gain access to encrypted messages.
 
-   A key component of interoperability is consistent access control
-   semantics.  Having a single server "own" a room allows for arbitrary
-   measures to be put in place by the owning provider, diminishing the
-   user experience on providers which do not (or can not) support those
-   measures.  With decentralization, all participating servers _must_
-   use the same consistent set of access controls in order to continue
-   their participation in that room by nature.  Linearized Matrix uses
-   such a decentralized room model but critically keeps the room model
-   itself linear for ease of implementation.
+   A key component for interoperability is consistent access control
+   semantics.  Where a single server 'owns' a room, it can establish
+   arbitrary measures.  For example, an owning provider might decide
+   that a different kind of password is required to join a room.  This
+   diminishes the user experience on providers who do not (or can not)
+   support those custom measures.  With decentralization, all
+   participating servers must use the same consistent set of access
+   controls.  Linearized Matrix uses a decentralized room model for this
+   reason, with linear room history for ease of implementation.
 
-   Linearized Matrix additionally supports transferring the hub to a
-   different server in the room.  This enables two major features:
-   servers leaving a room are not required to handle events for that
-   room, and access control semantics are forced to be consistent
-   because the hub could change at any time.  Additionally, by allowing
-   hub transfers it becomes possible for a (non-linearized) Matrix
-   server to participate in the room and take hub status.  When it
-   becomes the hub, it can be responsible for linearizing the room's DAG
-   on behalf of other Linearized Matrix servers in the room.  The exact
-   DAG linearization algorithm is not specified in this document as it
-   is not in scope for the MIMI working group.
+   Linearized Matrix also supports transferring a hub to a different
+   server in the room.  This enables two major features: a hub server
+   that wishes to leave the room can do so, as it is no longer
+   responsible for handling events for the room, and because the hub
+   could change at any time, access control semantics must remain
+   consistent.  As a bonus, hub transfers make it possible for a (non-
+   linearized) Matrix server to take hub status.  When it becomes the
+   hub, it takes responsibility for linearizing the room's DAG for other
+   Linearized Matrix servers in the room.  The DAG linearization
+   algorithm is not specified in this document; it is out of scope for
+   the MIMI working group.
 
 2.  Conventions and Definitions
 
@@ -250,18 +242,6 @@ Table of Contents
    capitals, as shown here.
 
    This document uses [I-D.ralston-mimi-terminology] where possible.
-
-   This document additionally uses the following definitions:
-
-   *  *Room*: Synonymous with "conversation" from I-D.ralston-mimi-
-      terminology.
-
-   *  *Room Member*: Synonymous with "conversation member" from I-
-      D.ralston-mimi-terminology.
-
-   *  *State Event*: Synonymous with "conversation property" from I-
-      D.ralston-mimi-terminology.  A state event is a subclass of an
-      event.
 
    Further terms are introduced in-context within this document.
 
@@ -295,9 +275,9 @@ Table of Contents
                                         |   Client C   |
                                          '------------'
 
-   In this diagram, events are objects which carry information about the
-   room as well as messages between users within that room.  See
-   Section 3.5 for schema and further definition.
+   In this diagram, events (Section 3.5) are objects which carry
+   information about the room as well as messages between users within
+   that room.
 
    Server A is acting as a hub for the other two servers in the diagram.
    Servers B and C do not converse directly when sending events to the
@@ -317,13 +297,16 @@ Table of Contents
    *  *Participant server*: any non-hub server.  This server MAY persist
       conversation history or rely on the hub server instead.
 
-   *TODO*: Describe how much history each server needs to store,
-   somewhere. ie: minimum state events, HEAD for the room, etc.  Maybe
-   the hub can drop events it doesn't need anymore too.
-
    *OPEN QUESTION*: Should we support having multiple hubs for increased
    trust between participant and hub? (participant can pick the hub it
    wants to use rather than being forced to use a single hub)
+
+   *OPEN QUESTION*: Should we instead require that each server persist
+   events they create, with the hub being responsible for purely
+   distribution/fetching?  It'd be in the hub's best interest to store
+   all history, but equally if it can rebuild the room by reaching out
+   to origin servers then it might be fine enough (it'd only be storing
+   event IDs rather than whole events).
 
 3.1.  Server Names
 
@@ -331,30 +314,21 @@ Table of Contents
    "domain name" or "server name" to uniquely identify it.  This server
    name is then used to namespace user IDs, room IDs/aliases, etc.
 
-   A server name MUST be compliant with Section 2.1 of [RFC1123] and,
-   when an IPv6 address, encoded per Section 2.2 of [RFC4291] surrounded
-   by square brackets ([]).  Improper server names MUST be considered
-   "uncontactable" by a server.
+   A server name MUST be compliant with Section 2.1 of [RFC1123].
+   Improper server names MUST be considered "uncontactable" by a server.
 
-   A server SHOULD NOT use a literal IPv4 or IPv6 address as a server
+   A server MUST NOT use a literal IPv4 or IPv6 address as a server
    name.  Doing so reduces the ability for the server to move to another
    internet address later, and IP addresses are generally difficult to
-   acquire certificates for (required in Section 12).  Additionally,
+   acquire a certificate for (required in Section 12).  Additionally,
    servers SHOULD NOT use an explicit port in their server name for
    similar portability reasons.
-
-   *TODO*: We should probably disallow literal IP addresses.
 
    The approximate ABNF [RFC5234] grammar for a server name is:
 
    server_name = hostname [ ":" port ]
    port        = 1*5DIGIT
-   hostname    = IPv4address / "[" IPv6address "]" / dns-name
-   IPv4address = 1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT "." 1*3DIGIT
-   IPv6address = 2*45IPv6char
-   IPv6char    = DIGIT / %x41-46 / %x61-66 / ":" / "."
-                     ; 0-9, A-F, a-f, :, .
-   dns-name    = 1*255dns-char
+   hostname    = 1*255dns-char
    dns-char    = DIGIT / ALPHA / "-" / "."
 
    Server names MUST be treated as case sensitive (eXaMpLe.OrG,
@@ -369,15 +343,6 @@ Table of Contents
    *  example.org (DNS host name)
 
    *  example.org:5678 (DNS host name with explicit port)
-
-   *  127.0.0.1 (literal IPv4 address)
-
-   *  127.0.0.1:5678 (literal IPv4 address with explicit port)
-
-   *  [2001:DB8:0:0:8:800:200C:417A] (literal IPv6 address)
-
-   *  [2001:DB8:0:0:8:800:200C:417A]:5678 (literal IPv6 address with
-      explicit port)
 
 3.2.  Rooms
 
@@ -547,13 +512,14 @@ Table of Contents
    ID, or would allocate the ID if the user doesn't exist yet.
 
    Identity systems and messaging providers SHOULD NOT use a phone
-   number in a localpart, as the localpart for a user ID is
-   unchangeable.  In these cases, a GUID (scoped to the allocating
-   server) is recommended so the associated human can change their phone
-   number without losing chats.
-
-   *TODO*: Clarify that phone numbers aren't banned, but that takeover
-   considerations need to be made.
+   number in a localpart.  Using a phone number would mean that when a
+   human operator's changes their phone number then they'd lose access
+   to their existing chats and potentially gain access to any chats the
+   new number is participating in.  Providers which use phone numbers
+   SHOULD ensure the new user ID is not in chats belonging to a
+   different logical user.  To prevent this case, a GUID (scoped to the
+   allocating server) or an account ID is recommended as a localpart,
+   allowing users to change their phone number without losing chats.
 
    This document does not define how a user ID is acquired.  It is
    expected that an identity specification under MIMI will handle
@@ -665,8 +631,32 @@ Table of Contents
    (Section 10) and prefix that with the event ID sigil, $. For example,
    $nKHVqt3iyLA_HEE8lT1yUaaVjjBRR-fAqpN4t7opadc.
 
-   *TODO*: Describe security benefits of using hashes-as-IDs here, in
-   contrast to privacy concern of having a hash as the ID.
+   Using a reference hash in the event ID prevents other servers from
+   changing what that event ID represents.  If an event ID was just a
+   UUID (or similar), any server along the send or receive path could
+   swap the actual event payload out for a different event.  The hashes
+   and signatures in this case do nothing to protect the actual event,
+   as a malicious server can simply generate legal hashes/signatures as
+   part of their modification.  If we add a namespace condition where
+   the event ID _must_ reference the same server name as the sender
+   ($uuid:example.org) then the sending server is free to re-assign the
+   event ID to a different payload during the sending of that event,
+   though all other servers along the send/receive path cannot change
+   the event.  This is particularly problematic if the event's sender is
+   the hub for the room: the hub can send one copy of an event to half
+   the room, and a very different copy to the other half while still
+   maintaining the same event ID for both halves.  To fix this, a hash
+   of the event itself would need to become part of the event ID such
+   that any modification or reassignment of the event ID is made obvious
+   to receipient servers.  This could be a tuple of (uuid, hash), though
+   for simplicity this document uses just the reference hash on its own.
+
+   With event IDs containing hashes of the events it's theoretically
+   possible for a sufficiently motivated person to build a database of
+   event IDs.  With that database, they could eventually determine
+   enough information to identify parts of the event payload itself.
+   There is not enough anchoring information on an event (or sent over
+   the transport) for this to be efficient or effective, however.
 
    The ABNF [RFC5234] for an event ID is:
 
@@ -1013,7 +1003,9 @@ Table of Contents
 4.  MLS Considerations
 
    *TODO*: We should consider running [I-D.robert-mimi-delivery-service]
-   over LM instead.
+   over LM instead.  Using something like [I-D.mahy-mimi-group-chat]
+   would be good for a purely client-side representation of the LM room
+   model.
 
    The MIMI working group is chartered to use Messaging Layer Security
    (MLS) [I-D.ietf-mls-protocol] [I-D.ietf-mls-architecture] for
@@ -1840,11 +1832,11 @@ Table of Contents
    endpoints.  It really should be replaced with something that works
    better.  This draft defines a protocol that can run over nearly any
    transport or server-server API.  A better option might be something
-   which uses gRPC for example, which might change how events are
+   that uses gRPC for example, which might change how events are
    structured, but the semantics remain the same.  This draft's
    transport is heavily inspired by Matrix's existing server-server API,
    and exists largely as a starting point for implementation validation
-   work - it is not really meant to live on indefinitely.
+   work - it is not really meant to exist indefinitely.
 
 12.1.  TLS Certificates
 
@@ -2020,52 +2012,33 @@ Table of Contents
    Per Section 3.1, a server name consists of <hostname>[:<port>].  The
    steps to convert that server name to an IP address and port are:
 
-   1.  If <hostname> is an IP literal, then that IP address is to be
-       used together with the given port number, or 8448 if no port is
-       given.
-
-       TLS certificate: <hostname> (always without port)
-
-       Host header: <hostname> or <hostname>:<port> if a port was
-       specified
-
-   2.  If <hostname> is not an IP literal, and an explicit <port> is
-       present, resolve <hostname> to an IP address using CNAME
-       [RFC1034] [RFC2181], AAAA [RFC3596], or A [RFC1035] DNS records.
-       Requests are made to the resolved IP address and port number.
+   1.  If <hostname> has an explicit <port> is present, resolve
+       <hostname> to an IP address using CNAME [RFC1034] [RFC2181], AAAA
+       [RFC3596], or A [RFC1035] DNS records.  Requests are made to the
+       resolved IP address and port number.
 
        TLS certificate: <hostname> (always without port)
 
        Host header: <hostname>:<port>
 
-   3.  If <hostname> is not an IP literal, a regular (non-Matrix) HTTPS
-       request is made to https://<hostname>/.well-known/matrix/server,
-       expecting the schema defined by Section 12.3.1.  If the response
-       is invalid (bad/not JSON, missing properties, non-200 response,
-       etc), skip to Step 4.  If the response is valid, the m.server
-       property is parsed as <delegated_hostname>[:<delegated_port>].
+   2.  A regular (non-Matrix) HTTPS request is made to
+       https://<hostname>/.well-known/matrix/server, expecting the
+       schema defined by Section 12.3.1.  If the response is invalid
+       (bad/not JSON, missing properties, non-200 response, etc), skip
+       to Step 4.  If the response is valid, the m.server property is
+       parsed as <delegated_hostname>[:<delegated_port>].
 
-       1.  If <delegated_hostname> is an IP literal, then that IP
-           address is to be used together with the given port number, or
-           8448 if no port is given.
-
-           TLS certificate: <delegated_hostname> (always without port)
-
-           Host header: <delegated_hostname> or
-           <delegated_hostname>:<delegated_port> if a port was specified
-
-       2.  If <delegated_hostname> is not an IP literal, and
-           <delegated_port> is present, resolve <delegated_hostname> to
-           an IP address using CNAME, AAAA, or A DNS records.  Requests
-           are made to the resolved IP address and port number.
+       1.  If <delegated_hostname> has an explicit <delegated_port> is
+           present, resolve <delegated_hostname> to an IP address using
+           CNAME, AAAA, or A DNS records.  Requests are made to the
+           resolved IP address and port number.
 
            TLS certificate: <delegated_hostname> (always without port)
 
            Host header: <delegated_hostname>:<delegated_port>
 
-       3.  If <delegated_hostname> is not an IP literal and no
-           <delegated_port> is present, an SRV DNS record is resolved
-           for _matrix._tcp.<delegated_hostname>.  This may result in
+       2.  An SRV DNS record is resolved for
+           _matrix._tcp.<delegated_hostname>.  This may result in
            another hostname and port to be resolved using AAAA or A DNS
            records.  Requests are made to the resolved IP address and
            port number.
@@ -2074,7 +2047,7 @@ Table of Contents
 
            Host header: <delegated_hostname> (without port)
 
-       4.  If no SRV record is found, an IP address is resolved for
+       3.  If no SRV record is found, an IP address is resolved for
            <delegated_hostname> is resolved using CNAME, AAAA, or A DNS
            records.  Requests are made to the resolved IP address with
            port number 8448.
@@ -2083,7 +2056,7 @@ Table of Contents
 
            Host header: <delegated_hostname> (without port)
 
-   4.  If the .well-known call from Step 3 resulted in an invalid
+   3.  If the .well-known call from Step 3 resulted in an invalid
        response, an SRV DNS record is resolved for
        _matrix._tcp.<hostname>.  This may result in another hostname and
        port to be resolved using AAAA or A DNS records.  Requests are
@@ -2093,7 +2066,7 @@ Table of Contents
 
        Host header: <hostname> (without port)
 
-   5.  If the .well-known call from Step 3 resulted in an invalid
+   4.  If the .well-known call from Step 3 resulted in an invalid
        response, and the SRV record from Step 4 was not found, and IP
        address is resolved using CNAME, AAAA, or A DNS records.
        Requests are made to the resolved IP address and port 8448.
@@ -3919,9 +3892,9 @@ Table of Contents
 
    [I-D.ralston-mimi-terminology]
               Ralston, T., "MIMI Terminology", Work in Progress,
-              Internet-Draft, draft-ralston-mimi-terminology-01, 9 June
+              Internet-Draft, draft-ralston-mimi-terminology-02, 10 July
               2023, <https://datatracker.ietf.org/doc/html/draft-
-              ralston-mimi-terminology-01>.
+              ralston-mimi-terminology-02>.
 
    [RFC1034]  Mockapetris, P., "Domain names - concepts and facilities",
               STD 13, RFC 1034, DOI 10.17487/RFC1034, November 1987,
@@ -4023,6 +3996,13 @@ Table of Contents
               /blob/48efb972075233c3a0f3e3ca01c4d4f888342205/
               decentralised.org>.
 
+   [I-D.mahy-mimi-group-chat]
+              Mahy, R., "Group Chat Framework for More Instant Messaging
+              Interoperability (MIMI)", Work in Progress, Internet-
+              Draft, draft-mahy-mimi-group-chat-00, 10 July 2023,
+              <https://datatracker.ietf.org/doc/html/draft-mahy-mimi-
+              group-chat-00>.
+
    [I-D.robert-mimi-delivery-service]
               Robert, R. and K. Kohbrok, "MIMI Delivery Service", Work
               in Progress, Internet-Draft, draft-robert-mimi-delivery-
@@ -4055,9 +4035,18 @@ Table of Contents
 
 Acknowledgments
 
-   Thank you to the Matrix Spec Core Team (SCT), and in particular
-   Richard van der Hoff, for exploring how Matrix rooms could be
-   represented as a linear structure, leading to this document.
+   Thanks to the Matrix Spec Core Team (SCT) for exploring methods of
+   linearizing Matrix's DAG room model, especially Richard van der Hoff
+   and Erik Johnston.  Additional thanks to the Matrix core team as a
+   whole for general review and input on this document, especially
+   Patrick Cloke and Jim Mackenzie.
+
+   Matrix's crypto team graciously allowed their work-in-progress MLS
+   considerations to be incorporated in this document.  Thanks to Hubert
+   Chathi for reviewing the MLS work for plausibility.
+
+   Thanks are also extended to the wider MIMI working group for
+   continous review and input on this document.
 
 Authors' Addresses
 
