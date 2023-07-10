@@ -241,7 +241,8 @@ Table of Contents
    BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
-   This document uses [I-D.ralston-mimi-terminology] where possible.
+   This document uses [I-D.ralston-mimi-terminology] for the majority of
+   terminology.
 
    This document additionally defines:
 
