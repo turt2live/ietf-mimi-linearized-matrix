@@ -110,11 +110,11 @@ access control. With some changes, it can become client-centric too. This docume
 transport for synchronizing the doubly-linked list to other servers. More efficient and scalable
 transport methods should replace this example.
 
-In a similar fashion, this document specifies how Messaging Layer Security (MLS) could run over a
-Linearized Matrix room. User messages use MLS, while state events (room configuration information)
-are plain-text in this iteration of the document. Clients synchronize room and MLS group membership,
-while servers verify those memberships. This ensures that users who are not in the room are unable to
-gain access to encrypted messages.
+In a similar fashion, this document specifies how Messaging Layer Security (MLS) {{!I-D.ietf-mls-protocol}}
+{{!I-D.ietf-mls-architecture}} could run over a Linearized Matrix room. User messages use MLS, while
+state events (room configuration information) are plain-text in this iteration of the document. Clients
+synchronize room and MLS group membership, while servers verify those memberships. This ensures that
+users who are not in the room are unable to gain access to encrypted messages.
 
 A key component for interoperability is consistent access control semantics. Where a single server
 'owns' a room, it can establish arbitrary measures. For example, an owning provider might decide that
@@ -1421,19 +1421,19 @@ scenario where hub transfers are possible, the room ID does not change when the 
 **TODO**: This section, if we want a single canonical hub in the room. Some expected problems in this
 area are: who signs the transfer event? who *sends* the transfer event? how does a transfer start?
 
-**TODO**: Is this section better placed in the MSC for now?
+**TODO**: Likely to be done with an `m.room.hub` state event in the room, where the "current hub" is
+either the sender of `m.room.hub` or `m.room.create` if no hub state event is present. Auth rules
+would govern what makes for a legal `m.room.hub` event.
 
 # Transport {#int-transport}
 
 This document specifies a wire transport which uses JSON {{!RFC8259}} over HTTPS {{!RFC9110}}. Servers
 MUST support a minimum of HTTP/2 {{!RFC9113}} and TLS 1.3 {{!RFC8446}}.
 
-**TODO**: This transport doesn't scale, and doesn't use RESTful endpoints. It really should be replaced
-with something that works better. This draft defines a protocol that can run over nearly any transport
-or server-server API. A better option might be something that uses gRPC for example, which might change
-how events are structured, but the semantics remain the same. This draft's transport is heavily inspired
-by Matrix's existing server-server API, and exists largely as a starting point for implementation
-validation work - it is not really meant to exist indefinitely.
+**TODO**: This transport doesn't scale, and doesn't use RESTful endpoints. This example transport is
+heavily inspired by Matrix's existing Server-Server API, largely acting as a starting point for testing
+interoperability of the access control semantics. A better option might be gRPC, which might change how
+events are structured but keep the overall semantics the same.
 
 ## TLS Certificates {#int-tls}
 
