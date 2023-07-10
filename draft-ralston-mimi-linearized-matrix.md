@@ -65,11 +65,21 @@ informative:
 
 --- abstract
 
-This document specifies Linearized Matrix (LM) - an extensible protocol for interoperability between messaging providers through usage of Matrix's ([matrix.org](https://matrix.org)) decentralized room model. LM simplifies Matrix's Directed Acyclic Graph (DAG) persistence to a doubly linked list with hub-and-spoke fanout while still being fully capable of supporting non-linearized servers in a room.
+This document specifies Linearized Matrix (LM). LM is an extensible protocol for interoperability
+between messaging providers, using Matrix's ([matrix.org](https://matrix.org)) decentralized room
+model. LM simplifies the Directed Acyclic Graph (DAG) persistence of Matrix while maintaining
+compatibility with non-linearized servers within a room. It does this by using a doubly-linked list
+with hub and spoke fanout.
 
-LM's extensibility enables a wide range of transport protocol and end-to-end encryption possibilities. This document describes Matrix's room access control semantics supported by Messaging Layer Security (MLS) and shared between servers via HTTPS and JSON. Both the details for what is put over MLS and the server-server transport used are designed to be replaced.
+LM's extensibility enables a wide range of transport protocol and end-to-end encryption possibilities.
+This document uses Matrix's room access control semantics supported by Messaging Layer Security (MLS),
+transported via HTTPS and JSON. The details of which server-to-server transport to use and what a is
+put over MLS are replaceable.
 
-LM's threat model avoids placing trust in a central owning server for each conversation, but does define a hub server which becomes responsible for maintaining linearized room history on behalf of other servers in the room. The lack of trust in an owning server enables transparent interconnection between Matrix and Linearized Matrix servers within the same room.
+The threat model of LM does not place trust in a central owning server for each conversation. Instead,
+it defines a hub server which handles maintaining linearized room history for other servers in the
+room. This model permits transparent interconnection between LM servers and Matrix servers, in the
+same room.
 
 --- middle
 
