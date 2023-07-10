@@ -830,11 +830,13 @@ it through its local server ({{int-transport-devices}}):
       "m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
    ],
    "keys": {
-      "m.mls.v1.credential.ed25519:ABCDEF": "<unpadded base64 BasicCredential>"
+      "m.mls.v1.credential.ed25519:ABCDEF":
+         "<unpadded base64 BasicCredential>"
    },
    "signatures": {
       "@alice:example.org": {
-         "m.mls.v1.credential.ed25519:ABCDEF": "<unpadded base64 signature>"
+         "m.mls.v1.credential.ed25519:ABCDEF":
+            "<unpadded base64 signature>"
       }
    }
 }
@@ -2308,13 +2310,13 @@ A typical invite flow would be:
        |                       | POST /invite (PDU)     |
        |                       +----------------------->|
        |                       |                        |
-       |                       |                        | Decide to process the
-       |                       |                        | invite. Can reject due
-       |                       |                        | to spam, or send it to
-       |                       |                        | the recipient user.
-       |                       |                        +----------------------+
-       |                       |                        |                      |
-       |                       |                        |<---------------------+
+       |                       |  Decide to process the |
+       |                       | invite. Can reject due |
+       |                       | to spam, or send it to |
+       |                       |    the recipient user. |
+       |                       | +----------------------+
+       |                       | |                      |
+       |                       | +--------------------->|
        |                       |                        |
        |                       |    Finish POST /invite |
        |                       |<-----------------------+
@@ -2322,7 +2324,7 @@ A typical invite flow would be:
        |   Finish POST /invite |                        |
        |<----------------------+                        |
        |                       |                        |
------------------------- User decides to accept invite -------------------------
+-------------------- User decides to accept invite ---------------------
        |                       |                        |
        |                       |         GET /make_join |
        |                       |<-----------------------+
@@ -2330,10 +2332,10 @@ A typical invite flow would be:
        |                       | Finish GET /make_join  |
        |                       +----------------------->|
        |                       |                        |
-       |                       |                        | Fill event template
-       |                       |                        +-------------------+
-       |                       |                        |                   |
-       |                       |                        |<------------------+
+       |                       |    Fill event template |
+       |                       |    +-------------------+
+       |                       |    |                   |
+       |                       |    +------------------>|
        |                       |                        |
        |                       |        POST /send_join |
        |                       |<-----------------------+
@@ -2464,12 +2466,12 @@ The full invite sequence is:
        |            rejection |                        |
        |<---------------------+                        |
        |                      |                        |
-       |                      |                        | Otherwise, queue
-       |                      |                        | sending the invite to
-       |                      |                        | target user
-       |                      |                        +----------------------+
-       |                      |                        |                      |
-       |                      |                        |<---------------------+
+       |                      |       Otherwise, queue |
+       |                      |  sending the invite to |
+       |                      |            target user |
+       |                      |  +---------------------+
+       |                      |  |                     |
+       |                      |  +-------------------->|
        |                      |                        |
        |                      |                 200 OK |
        |                      |<-----------------------+
@@ -3016,11 +3018,13 @@ Request body: None applicable.
       "m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
    ],
    "keys": {
-      "m.mls.v1.credential.ed25519:ABCDEF": "<unpadded base64 BasicCredential>"
+      "m.mls.v1.credential.ed25519:ABCDEF":
+         "<unpadded base64 BasicCredential>"
    },
    "signatures": {
       "@alice:example.org": {
-         "m.mls.v1.credential.ed25519:ABCDEF": "<unpadded base64 signature>"
+         "m.mls.v1.credential.ed25519:ABCDEF":
+            "<unpadded base64 signature>"
       }
    }
 }
@@ -3085,7 +3089,8 @@ Request body:
 {
    "one_time_keys": {
       "@alice:example.org": {
-         "ABCD": "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519"
+         "ABCD":
+            "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519"
       }
    }
 }
