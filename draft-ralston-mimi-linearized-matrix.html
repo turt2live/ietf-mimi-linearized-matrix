@@ -2360,11 +2360,13 @@ it through its local server (<a href="#int-transport-devices" class="auto intern
       "m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
    ],
    "keys": {
-      "m.mls.v1.credential.ed25519:ABCDEF": "&lt;unpadded base64 BasicCredential&gt;"
+      "m.mls.v1.credential.ed25519:ABCDEF":
+         "&lt;unpadded base64 BasicCredential&gt;"
    },
    "signatures": {
       "@alice:example.org": {
-         "m.mls.v1.credential.ed25519:ABCDEF": "&lt;unpadded base64 signature&gt;"
+         "m.mls.v1.credential.ed25519:ABCDEF":
+            "&lt;unpadded base64 signature&gt;"
       }
    }
 }
@@ -4133,7 +4135,7 @@ not already participating however, it needs to be welcomed in by the hub server.
 <p id="section-12.7-2">A typical invite flow would be:<a href="#section-12.7-2" class="pilcrow">¶</a></p>
 <div id="section-12.7-3">
           <div class="alignLeft art-svg artwork" id="section-12.7-3.1">
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="720" width="648" viewBox="0 0 648 720" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="720" width="584" viewBox="0 0 584 720" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
               <path d="M 8,32 L 8,64" fill="none" stroke="black"></path>
               <path d="M 64,72 L 64,408" fill="none" stroke="black"></path>
               <path d="M 64,424 L 64,704" fill="none" stroke="black"></path>
@@ -4141,13 +4143,13 @@ not already participating however, it needs to be welcomed in by the hub server.
               <path d="M 232,32 L 232,64" fill="none" stroke="black"></path>
               <path d="M 256,72 L 256,400" fill="none" stroke="black"></path>
               <path d="M 256,432 L 256,704" fill="none" stroke="black"></path>
+              <path d="M 272,256 L 272,288" fill="none" stroke="black"></path>
               <path d="M 280,32 L 280,64" fill="none" stroke="black"></path>
+              <path d="M 296,560 L 296,592" fill="none" stroke="black"></path>
               <path d="M 392,32 L 392,64" fill="none" stroke="black"></path>
               <path d="M 456,72 L 456,408" fill="none" stroke="black"></path>
               <path d="M 456,424 L 456,704" fill="none" stroke="black"></path>
               <path d="M 520,32 L 520,64" fill="none" stroke="black"></path>
-              <path d="M 616,560 L 616,592" fill="none" stroke="black"></path>
-              <path d="M 640,256 L 640,288" fill="none" stroke="black"></path>
               <path d="M 8,32 L 120,32" fill="none" stroke="black"></path>
               <path d="M 232,32 L 280,32" fill="none" stroke="black"></path>
               <path d="M 392,32 L 520,32" fill="none" stroke="black"></path>
@@ -4156,22 +4158,22 @@ not already participating however, it needs to be welcomed in by the hub server.
               <path d="M 392,64 L 520,64" fill="none" stroke="black"></path>
               <path d="M 64,112 L 248,112" fill="none" stroke="black"></path>
               <path d="M 256,160 L 448,160" fill="none" stroke="black"></path>
-              <path d="M 456,256 L 640,256" fill="none" stroke="black"></path>
-              <path d="M 464,288 L 640,288" fill="none" stroke="black"></path>
+              <path d="M 272,256 L 456,256" fill="none" stroke="black"></path>
+              <path d="M 272,288 L 448,288" fill="none" stroke="black"></path>
               <path d="M 264,336 L 456,336" fill="none" stroke="black"></path>
               <path d="M 72,384 L 256,384" fill="none" stroke="black"></path>
-              <path d="M 8,416 L 192,416" fill="none" stroke="black"></path>
-              <path d="M 448,416 L 640,416" fill="none" stroke="black"></path>
+              <path d="M 8,416 L 160,416" fill="none" stroke="black"></path>
+              <path d="M 416,416 L 576,416" fill="none" stroke="black"></path>
               <path d="M 264,464 L 456,464" fill="none" stroke="black"></path>
               <path d="M 256,512 L 448,512" fill="none" stroke="black"></path>
-              <path d="M 456,560 L 616,560" fill="none" stroke="black"></path>
-              <path d="M 464,592 L 616,592" fill="none" stroke="black"></path>
+              <path d="M 296,560 L 456,560" fill="none" stroke="black"></path>
+              <path d="M 296,592 L 448,592" fill="none" stroke="black"></path>
               <path d="M 264,640 L 456,640" fill="none" stroke="black"></path>
               <path d="M 256,688 L 448,688" fill="none" stroke="black"></path>
-              <polygon class="arrowhead" points="472,592 460,586.4 460,597.6" fill="black" transform="rotate(180,464,592)"></polygon>
-              <polygon class="arrowhead" points="472,288 460,282.4 460,293.6" fill="black" transform="rotate(180,464,288)"></polygon>
               <polygon class="arrowhead" points="456,688 444,682.4 444,693.6" fill="black" transform="rotate(0,448,688)"></polygon>
+              <polygon class="arrowhead" points="456,592 444,586.4 444,597.6" fill="black" transform="rotate(0,448,592)"></polygon>
               <polygon class="arrowhead" points="456,512 444,506.4 444,517.6" fill="black" transform="rotate(0,448,512)"></polygon>
+              <polygon class="arrowhead" points="456,288 444,282.4 444,293.6" fill="black" transform="rotate(0,448,288)"></polygon>
               <polygon class="arrowhead" points="456,160 444,154.4 444,165.6" fill="black" transform="rotate(0,448,160)"></polygon>
               <polygon class="arrowhead" points="272,640 260,634.4 260,645.6" fill="black" transform="rotate(180,264,640)"></polygon>
               <polygon class="arrowhead" points="272,464 260,458.4 260,469.6" fill="black" transform="rotate(180,264,464)"></polygon>
@@ -4188,42 +4190,42 @@ not already participating however, it needs to be welcomed in by the hub server.
                 <text x="284" y="148">POST</text>
                 <text x="336" y="148">/invite</text>
                 <text x="392" y="148">(PDU)</text>
-                <text x="492" y="196">Decide</text>
-                <text x="532" y="196">to</text>
-                <text x="576" y="196">process</text>
-                <text x="624" y="196">the</text>
-                <text x="496" y="212">invite.</text>
-                <text x="544" y="212">Can</text>
-                <text x="588" y="212">reject</text>
-                <text x="632" y="212">due</text>
-                <text x="476" y="228">to</text>
-                <text x="512" y="228">spam,</text>
-                <text x="548" y="228">or</text>
-                <text x="580" y="228">send</text>
-                <text x="612" y="228">it</text>
-                <text x="636" y="228">to</text>
-                <text x="480" y="244">the</text>
-                <text x="536" y="244">recipient</text>
-                <text x="600" y="244">user.</text>
+                <text x="300" y="196">Decide</text>
+                <text x="340" y="196">to</text>
+                <text x="384" y="196">process</text>
+                <text x="432" y="196">the</text>
+                <text x="296" y="212">invite.</text>
+                <text x="344" y="212">Can</text>
+                <text x="388" y="212">reject</text>
+                <text x="432" y="212">due</text>
+                <text x="276" y="228">to</text>
+                <text x="312" y="228">spam,</text>
+                <text x="348" y="228">or</text>
+                <text x="380" y="228">send</text>
+                <text x="412" y="228">it</text>
+                <text x="436" y="228">to</text>
+                <text x="304" y="244">the</text>
+                <text x="360" y="244">recipient</text>
+                <text x="424" y="244">user.</text>
                 <text x="316" y="324">Finish</text>
                 <text x="364" y="324">POST</text>
                 <text x="416" y="324">/invite</text>
                 <text x="116" y="372">Finish</text>
                 <text x="164" y="372">POST</text>
                 <text x="216" y="372">/invite</text>
-                <text x="220" y="420">User</text>
-                <text x="272" y="420">decides</text>
-                <text x="316" y="420">to</text>
-                <text x="356" y="420">accept</text>
-                <text x="412" y="420">invite</text>
+                <text x="188" y="420">User</text>
+                <text x="240" y="420">decides</text>
+                <text x="284" y="420">to</text>
+                <text x="324" y="420">accept</text>
+                <text x="380" y="420">invite</text>
                 <text x="344" y="452">GET</text>
                 <text x="404" y="452">/make_join</text>
                 <text x="292" y="500">Finish</text>
                 <text x="336" y="500">GET</text>
                 <text x="396" y="500">/make_join</text>
-                <text x="484" y="548">Fill</text>
-                <text x="528" y="548">event</text>
-                <text x="588" y="548">template</text>
+                <text x="308" y="548">Fill</text>
+                <text x="352" y="548">event</text>
+                <text x="412" y="548">template</text>
                 <text x="340" y="628">POST</text>
                 <text x="404" y="628">/send_join</text>
                 <text x="292" y="676">Finish</text>
@@ -4377,18 +4379,18 @@ send additional invites to other users on the same server.<a href="#section-12.7
 <p id="section-12.7.2-3">The full invite sequence is:<a href="#section-12.7.2-3" class="pilcrow">¶</a></p>
 <div id="section-12.7.2-4">
             <div class="alignLeft art-svg artwork" id="section-12.7.2-4.1">
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="784" width="640" viewBox="0 0 640 784" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="784" width="520" viewBox="0 0 520 784" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
                 <path d="M 8,32 L 8,64" fill="none" stroke="black"></path>
                 <path d="M 64,72 L 64,768" fill="none" stroke="black"></path>
                 <path d="M 120,32 L 120,64" fill="none" stroke="black"></path>
                 <path d="M 224,32 L 224,64" fill="none" stroke="black"></path>
                 <path d="M 248,72 L 248,768" fill="none" stroke="black"></path>
                 <path d="M 272,32 L 272,64" fill="none" stroke="black"></path>
+                <path d="M 272,624 L 272,656" fill="none" stroke="black"></path>
                 <path d="M 384,32 L 384,64" fill="none" stroke="black"></path>
                 <path d="M 400,256 L 400,288" fill="none" stroke="black"></path>
                 <path d="M 448,72 L 448,768" fill="none" stroke="black"></path>
                 <path d="M 512,32 L 512,64" fill="none" stroke="black"></path>
-                <path d="M 632,624 L 632,656" fill="none" stroke="black"></path>
                 <path d="M 8,32 L 120,32" fill="none" stroke="black"></path>
                 <path d="M 224,32 L 272,32" fill="none" stroke="black"></path>
                 <path d="M 384,32 L 512,32" fill="none" stroke="black"></path>
@@ -4403,11 +4405,11 @@ send additional invites to other users on the same server.<a href="#section-12.7
                 <path d="M 256,400 L 448,400" fill="none" stroke="black"></path>
                 <path d="M 256,480 L 448,480" fill="none" stroke="black"></path>
                 <path d="M 72,544 L 248,544" fill="none" stroke="black"></path>
-                <path d="M 448,624 L 632,624" fill="none" stroke="black"></path>
-                <path d="M 456,656 L 632,656" fill="none" stroke="black"></path>
+                <path d="M 272,624 L 448,624" fill="none" stroke="black"></path>
+                <path d="M 272,656 L 440,656" fill="none" stroke="black"></path>
                 <path d="M 256,704 L 448,704" fill="none" stroke="black"></path>
                 <path d="M 72,752 L 248,752" fill="none" stroke="black"></path>
-                <polygon class="arrowhead" points="464,656 452,650.4 452,661.6" fill="black" transform="rotate(180,456,656)"></polygon>
+                <polygon class="arrowhead" points="448,656 436,650.4 436,661.6" fill="black" transform="rotate(0,440,656)"></polygon>
                 <polygon class="arrowhead" points="448,336 436,330.4 436,341.6" fill="black" transform="rotate(0,440,336)"></polygon>
                 <polygon class="arrowhead" points="264,704 252,698.4 252,709.6" fill="black" transform="rotate(180,256,704)"></polygon>
                 <polygon class="arrowhead" points="264,480 252,474.4 252,485.6" fill="black" transform="rotate(180,256,480)"></polygon>
@@ -4453,14 +4455,14 @@ send additional invites to other users on the same server.<a href="#section-12.7
                   <text x="112" y="516">Proxy</text>
                   <text x="188" y="516">TargetServer</text>
                   <text x="200" y="532">rejection</text>
-                  <text x="500" y="580">Otherwise,</text>
-                  <text x="568" y="580">queue</text>
-                  <text x="488" y="596">sending</text>
-                  <text x="536" y="596">the</text>
-                  <text x="580" y="596">invite</text>
-                  <text x="620" y="596">to</text>
-                  <text x="484" y="612">target</text>
-                  <text x="532" y="612">user</text>
+                  <text x="348" y="580">Otherwise,</text>
+                  <text x="416" y="580">queue</text>
+                  <text x="296" y="596">sending</text>
+                  <text x="344" y="596">the</text>
+                  <text x="388" y="596">invite</text>
+                  <text x="428" y="596">to</text>
+                  <text x="372" y="612">target</text>
+                  <text x="420" y="612">user</text>
                   <text x="400" y="692">200</text>
                   <text x="428" y="692">OK</text>
                   <text x="200" y="740">200</text>
@@ -5037,11 +5039,13 @@ account for breaking changes.<a href="#section-12.10.1.1-2" class="pilcrow">¶</
       "m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
    ],
    "keys": {
-      "m.mls.v1.credential.ed25519:ABCDEF": "&lt;unpadded base64 BasicCredential&gt;"
+      "m.mls.v1.credential.ed25519:ABCDEF":
+         "&lt;unpadded base64 BasicCredential&gt;"
    },
    "signatures": {
       "@alice:example.org": {
-         "m.mls.v1.credential.ed25519:ABCDEF": "&lt;unpadded base64 signature&gt;"
+         "m.mls.v1.credential.ed25519:ABCDEF":
+            "&lt;unpadded base64 signature&gt;"
       }
    }
 }
@@ -5111,7 +5115,8 @@ server which owns the given user IDs.<a href="#section-12.10.3.1-1" class="pilcr
 {
    "one_time_keys": {
       "@alice:example.org": {
-         "ABCD": "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519"
+         "ABCD":
+            "m.mls.v1.key_package.dhkemx25519-aes128gcm-sha256-ed25519"
       }
    }
 }
