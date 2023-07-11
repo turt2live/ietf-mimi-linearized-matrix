@@ -216,23 +216,6 @@ The only change is made to Step 1 of the content hashing algorithm. The full alg
 3. Hash the resulting bytes with SHA-256.
 4. Encode the hash using unpadded base64.
 
-## Request Authentication
-
-There are largely clarifications to how request authentication works. Namely:
-
-* A 401 M_FORBIDDEN error is returned when improperly authenticated.
-* Only one of the sender's signing keys needs to be used, but senders should send as many as possible (if the server
-  has multiple signing keys).
-* A failure in any one `Authorization` header is treated as fatal for the whole request.
-* `GET` requests, or those without a request body, are represented as `{}` in the signed JSON.
-* `destination` in the `Authorization` header is formally required, though backwards compatible with Matrix today.
-
-This is meant to be compatible with [MSC4029](https://github.com/matrix-org/matrix-spec-proposals/pull/4029), when
-MSC4029 has real content in it.
-
-Linearized Matrix requires attempting the server *first* before falling back to
-a notary server.
-
 ### Encryption
 
 Encryption is enabled via an `encryption` property in the `m.room.create` event, not via a separate
@@ -252,6 +235,23 @@ Thus encryption must be enabled at room creation time.
 `m.mls.commit` events can be viewed by any user in the room, regardless of
 history visibility. (Does this mean `shared` or `world_readable` or something
 else? Can a user see them after they've left? How does this work?)
+
+## Request Authentication
+
+There are largely clarifications to how request authentication works. Namely:
+
+* A 401 M_FORBIDDEN error is returned when improperly authenticated.
+* Only one of the sender's signing keys needs to be used, but senders should send as many as possible (if the server
+  has multiple signing keys).
+* A failure in any one `Authorization` header is treated as fatal for the whole request.
+* `GET` requests, or those without a request body, are represented as `{}` in the signed JSON.
+* `destination` in the `Authorization` header is formally required, though backwards compatible with Matrix today.
+
+This is meant to be compatible with [MSC4029](https://github.com/matrix-org/matrix-spec-proposals/pull/4029), when
+MSC4029 has real content in it.
+
+Linearized Matrix requires attempting the server *first* before falling back to
+a notary server.
 
 ## Linearization Algorithm
 
