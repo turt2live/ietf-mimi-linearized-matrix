@@ -308,7 +308,7 @@ and participants can choose their favourite, creating small clusters of LM serve
   Additionally, the response changes accordingly:
 
   * `pdus` is replaced by `failed_pdus`, retaining a similar structure. The `failed_pdus` object is keyed by
-    failed event ID (LPDU event ID if it's not yet a PDU) with a an object value. The object value has the
+    failed event ID (LPDU event ID if it's not yet a PDU) with an object value. The object value has the
     same schema as the `v1` endpoint: `error` as a human-readable string to denote the rejection reason.
 
     Note that events which are dropped or accepted do not appear in `failed_pdus`.
