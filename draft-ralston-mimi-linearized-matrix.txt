@@ -5,7 +5,7 @@
 More Instant Messaging Interoperability                       T. Ralston
 Internet-Draft                                                M. Hodgson
 Intended status: Standards Track        The Matrix.org Foundation C.I.C.
-Expires: 11 January 2024                                    10 July 2023
+Expires: 12 January 2024                                    11 July 2023
 
 
                            Linearized Matrix
@@ -25,8 +25,7 @@ Abstract
    end-to-end encryption possibilities.  This document uses Matrix's
    room access control semantics supported by Messaging Layer Security
    (MLS), transported via HTTPS and JSON.  The details of which server-
-   to-server transport to use and what a is put over MLS are
-   replaceable.
+   to-server transport to use and what is put over MLS are replaceable.
 
    The threat model of LM does not place trust in a central owning
    server for each conversation.  Instead, it defines a hub server which
@@ -67,7 +66,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 11 January 2024.
+   This Internet-Draft will expire on 12 January 2024.
 
 Copyright Notice
 
@@ -806,8 +805,8 @@ Table of Contents
 
 3.5.2.1.  Stripped State
 
-   Stripped state event are extremely simplified state events to provide
-   context to a user for an invite (Section 12.7.2) or knock
+   Stripped state events are extremely simplified state events to
+   provide context to a user for an invite (Section 12.7.2) or knock
    (Section 12.7.4).  Servers and clients have no ability to verify the
    events outside of the context for a room, so all such fields are
    removed.  Servers and clients MUST NOT rely on the events being
@@ -1021,7 +1020,7 @@ Table of Contents
 
    algorithm denotes which specific algorithm clients MUST use for
    sending and receiving encrypted events in the room.  If a received
-   event is encrypted using a different algorith, it MUST be treated as
+   event is encrypted using a different algorithm, it MUST be treated as
    undecryptable (even if the client has sufficient key information to
    decrypt it).
 
@@ -1153,7 +1152,7 @@ Table of Contents
 
       -  A device can be removed by anyone if the user ID to which it
          belongs is no longer in the join state.  This condition is
-         required to satisy a case in MLS where a device cannot self-
+         required to satisfy a case in MLS where a device cannot self-
          remove itself from the group.
 
    If this validation fails, the hub server MUST reject the request if
@@ -2055,7 +2054,7 @@ Table of Contents
 
            Host header: <delegated_hostname> (without port)
 
-   3.  If the .well-known call from Step 3 resulted in an invalid
+   3.  If the .well-known call from Step 2 resulted in an invalid
        response, an SRV DNS record is resolved for
        _matrix._tcp.<hostname>.  This may result in another hostname and
        port to be resolved using AAAA or A DNS records.  Requests are
@@ -2075,7 +2074,7 @@ Table of Contents
        Host header: <hostname> (without port)
 
    We require <[delegated_]hostname> rather than <srv_hostname> in Steps
-   3.3 and 4 for the following reasons:
+   2.3 and 3 for the following reasons:
 
    1.  DNS is largely insecure (not all domains use DNSSEC [RFC9364]),
        so the target of the SRV record must prove it is a valid
@@ -2252,7 +2251,7 @@ Table of Contents
    ways: Section 12.4.1.3 and Section 12.4.1.4.  Notary servers
    implicitly call /_matrix/key/v2/server when queried, signing and
    caching the response for some time.  This allows the target server to
-   offline without affecting their previously sent events.
+   be offline without affecting their previously sent events.
 
    The approach used here is borrowed from the Perspectives Project
    [PerspectivesProject], modified to cover the server's ed25519 keys
@@ -2609,7 +2608,7 @@ Table of Contents
    transaction ID from the one already in flight, the receiving server
    MUST respond with a 400 Bad Request HTTP status code and M_BAD_STATE
    error code (Section 12.2.2).  Receiving servers SHOULD continue
-   processing requests to this endpoint event after the sender has
+   processing requests to this endpoint even after the sender has
    disconnected/timed out, but SHOULD NOT process the request multiple
    times due to the transaction ID (Section 12.2.5).
 

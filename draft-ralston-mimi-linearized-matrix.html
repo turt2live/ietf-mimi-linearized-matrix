@@ -15,7 +15,7 @@ compatibility with non-linearized servers within a room. It does this by using a
 of events/messages per room with hub and spoke fanout. 
        LM's extensibility enables a wide range of transport protocol and end-to-end encryption possibilities.
 This document uses Matrix's room access control semantics supported by Messaging Layer Security (MLS),
-transported via HTTPS and JSON. The details of which server-to-server transport to use and what a is
+transported via HTTPS and JSON. The details of which server-to-server transport to use and what is
 put over MLS are replaceable. 
        The threat model of LM does not place trust in a central owning server for each conversation. Instead,
 it defines a hub server which handles maintaining linearized room history for other servers in the
@@ -1069,7 +1069,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Ralston &amp; Hodgson</td>
-<td class="center">Expires 11 January 2024</td>
+<td class="center">Expires 12 January 2024</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1082,12 +1082,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ralston-mimi-linearized-matrix-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2023-07-10" class="published">10 July 2023</time>
+<time datetime="2023-07-11" class="published">11 July 2023</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2024-01-11">11 January 2024</time></dd>
+<dd class="expires"><time datetime="2024-01-12">12 January 2024</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1111,7 +1111,7 @@ compatibility with non-linearized servers within a room. It does this by using a
 of events/messages per room with hub and spoke fanout.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <p id="section-abstract-2">LM's extensibility enables a wide range of transport protocol and end-to-end encryption possibilities.
 This document uses Matrix's room access control semantics supported by Messaging Layer Security (MLS),
-transported via HTTPS and JSON. The details of which server-to-server transport to use and what a is
+transported via HTTPS and JSON. The details of which server-to-server transport to use and what is
 put over MLS are replaceable.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
 <p id="section-abstract-3">The threat model of LM does not place trust in a central owning server for each conversation. Instead,
 it defines a hub server which handles maintaining linearized room history for other servers in the
@@ -1153,7 +1153,7 @@ same room.<a href="#section-abstract-3" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 11 January 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 12 January 2024.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2092,7 +2092,7 @@ avatars, etc.<a href="#section-3.5.2-6" class="pilcrow">¶</a></p>
             <h5 id="name-stripped-state">
 <a href="#section-3.5.2.1" class="section-number selfRef">3.5.2.1. </a><a href="#name-stripped-state" class="section-name selfRef">Stripped State</a>
             </h5>
-<p id="section-3.5.2.1-1">Stripped state event are extremely simplified state events to provide context to a user for an invite
+<p id="section-3.5.2.1-1">Stripped state events are extremely simplified state events to provide context to a user for an invite
 (<a href="#int-transport-invites" class="auto internal xref">Section 12.7.2</a>) or knock (<a href="#int-transport-knocks" class="auto internal xref">Section 12.7.4</a>). Servers and clients have no ability
 to verify the events outside of the context for a room, so all such fields are removed. Servers and
 clients <span class="bcp14">MUST NOT</span> rely on the events being accurate because they cannot independently verify them.<a href="#section-3.5.2.1-1" class="pilcrow">¶</a></p>
@@ -2328,7 +2328,7 @@ algorithmic details are contained in the <code>content</code> for the <code>m.ro
 </pre><a href="#section-4-5" class="pilcrow">¶</a>
 </div>
 <p id="section-4-6"><code>algorithm</code> denotes which specific algorithm clients <span class="bcp14">MUST</span> use for sending and receiving encrypted
-events in the room. If a received event is encrypted using a different algorith, it <span class="bcp14">MUST</span> be treated
+events in the room. If a received event is encrypted using a different algorithm, it <span class="bcp14">MUST</span> be treated
 as undecryptable (even if the client has sufficient key information to decrypt it).<a href="#section-4-6" class="pilcrow">¶</a></p>
 <p id="section-4-7"><code>m.mls.v1.</code> as a prefix describes the behaviour for encrypted clients, with the remainder of the
 algorithm string covering the exact ciphersuite. This document uses the same mandatory ciphersuite
@@ -2440,7 +2440,7 @@ knocking, etc on the room - the user ID must usually be in the <code>join</code>
 <li class="normal" id="section-4.3-3.2.2.1">A device can remove another device if they both belong to the same user ID.<a href="#section-4.3-3.2.2.1" class="pilcrow">¶</a>
 </li>
               <li class="normal" id="section-4.3-3.2.2.2">A device can be removed by anyone if the user ID to which it belongs is no longer in the <code>join</code> state.
-This condition is required to satisy a case in MLS where a device cannot self-remove itself from
+This condition is required to satisfy a case in MLS where a device cannot self-remove itself from
 the group.<a href="#section-4.3-3.2.2.2" class="pilcrow">¶</a>
 </li>
             </ul>
@@ -3409,7 +3409,7 @@ Host header: <code>&lt;delegated_hostname&gt;</code> (without port)<a href="#sec
             </ol>
 </li>
           <li id="section-12.3-7.3">
-            <p id="section-12.3-7.3.1">If the <code>.well-known</code> call from Step 3 resulted in an invalid response, an SRV DNS record is resolved
+            <p id="section-12.3-7.3.1">If the <code>.well-known</code> call from Step 2 resulted in an invalid response, an SRV DNS record is resolved
 for <code>_matrix._tcp.&lt;hostname&gt;</code>. This may result in another hostname and port to be resolved using AAAA
 or A DNS records. Requests are made to the resolved IP address and port number.<a href="#section-12.3-7.3.1" class="pilcrow">¶</a></p>
 <p id="section-12.3-7.3.2">
@@ -3427,7 +3427,7 @@ TLS certificate: <code>&lt;hostname&gt;</code> (always without port)<a href="#se
 Host header: <code>&lt;hostname&gt;</code> (without port)<a href="#section-12.3-7.4.3" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-12.3-8">We require <code>&lt;[delegated_]hostname&gt;</code> rather than <code>&lt;srv_hostname&gt;</code> in Steps 3.3 and 4 for the following reasons:<a href="#section-12.3-8" class="pilcrow">¶</a></p>
+<p id="section-12.3-8">We require <code>&lt;[delegated_]hostname&gt;</code> rather than <code>&lt;srv_hostname&gt;</code> in Steps 2.3 and 3 for the following reasons:<a href="#section-12.3-8" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-12.3-9">
 <li id="section-12.3-9.1">DNS is largely insecure (not all domains use DNSSEC <span>[<a href="#RFC9364" class="cite xref">RFC9364</a>]</span>), so the target of the SRV record must
 prove it is a valid delegate/target for <code>&lt;[delegated_]hostname&gt;</code> via TLS.<a href="#section-12.3-9.1" class="pilcrow">¶</a>
@@ -3579,7 +3579,7 @@ with an HTTP <code>401 Unauthorized</code> status code and <code>M_FORBIDDEN</co
 <p id="section-12.4.1-2">A server's signing keys are published under <code>/_matrix/key/v2/server</code> (<a href="#int-api-self-key" class="auto internal xref">Section 12.4.1.2</a>) and can
 be queried through notary servers in two ways: <a href="#int-api-notary-query" class="auto internal xref">Section 12.4.1.3</a> and <a href="#int-api-notary-query-bulk" class="auto internal xref">Section 12.4.1.4</a>.
 Notary servers implicitly call <code>/_matrix/key/v2/server</code> when queried, signing and caching the response
-for some time. This allows the target server to offline without affecting their previously sent events.<a href="#section-12.4.1-2" class="pilcrow">¶</a></p>
+for some time. This allows the target server to be offline without affecting their previously sent events.<a href="#section-12.4.1-2" class="pilcrow">¶</a></p>
 <p id="section-12.4.1-3">The approach used here is borrowed from the Perspectives Project <span>[<a href="#PerspectivesProject" class="cite xref">PerspectivesProject</a>]</span>, modified to
 cover the server's ed25519 keys and to use JSON instead of XML. The advantage of this system is it allows
 each server to pick which notaries it trusts, and can contact multiple notaries to corroborate the keys
@@ -3921,7 +3921,7 @@ participant servers, as doing so could lead to a lengthy backlog of events waiti
 ID until they see a <code>200 OK</code> response. If the sending server attempts to send a different transaction
 ID from the one already in flight, the receiving server <span class="bcp14">MUST</span> respond with a <code>400 Bad Request</code> HTTP
 status code and <code>M_BAD_STATE</code> error code (<a href="#int-transport-errors" class="auto internal xref">Section 12.2.2</a>). Receiving servers <span class="bcp14">SHOULD</span> continue
-processing requests to this endpoint event after the sender has disconnected/timed out, but <span class="bcp14">SHOULD NOT</span>
+processing requests to this endpoint even after the sender has disconnected/timed out, but <span class="bcp14">SHOULD NOT</span>
 process the request multiple times due to the transaction ID (<a href="#int-txn-ids" class="auto internal xref">Section 12.2.5</a>).<a href="#section-12.5.1-19" class="pilcrow">¶</a></p>
 <p id="section-12.5.1-20"><code>failed_pdus</code> is an object mapping event ID (<a href="#int-pdu" class="auto internal xref">Section 3.5</a>) to error string. Event IDs are based upon
 the received object, not the final/complete object. For example, if an LPDU is sent, gets its PDU
