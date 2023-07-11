@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2023-07-09T00:18:52.320891+00:00",
+  "timestamp": "2023-07-11T00:16:19.178199+00:00",
   "repo": "turt2live/ietf-mimi-linearized-matrix",
   "labels": [
     {
@@ -172,24 +172,26 @@
       "id": "PR_kwDOJM90Qc5UYM8K",
       "title": "MLS",
       "url": "https://github.com/turt2live/ietf-mimi-linearized-matrix/pull/3",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "turt2live",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "[Rendered: HTML](https://turt2live.github.io/ietf-mimi-linearized-matrix/travis/mls/draft-ralston-mimi-linearized-matrix.html)\r\n[Rendered: text](https://turt2live.github.io/ietf-mimi-linearized-matrix/travis/mls/draft-ralston-mimi-linearized-matrix.txt)",
       "createdAt": "2023-07-01T03:14:42Z",
-      "updatedAt": "2023-07-08T03:01:47Z",
+      "updatedAt": "2023-07-10T06:16:30Z",
       "baseRepository": "turt2live/ietf-mimi-linearized-matrix",
       "baseRefName": "main",
-      "baseRefOid": "154b3f1d6ce4f8face4811b3abd9185fd8052cd2",
+      "baseRefOid": "ef0568677879020f3ddb631d736a480668f7d419",
       "headRepository": "turt2live/ietf-mimi-linearized-matrix",
       "headRefName": "travis/mls",
-      "headRefOid": "7d0c095b9e354de229a9428d5426009742b95691",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "42501f1feb7e2cdbbbd638f7281ced630a9f5d9e",
+      "closedAt": "2023-07-10T06:16:26Z",
+      "mergedAt": "2023-07-10T06:16:26Z",
+      "mergedBy": "turt2live",
+      "mergeCommit": {
+        "oid": "8e6edc49354ee019c88e2e42a776b6ca237acf90"
+      },
       "comments": [
         {
           "author": "turt2live",
