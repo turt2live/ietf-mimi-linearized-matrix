@@ -230,6 +230,29 @@ There are largely clarifications to how request authentication works. Namely:
 This is meant to be compatible with [MSC4029](https://github.com/matrix-org/matrix-spec-proposals/pull/4029), when
 MSC4029 has real content in it.
 
+Linearized Matrix requires attempting the server *first* before falling back to
+a notary server.
+
+### Encryption
+
+Encryption is enabled via an `encryption` property in the `m.room.create` event, not via a separate
+`m.room.encryption` event:
+
+
+```json
+{
+   "encryption": {
+      "algorithm": "m.mls.v1.dhkemx25519-aes128gcm-sha256-ed25519"
+   }
+}
+```
+
+Thus encryption must be enabled at room creation time.
+
+`m.mls.commit` events can be viewed by any user in the room, regardless of
+history visibility. (Does this mean `shared` or `world_readable` or something
+else? Can a user see them after they've left? How does this work?)
+
 ## Linearization Algorithm
 
 The specific mechanics of this algorithm are undefined. The rough idea is that when a DAG-capable server becomes
