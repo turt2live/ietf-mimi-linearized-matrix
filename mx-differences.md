@@ -233,8 +233,8 @@ Encryption is enabled via an `encryption` property in the `m.room.create` event,
 Thus encryption must be enabled at room creation time.
 
 `m.mls.commit` events can be viewed by any user in the room, regardless of
-history visibility. (Does this mean `shared` or `world_readable` or something
-else? Can a user see them after they've left? How does this work?)
+history visibility. The draft doesn't currently cover how exactly this works,
+but should be treated as `shared` history for ease of use for now.
 
 ## Request Authentication
 
