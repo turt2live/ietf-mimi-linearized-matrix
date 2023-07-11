@@ -73,7 +73,7 @@ of events/messages per room with hub and spoke fanout.
 
 LM's extensibility enables a wide range of transport protocol and end-to-end encryption possibilities.
 This document uses Matrix's room access control semantics supported by Messaging Layer Security (MLS),
-transported via HTTPS and JSON. The details of which server-to-server transport to use and what a is
+transported via HTTPS and JSON. The details of which server-to-server transport to use and what is
 put over MLS are replaceable.
 
 The threat model of LM does not place trust in a central owning server for each conversation. Instead,
@@ -629,7 +629,7 @@ avatars, etc.
 
 #### Stripped State {#int-stripped-state}
 
-Stripped state event are extremely simplified state events to provide context to a user for an invite
+Stripped state events are extremely simplified state events to provide context to a user for an invite
 ({{int-transport-invites}}) or knock ({{int-transport-knocks}}). Servers and clients have no ability
 to verify the events outside of the context for a room, so all such fields are removed. Servers and
 clients MUST NOT rely on the events being accurate because they cannot independently verify them.
@@ -794,7 +794,7 @@ algorithmic details are contained in the `content` for the `m.room.create` event
 ~~~
 
 `algorithm` denotes which specific algorithm clients MUST use for sending and receiving encrypted
-events in the room. If a received event is encrypted using a different algorith, it MUST be treated
+events in the room. If a received event is encrypted using a different algorithm, it MUST be treated
 as undecryptable (even if the client has sufficient key information to decrypt it).
 
 `m.mls.v1.` as a prefix describes the behaviour for encrypted clients, with the remainder of the
@@ -903,7 +903,7 @@ validate that any membership changes match what is possible with the room member
 * Devices can be removed in two ways:
    * A device can remove another device if they both belong to the same user ID.
    * A device can be removed by anyone if the user ID to which it belongs is no longer in the `join` state.
-     This condition is required to satisy a case in MLS where a device cannot self-remove itself from
+     This condition is required to satisfy a case in MLS where a device cannot self-remove itself from
      the group.
 
 If this validation fails, the hub server MUST reject the request if it's shaped as an LPDU ({{int-lpdu}})
@@ -1604,7 +1604,7 @@ server name to an IP address and port are:
 
       Host header: `<delegated_hostname>` (without port)
 
-4. If the `.well-known` call from Step 3 resulted in an invalid response, an SRV DNS record is resolved
+3. If the `.well-known` call from Step 2 resulted in an invalid response, an SRV DNS record is resolved
    for `_matrix._tcp.<hostname>`. This may result in another hostname and port to be resolved using AAAA
    or A DNS records. Requests are made to the resolved IP address and port number.
 
@@ -1612,7 +1612,7 @@ server name to an IP address and port are:
 
    Host header: `<hostname>` (without port)
 
-5. If the `.well-known` call from Step 3 resulted in an invalid response, and the SRV record from Step 4
+4. If the `.well-known` call from Step 3 resulted in an invalid response, and the SRV record from Step 4
    was not found, and IP address is resolved using CNAME, AAAA, or A DNS records. Requests are made to the
    resolved IP address and port 8448.
 
@@ -1620,7 +1620,7 @@ server name to an IP address and port are:
 
    Host header: `<hostname>` (without port)
 
-We require `<[delegated_]hostname>` rather than `<srv_hostname>` in Steps 3.3 and 4 for the following reasons:
+We require `<[delegated_]hostname>` rather than `<srv_hostname>` in Steps 2.3 and 3 for the following reasons:
 
 1. DNS is largely insecure (not all domains use DNSSEC {{?RFC9364}}), so the target of the SRV record must
    prove it is a valid delegate/target for `<[delegated_]hostname>` via TLS.
@@ -1767,7 +1767,7 @@ Responses from a server are authenticated using TLS and do not have additional s
 A server's signing keys are published under `/_matrix/key/v2/server` ({{int-api-self-key}}) and can
 be queried through notary servers in two ways: {{int-api-notary-query}} and {{int-api-notary-query-bulk}}.
 Notary servers implicitly call `/_matrix/key/v2/server` when queried, signing and caching the response
-for some time. This allows the target server to offline without affecting their previously sent events.
+for some time. This allows the target server to be offline without affecting their previously sent events.
 
 The approach used here is borrowed from the Perspectives Project {{PerspectivesProject}}, modified to
 cover the server's ed25519 keys and to use JSON instead of XML. The advantage of this system is it allows
@@ -2087,7 +2087,7 @@ Sending servers SHOULD apply/expect a timeout and retry the exact same request w
 ID until they see a `200 OK` response. If the sending server attempts to send a different transaction
 ID from the one already in flight, the receiving server MUST respond with a `400 Bad Request` HTTP
 status code and `M_BAD_STATE` error code ({{int-transport-errors}}). Receiving servers SHOULD continue
-processing requests to this endpoint event after the sender has disconnected/timed out, but SHOULD NOT
+processing requests to this endpoint even after the sender has disconnected/timed out, but SHOULD NOT
 process the request multiple times due to the transaction ID ({{int-txn-ids}}).
 
 `failed_pdus` is an object mapping event ID ({{int-pdu}}) to error string. Event IDs are based upon
