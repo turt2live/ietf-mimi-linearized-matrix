@@ -1,0 +1,600 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2023-07-16T00:18:49.033609+00:00",
+  "repo": "turt2live/ietf-mimi-linearized-matrix",
+  "labels": [
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    },
+    {
+      "name": "matrix-developers-guide",
+      "description": "Doesn't affect the I-D itself",
+      "color": "300CF1"
+    }
+  ],
+  "issues": [
+    {
+      "number": 2,
+      "id": "I_kwDOJM90Qc5iPrgz",
+      "title": "Account for new terminology and signing approach",
+      "url": "https://github.com/turt2live/ietf-mimi-linearized-matrix/issues/2",
+      "state": "CLOSED",
+      "author": "turt2live",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "![DLPDU, LPDU, PDU signing (1)](https://user-images.githubusercontent.com/1190097/228958491-32ca1bfd-c37a-451b-a678-2594bd8759f0.png)\r\n",
+      "createdAt": "2023-03-30T20:37:45Z",
+      "updatedAt": "2023-04-12T20:45:36Z",
+      "closedAt": "2023-04-12T20:45:36Z",
+      "comments": []
+    },
+    {
+      "number": 6,
+      "id": "I_kwDOJM90Qc5roH8S",
+      "title": "mxdiff: Backfill can't return empty because `m.room.create` is still `?v` and therefore included",
+      "url": "https://github.com/turt2live/ietf-mimi-linearized-matrix/issues/6",
+      "state": "OPEN",
+      "author": "turt2live",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [
+        "matrix-developers-guide"
+      ],
+      "body": "",
+      "createdAt": "2023-07-14T22:43:35Z",
+      "updatedAt": "2023-07-14T22:46:18Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOJM90Qc5MsP7Y",
+      "title": "lots of tweaks",
+      "url": "https://github.com/turt2live/ietf-mimi-linearized-matrix/pull/1",
+      "state": "MERGED",
+      "author": "ara4n",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "* reword the abstract to better justify the existence of LM\r\n* emphasise the importance of following authentication rules as per the room version\r\n* clarify (i think) how DAG compatibility would work by \"trunking\" LM via a DAG-capable server.",
+      "createdAt": "2023-03-23T01:01:55Z",
+      "updatedAt": "2023-03-24T01:32:08Z",
+      "baseRepository": "turt2live/ietf-mimi-linearized-matrix",
+      "baseRefName": "main",
+      "baseRefOid": "a534937209475fcc1871031197c1dbea0c253075",
+      "headRepository": "ara4n/ietf-mimi-linearized-matrix",
+      "headRefName": "patch-1",
+      "headRefOid": "100a32c7d816b1e0380cafb8857086ce0e90eb80",
+      "closedAt": "2023-03-24T01:32:08Z",
+      "mergedAt": "2023-03-24T01:32:08Z",
+      "mergedBy": "turt2live",
+      "mergeCommit": {
+        "oid": "6e0b3c10085bf40e1fb932599758359603ad9fbd"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOJM90Qc5QtEkB",
+          "commit": {
+            "abbreviatedOid": "031f12f"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-23T07:30:27Z",
+          "updatedAt": "2023-03-23T07:36:14Z",
+          "comments": [
+            {
+              "originalPosition": 32,
+              "body": "```suggestion\r\nThis document explores an API surface for Matrix which optimizes for ease of\r\n```",
+              "createdAt": "2023-03-23T07:30:27Z",
+              "updatedAt": "2023-03-23T07:36:15Z"
+            },
+            {
+              "originalPosition": 33,
+              "body": "```suggestion\r\ninteroperability at the expense of decentralized conversation history at a per-room level.\r\n```",
+              "createdAt": "2023-03-23T07:30:37Z",
+              "updatedAt": "2023-03-23T07:36:15Z"
+            },
+            {
+              "originalPosition": 92,
+              "body": "Membership has additional context above normal state handling. \r\n\r\nWe're not saying here that one needs to have a transport layer difference between membership and state, just calling out that membership is slightly weird.",
+              "createdAt": "2023-03-23T07:33:00Z",
+              "updatedAt": "2023-03-23T07:36:15Z"
+            },
+            {
+              "originalPosition": 33,
+              "body": "ize throughout",
+              "createdAt": "2023-03-23T07:34:30Z",
+              "updatedAt": "2023-03-23T07:36:15Z"
+            },
+            {
+              "originalPosition": 133,
+              "body": "```suggestion\r\nnot able to implement full decentralisation yet. {{?I-D.avoiding-internet-centralization}}\r\n```",
+              "createdAt": "2023-03-23T07:34:56Z",
+              "updatedAt": "2023-03-23T07:36:15Z"
+            },
+            {
+              "originalPosition": 92,
+              "body": "We can rename the section if needed.",
+              "createdAt": "2023-03-23T07:36:11Z",
+              "updatedAt": "2023-03-23T07:36:15Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5QtNl0",
+          "commit": {
+            "abbreviatedOid": "2c060c3"
+          },
+          "author": "ara4n",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-03-23T08:00:44Z",
+          "updatedAt": "2023-03-23T08:00:45Z",
+          "comments": [
+            {
+              "originalPosition": 92,
+              "body": "okay, that works for me.",
+              "createdAt": "2023-03-23T08:00:45Z",
+              "updatedAt": "2023-03-23T08:00:45Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "id": "PR_kwDOJM90Qc5UYM8K",
+      "title": "MLS",
+      "url": "https://github.com/turt2live/ietf-mimi-linearized-matrix/pull/3",
+      "state": "MERGED",
+      "author": "turt2live",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "[Rendered: HTML](https://turt2live.github.io/ietf-mimi-linearized-matrix/travis/mls/draft-ralston-mimi-linearized-matrix.html)\r\n[Rendered: text](https://turt2live.github.io/ietf-mimi-linearized-matrix/travis/mls/draft-ralston-mimi-linearized-matrix.txt)",
+      "createdAt": "2023-07-01T03:14:42Z",
+      "updatedAt": "2023-07-10T06:16:30Z",
+      "baseRepository": "turt2live/ietf-mimi-linearized-matrix",
+      "baseRefName": "main",
+      "baseRefOid": "ef0568677879020f3ddb631d736a480668f7d419",
+      "headRepository": "turt2live/ietf-mimi-linearized-matrix",
+      "headRefName": "travis/mls",
+      "headRefOid": "42501f1feb7e2cdbbbd638f7281ced630a9f5d9e",
+      "closedAt": "2023-07-10T06:16:26Z",
+      "mergedAt": "2023-07-10T06:16:26Z",
+      "mergedBy": "turt2live",
+      "mergeCommit": {
+        "oid": "8e6edc49354ee019c88e2e42a776b6ca237acf90"
+      },
+      "comments": [
+        {
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "body": "This is ready to be merged I think, though is waiting on some potential external review. Will land it before the submission deadline.",
+          "createdAt": "2023-07-08T03:01:47Z",
+          "updatedAt": "2023-07-08T03:01:47Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOJM90Qc5aNZer",
+          "commit": {
+            "abbreviatedOid": "84680ff"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-04T22:44:52Z",
+          "updatedAt": "2023-07-04T22:48:06Z",
+          "comments": [
+            {
+              "originalPosition": 237,
+              "body": "Reviewer: please verify",
+              "createdAt": "2023-07-04T22:44:52Z",
+              "updatedAt": "2023-07-04T22:48:06Z"
+            },
+            {
+              "originalPosition": 105,
+              "body": "Reviewer: please verify",
+              "createdAt": "2023-07-04T22:45:08Z",
+              "updatedAt": "2023-07-04T22:48:06Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aUrO_",
+          "commit": {
+            "abbreviatedOid": "ed4b107"
+          },
+          "author": "uhoreg",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-05T21:05:26Z",
+          "updatedAt": "2023-07-05T21:31:17Z",
+          "comments": [
+            {
+              "originalPosition": 105,
+              "body": "My thinking was that the BasicCredential would contain separate user ID and device ID fields.  Though I don't know if there's a better way to it.",
+              "createdAt": "2023-07-05T21:05:26Z",
+              "updatedAt": "2023-07-05T21:31:17Z"
+            },
+            {
+              "originalPosition": 170,
+              "body": "shouldn't invited users be added in rooms that allow them access to room history?  Or is that not a thing in LM?",
+              "createdAt": "2023-07-05T21:09:02Z",
+              "updatedAt": "2023-07-05T21:31:17Z"
+            },
+            {
+              "originalPosition": 172,
+              "body": "This can be an issue if a user logs out of their device -- others need to be able to remove that device from the tree.  The device can't remove itself, and the user may not have another device to do the removal.",
+              "createdAt": "2023-07-05T21:14:53Z",
+              "updatedAt": "2023-07-05T21:31:17Z"
+            },
+            {
+              "originalPosition": 201,
+              "body": "Is this for supporting external joins?  I don't think it's needed for anything else.",
+              "createdAt": "2023-07-05T21:17:29Z",
+              "updatedAt": "2023-07-05T21:31:17Z"
+            },
+            {
+              "originalPosition": 237,
+              "body": "I'm not sure what `FramedMessageAuth` and `FramedMessage` are, but I'm guessing they're parts of the MLS message?  We should probably just use the whole serialized MLS `PublicMessage` as a single chunk.\r\n\r\nWe also need a `commit_event_id` property, pointing to the event ID where the parent epoch was created.  This is to allow for backfilling.  i.e. the client gets a `limited` sync, and so can't decrypt the latest messages because it hasn't created those epochs yet.  So it looks up the `commit_event_id` to get the commit, and does so recursively until it gets to a commit that it can process. (or realizes that it wasn't in the group at the time, and so can't decrypt)",
+              "createdAt": "2023-07-05T21:28:54Z",
+              "updatedAt": "2023-07-05T21:31:17Z"
+            },
+            {
+              "originalPosition": 237,
+              "body": "Also we need a property for the public group state, if we need to support external joins.",
+              "createdAt": "2023-07-05T21:30:37Z",
+              "updatedAt": "2023-07-05T21:31:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aU24V",
+          "commit": {
+            "abbreviatedOid": "ed4b107"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-05T21:41:55Z",
+          "updatedAt": "2023-07-05T21:41:56Z",
+          "comments": [
+            {
+              "originalPosition": 105,
+              "body": "I borrowed this from a much earlier draft of the MLS protocol, so not sure it makes much sense either. I imagine `identity` is the only bit which needs to be split apart?",
+              "createdAt": "2023-07-05T21:41:55Z",
+              "updatedAt": "2023-07-05T21:41:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aU2-1",
+          "commit": {
+            "abbreviatedOid": "ed4b107"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-05T21:42:18Z",
+          "updatedAt": "2023-07-05T21:42:18Z",
+          "comments": [
+            {
+              "originalPosition": 170,
+              "body": "bleh, it is. Will have to figure out how that works exactly.",
+              "createdAt": "2023-07-05T21:42:18Z",
+              "updatedAt": "2023-07-05T21:42:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aU3KA",
+          "commit": {
+            "abbreviatedOid": "ed4b107"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-05T21:43:05Z",
+          "updatedAt": "2023-07-05T21:43:05Z",
+          "comments": [
+            {
+              "originalPosition": 172,
+              "body": "yup - this is the reason for the condition below. The lack of \"only\" might be a bit too subtle, I suppose.",
+              "createdAt": "2023-07-05T21:43:05Z",
+              "updatedAt": "2023-07-05T21:43:05Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aU3dp",
+          "commit": {
+            "abbreviatedOid": "ed4b107"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-05T21:44:12Z",
+          "updatedAt": "2023-07-05T21:44:13Z",
+          "comments": [
+            {
+              "originalPosition": 201,
+              "body": "This is largely based on my understanding for what's needed to ensure that the membership rules above are honoured, though maybe that's something the clients can figure out on their own?",
+              "createdAt": "2023-07-05T21:44:12Z",
+              "updatedAt": "2023-07-05T21:44:13Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aU4qZ",
+          "commit": {
+            "abbreviatedOid": "ed4b107"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-05T21:47:45Z",
+          "updatedAt": "2023-07-05T21:47:46Z",
+          "comments": [
+            {
+              "originalPosition": 237,
+              "body": "`FramedMessage*` comes from the MLS protocol spec, which makes up a `PublicMessage`. I'm sure there was a reason why I broke it down, but equally we don't seem to need to, so meh. \r\n\r\nIs the public room state not part of the `PublicMessage` parts? If we need it as an additional field, can add it.\r\n\r\nI might call the commit ID field `prev_commit_event_id` though to denote it's pointing at a predecessor. We might also need to shorten some of these names eventually.",
+              "createdAt": "2023-07-05T21:47:45Z",
+              "updatedAt": "2023-07-05T21:47:46Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aVT0q",
+          "commit": {
+            "abbreviatedOid": "84680ff"
+          },
+          "author": "uhoreg",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-06T00:08:42Z",
+          "updatedAt": "2023-07-06T00:08:42Z",
+          "comments": [
+            {
+              "originalPosition": 237,
+              "body": "I'm seeing `FramedContent` and `FramedContentAuthData` at https://github.com/mlswg/mls-protocol/blob/main/draft-ietf-mls-protocol.md#encoding-and-decoding-a-public-message and https://messaginglayersecurity.rocks/mls-protocol/draft-ietf-mls-protocol.html#name-encoding-and-decoding-a-pub\r\n\r\nPart of the public room state is in the `PublicMessage` part.  The `RatchetTree` may be included, if the group uses the `RatchetTree` extension.  We may or may not want to use the `RatchetTree` extension.  One downside with it is that's the part of the public group state that can get really big, and could necessitate storing in the media repo.",
+              "createdAt": "2023-07-06T00:08:42Z",
+              "updatedAt": "2023-07-06T00:08:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aVYdO",
+          "commit": {
+            "abbreviatedOid": "84680ff"
+          },
+          "author": "uhoreg",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-06T00:31:01Z",
+          "updatedAt": "2023-07-06T00:31:01Z",
+          "comments": [
+            {
+              "originalPosition": 105,
+              "body": "Yeah, probably just need to split `identity` into two fields.  Might also be able to drop the `SignatureScheme` since we don't have that enum any more in MLS.",
+              "createdAt": "2023-07-06T00:31:01Z",
+              "updatedAt": "2023-07-06T00:31:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5aVZYK",
+          "commit": {
+            "abbreviatedOid": "ed4b107"
+          },
+          "author": "uhoreg",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-06T00:36:55Z",
+          "updatedAt": "2023-07-06T00:36:55Z",
+          "comments": [
+            {
+              "originalPosition": 201,
+              "body": "Yeah, if the client is supposed to validate the full history, then I suppose it's needed.  I haven't really thought much about that.",
+              "createdAt": "2023-07-06T00:36:55Z",
+              "updatedAt": "2023-07-06T00:36:55Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "id": "PR_kwDOJM90Qc5VN87k",
+      "title": "Fix typos / repeated words.",
+      "url": "https://github.com/turt2live/ietf-mimi-linearized-matrix/pull/4",
+      "state": "MERGED",
+      "author": "clokep",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Additionally fixes the numbering being misaligned for the server discovery section.",
+      "createdAt": "2023-07-11T15:40:00Z",
+      "updatedAt": "2023-07-11T16:21:52Z",
+      "baseRepository": "turt2live/ietf-mimi-linearized-matrix",
+      "baseRefName": "main",
+      "baseRefOid": "cbfd9ff5db8ed092f177fc812ad40e0a9d13c9a4",
+      "headRepository": "clokep/ietf-mimi-linearized-matrix",
+      "headRefName": "fix-typos",
+      "headRefOid": "ecdd1b98b769e011a96e405298efba29191baea8",
+      "closedAt": "2023-07-11T15:55:48Z",
+      "mergedAt": "2023-07-11T15:55:48Z",
+      "mergedBy": "turt2live",
+      "mergeCommit": {
+        "oid": "c23cc5403b66618bc3f752b80920a648454f5c75"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOJM90Qc5a37gU",
+          "commit": {
+            "abbreviatedOid": "ecdd1b9"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "Thank you!",
+          "createdAt": "2023-07-11T15:53:57Z",
+          "updatedAt": "2023-07-11T15:53:57Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "id": "PR_kwDOJM90Qc5VN_Ei",
+      "title": "Encryption & notary differences from Matrix.",
+      "url": "https://github.com/turt2live/ietf-mimi-linearized-matrix/pull/5",
+      "state": "MERGED",
+      "author": "clokep",
+      "authorAssociation": "CONTRIBUTOR",
+      "assignees": [],
+      "labels": [
+        "matrix-developers-guide"
+      ],
+      "body": "I'm unsure if either of these are worth calling out:\r\n\r\n* I don't think servers care much about encryption -- the auth rules don't touch the `m.room.encryption` event\r\n* The notary difference may not matter much, but [Synapse checks the local cache, then notaries, then directly fetches](https://github.com/matrix-org/synapse/blob/b516d919995f3bf36045263376628ff0aa298095/synapse/crypto/keyring.py#L154-L161).",
+      "createdAt": "2023-07-11T15:45:32Z",
+      "updatedAt": "2023-07-14T22:46:53Z",
+      "baseRepository": "turt2live/ietf-mimi-linearized-matrix",
+      "baseRefName": "main",
+      "baseRefOid": "cbfd9ff5db8ed092f177fc812ad40e0a9d13c9a4",
+      "headRepository": "clokep/ietf-mimi-linearized-matrix",
+      "headRefName": "mx-diffs",
+      "headRefOid": "67a4c6090dbc91bce523e16ff6b138a8a7ddc042",
+      "closedAt": "2023-07-11T20:43:34Z",
+      "mergedAt": "2023-07-11T20:43:34Z",
+      "mergedBy": "turt2live",
+      "mergeCommit": {
+        "oid": "14967d87d679ebe5164e94d60db6c0b82115c710"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOJM90Qc5a38-N",
+          "commit": {
+            "abbreviatedOid": "0f076f9"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "otherwise lgtm! ",
+          "createdAt": "2023-07-11T15:56:23Z",
+          "updatedAt": "2023-07-11T15:57:18Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "```suggestion\r\n## Encryption\r\n```\r\n\r\nI think? (to put it in line with the other sections instead of under \"request auth\")",
+              "createdAt": "2023-07-11T15:56:23Z",
+              "updatedAt": "2023-07-11T15:57:18Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5a4I1k",
+          "commit": {
+            "abbreviatedOid": "0f076f9"
+          },
+          "author": "clokep",
+          "authorAssociation": "CONTRIBUTOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-11T16:22:37Z",
+          "updatedAt": "2023-07-11T16:22:37Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "This isn't part of the \"request auth\" section -- just another section that notes differences. I debated putting it under the room version bits actually?",
+              "createdAt": "2023-07-11T16:22:37Z",
+              "updatedAt": "2023-07-11T16:22:37Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOJM90Qc5a5MIR",
+          "commit": {
+            "abbreviatedOid": "0f076f9"
+          },
+          "author": "turt2live",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2023-07-11T18:34:49Z",
+          "updatedAt": "2023-07-11T18:34:50Z",
+          "comments": [
+            {
+              "originalPosition": 7,
+              "body": "Request authentication is at H2 above this. Putting it under room version would probably be best - I'll move it there.",
+              "createdAt": "2023-07-11T18:34:50Z",
+              "updatedAt": "2023-07-11T18:34:50Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
