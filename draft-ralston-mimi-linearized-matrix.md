@@ -3209,7 +3209,7 @@ the sending device and the event which gets emitted.
 # MIMI Protocol Comparison
 
 {{!I-D.barnes-mimi-arch}}, {{!I-D.ralston-mimi-protocol}}, and {{!I-D.robert-mimi-delivery-service}}
-collectively define a protocol with similar capabilities to Linearized Matrix, though leans more heavily
+collectively define a protocol with similar capabilities to Linearized Matrix, leaning more heavily
 into the MLS layering to accomplish interoperable messaging. Linearized Matrix in contrast provides
 a signaling layer for which encryption can operate, using existing open standards as the foundational
 piece.
