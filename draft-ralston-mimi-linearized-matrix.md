@@ -3206,6 +3206,14 @@ to be established to ensure a user's devices are actually a user's devices.
 Servers retain the ability to control/puppet their own users due to no strong cryptographic link between
 the sending device and the event which gets emitted.
 
+# MIMI Protocol Comparison
+
+{{!I-D.barnes-mimi-arch}}, {{!I-D.ralston-mimi-protocol}}, and {{!I-D.robert-mimi-delivery-service}}
+collectively define a protocol with similar capabilities to Linearized Matrix, though leans more heavily
+into the MLS layering to accomplish interoperable messaging. Linearized Matrix in contrast provides
+a signaling layer for which encryption can operate, using existing open standards as the foundational
+piece.
+
 # IANA Considerations
 
 The `m.*` namespace likely needs formal registration in some capacity.
