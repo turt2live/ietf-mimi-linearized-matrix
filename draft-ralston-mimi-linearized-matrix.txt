@@ -5,7 +5,7 @@
 More Instant Messaging Interoperability                       T. Ralston
 Internet-Draft                                                M. Hodgson
 Intended status: Standards Track        The Matrix.org Foundation C.I.C.
-Expires: 12 January 2024                                    11 July 2023
+Expires: 14 July 2024                                    11 January 2024
 
 
                            Linearized Matrix
@@ -66,11 +66,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 January 2024.
+   This Internet-Draft will expire on 14 July 2024.
 
 Copyright Notice
 
-   Copyright (c) 2023 IETF Trust and the persons identified as the
+   Copyright (c) 2024 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -158,10 +158,11 @@ Table of Contents
    13. User Privacy
    14. Spam Prevention
    15. Security Considerations
-   16. IANA Considerations
-   17. References
-     17.1.  Normative References
-     17.2.  Informative References
+   16. MIMI Protocol Comparison
+   17. IANA Considerations
+   18. References
+     18.1.  Normative References
+     18.2.  Informative References
    Acknowledgments
    Authors' Addresses
 
@@ -3858,7 +3859,17 @@ Table of Contents
    no strong cryptographic link between the sending device and the event
    which gets emitted.
 
-16.  IANA Considerations
+16.  MIMI Protocol Comparison
+
+   [I-D.barnes-mimi-arch], [I-D.ralston-mimi-protocol], and
+   [I-D.robert-mimi-delivery-service] collectively define a protocol
+   with similar capabilities to Linearized Matrix, though leans more
+   heavily into the MLS layering to accomplish interoperable messaging.
+   Linearized Matrix in contrast provides a signaling layer for which
+   encryption can operate, using existing open standards as the
+   foundational piece.
+
+17.  IANA Considerations
 
    The m.* namespace likely needs formal registration in some capacity.
 
@@ -3872,17 +3883,24 @@ Table of Contents
    The .well-known/matrix namespace is already registered for use by The
    Matrix.org Foundation C.I.C.
 
-17.  References
+18.  References
 
-17.1.  Normative References
+18.1.  Normative References
+
+   [I-D.barnes-mimi-arch]
+              Barnes, R., "An Architecture for More Instant Messaging
+              Interoperability (MIMI)", Work in Progress, Internet-
+              Draft, draft-barnes-mimi-arch-02, 23 October 2023,
+              <https://datatracker.ietf.org/doc/html/draft-barnes-mimi-
+              arch-02>.
 
    [I-D.ietf-mls-architecture]
               Beurdouche, B., Rescorla, E., Omara, E., Inguva, S., and
               A. Duric, "The Messaging Layer Security (MLS)
               Architecture", Work in Progress, Internet-Draft, draft-
-              ietf-mls-architecture-10, 16 December 2022,
+              ietf-mls-architecture-11, 26 July 2023,
               <https://datatracker.ietf.org/doc/html/draft-ietf-mls-
-              architecture-10>.
+              architecture-11>.
 
    [I-D.ietf-mls-protocol]
               Barnes, R., Beurdouche, B., Robert, R., Millican, J.,
@@ -3892,11 +3910,26 @@ Table of Contents
               <https://datatracker.ietf.org/doc/html/draft-ietf-mls-
               protocol-20>.
 
+   [I-D.ralston-mimi-protocol]
+              Ralston, T., Kohbrok, K., Robert, R., and M. Hodgson,
+              "More Instant Messaging Interoperability (MIMI) using
+              HTTPS and MLS", Work in Progress, Internet-Draft, draft-
+              ralston-mimi-protocol-01, 6 November 2023,
+              <https://datatracker.ietf.org/doc/html/draft-ralston-mimi-
+              protocol-01>.
+
    [I-D.ralston-mimi-terminology]
               Ralston, T., "MIMI Terminology", Work in Progress,
-              Internet-Draft, draft-ralston-mimi-terminology-02, 10 July
-              2023, <https://datatracker.ietf.org/doc/html/draft-
-              ralston-mimi-terminology-02>.
+              Internet-Draft, draft-ralston-mimi-terminology-03, 23
+              October 2023, <https://datatracker.ietf.org/doc/html/
+              draft-ralston-mimi-terminology-03>.
+
+   [I-D.robert-mimi-delivery-service]
+              Robert, R. and K. Kohbrok, "MIMI Delivery Service", Work
+              in Progress, Internet-Draft, draft-robert-mimi-delivery-
+              service-06, 6 November 2023,
+              <https://datatracker.ietf.org/doc/html/draft-robert-mimi-
+              delivery-service-06>.
 
    [RFC1034]  Mockapetris, P., "Domain names - concepts and facilities",
               STD 13, RFC 1034, DOI 10.17487/RFC1034, November 1987,
@@ -3987,7 +4020,7 @@ Table of Contents
               DOI 10.17487/RFC9113, June 2022,
               <https://www.rfc-editor.org/rfc/rfc9113>.
 
-17.2.  Informative References
+18.2.  Informative References
 
    [DMLS]     Chathi, H., "Decentralised MLS", 29 May 2023,
               <https://gitlab.matrix.org/matrix-org/mls-ts/-
@@ -3997,8 +4030,9 @@ Table of Contents
    [I-D.kohbrok-mimi-portability]
               Kohbrok, K. and R. Robert, "MIMI Portability", Work in
               Progress, Internet-Draft, draft-kohbrok-mimi-portability-
-              00, 10 July 2023, <https://datatracker.ietf.org/doc/html/
-              draft-kohbrok-mimi-portability-00>.
+              01, 4 January 2024,
+              <https://datatracker.ietf.org/doc/html/draft-kohbrok-mimi-
+              portability-01>.
 
    [I-D.mahy-mimi-group-chat]
               Mahy, R., "Group Chat Framework for More Instant Messaging
@@ -4006,13 +4040,6 @@ Table of Contents
               Draft, draft-mahy-mimi-group-chat-00, 10 July 2023,
               <https://datatracker.ietf.org/doc/html/draft-mahy-mimi-
               group-chat-00>.
-
-   [I-D.robert-mimi-delivery-service]
-              Robert, R. and K. Kohbrok, "MIMI Delivery Service", Work
-              in Progress, Internet-Draft, draft-robert-mimi-delivery-
-              service-03, 10 July 2023,
-              <https://datatracker.ietf.org/doc/html/draft-robert-mimi-
-              delivery-service-03>.
 
    [I-D.rosenberg-mimi-protocol]
               Rosenberg, J., Jennings, C. F., and S. Nandakumar, "More
